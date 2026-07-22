@@ -1,10 +1,12 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, VideoSource } from '@prisma/client';
 import { buildCode, buildRefreshToken, buildUser } from '__tests__/shared/factories';
 import { User } from 'features/user/types';
 import { CodeType, UserCode } from 'features/auth/types';
 import { hashPassword } from 'shared/utils/hashing';
 import { RefreshToken } from '@prisma/client';
 import { RedisClientType } from 'redis';
+import { Video, VideoWithSource } from 'features/video/types';
+import { buildVideoInput, buildVideoWithSource } from '../factories/videoFactory';
 
 export const seedUser = async (db: PrismaClient, overrides: Partial<User> = {}): Promise<User> => {
     const user = buildUser(overrides);
@@ -61,4 +63,39 @@ export const seedCodes = async (
     return await Promise.all(
         Array.from({ length }, (_, i) => seedCode(redis, codeType, overrides[i] ?? {})),
     );
+};
+
+export const seedVideo = async (
+    db: PrismaClient,
+    overrides: Partial<Video> = {},
+): Promise<Video> => {
+    const videoInput = buildVideoInput(overrides);
+    return await db.video.create({ data: { ...videoInput } });
+};
+
+export const seedVideoWithSource = async ({
+    db,
+    videoOverrides,
+    sourceOverrides,
+}: {
+    db: PrismaClient;
+    videoOverrides?: Partial<Video>;
+    sourceOverrides?: Partial<VideoSource>;
+}): Promise<VideoWithSource> => {
+    const videoWithSource = buildVideoWithSource({ sourceOverrides, videoOverrides });
+    const { url, source } = videoWithSource;
+    const { platform, platformId, title, thumbnail, description } = source!;
+    const savedSource = await db.videoSource.create({
+        data: { platform, platformId, title, thumbnail, description, ...sourceOverrides },
+    });
+    return await db.video.create({
+        data: {
+            url,
+            sourceId: savedSource.id,
+            ...videoOverrides,
+        },
+        include: {
+            source: true,
+        },
+    });
 };

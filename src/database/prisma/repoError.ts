@@ -5,12 +5,10 @@ export const PRISMA_NOT_FOUND_ERROR = 'P2025';
 export const PRISMA_UNIQUE_CONTSTRAINT_ERROR = 'P2002';
 
 export const handleNotFoundError = (error: any, msg: string) => {
-    if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === PRISMA_NOT_FOUND_ERROR
-    ) {
+    if (isNotFoundError(error)) {
         throw new NotFoundError(msg);
     }
+    throw error;
 };
 
 export const translateNotFoundToUnAuth = (error: any, msg: string) => {
@@ -25,11 +23,22 @@ export const translateNotFoundToUnAuth = (error: any, msg: string) => {
     }
 };
 
-export const handleUniqueConstraintError = (error: any) => {
-    if (
+export const isNotFoundError = (error: any) => {
+    return (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === PRISMA_NOT_FOUND_ERROR
+    );
+};
+
+export const isUniqueConstraintError = (error: any) => {
+    return (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === PRISMA_UNIQUE_CONTSTRAINT_ERROR
-    ) {
+    );
+};
+
+export const handleUniqueConstraintError = (error: any) => {
+    if (isUniqueConstraintError(error)) {
         const match = error.message.match(/Unique constraint failed on the fields: \(.+\)/);
         const field =
             match?.[0]?.slice(match[0].indexOf('(') + 1, match[0].indexOf(')')).replace(/`/g, '') ??

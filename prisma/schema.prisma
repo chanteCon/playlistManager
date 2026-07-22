@@ -42,15 +42,29 @@ enum Platform {
 
 model Video {
   id                String@id@default(uuid())
-  platform          String
+  url               String @unique
+
+  sourceId          String?
+  source            VideoSource? @relation(fields: [sourceId], references: [id])
+  createdAt         DateTime @default(now())
+
+  updatedAt         DateTime @updatedAt
+
+}
+
+model VideoSource {
+  id                String@id@default(uuid())
+
+  platform          Platform
   platformId        String
-  url               String
   title             String?
   thumbnail         String?
   description       String?
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  videos            Video[]
 
   @@unique([platform, platformId])
 }
