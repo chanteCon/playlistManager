@@ -1,0 +1,57 @@
+/** @type {import("jest").Config} **/
+
+module.exports = {
+    testEnvironment: 'node',
+    projects: [
+        {
+            displayName: 'unit',
+            modulePaths: ['./src'],
+            testRegex: '.*__tests__/unit/.*\\.test\\.ts$',
+            setupFiles: ['./src/__tests__/setup/jest.setup.ts'],
+            extensionsToTreatAsEsm: ['.ts'],
+            transform: {
+                '^.+\\.tsx?$': ['@swc/jest'],
+            },
+        },
+        {
+            displayName: 'integration_e2e',
+            modulePaths: ['./src'],
+            testRegex: [
+                '.*__tests__/integration/.*\\.test\\.ts$',
+                '.*__tests__/e2e/.*\\.test\\.ts$',
+            ],
+            globalSetup: './src/__tests__/setup/database/dbContainer.ts',
+            setupFiles: [
+                './src/__tests__/setup/jest.setup.ts',
+                './src/__tests__/setup/database/workerDbUrl.ts',
+            ],
+            setupFilesAfterEnv: ['./src/__tests__/setup/database/createWorkerDb.ts'],
+            extensionsToTreatAsEsm: ['.ts'],
+            transform: {
+                '^.+\\.tsx?$': ['@swc/jest'],
+            },
+        },
+    ],
+    collectCoverage: true,
+    coverageDirectory: 'coverage',
+    coverageThreshold: {
+        global: {
+            branches: 90,
+            functions: 95,
+            lines: 95,
+            statements: 95,
+        },
+    },
+    collectCoverageFrom: [
+        'src/**/*.ts',
+        '!src/**/__tests__/**',
+        '!src/database/**',
+        '!src/redis/**',
+        '!src/features/*/repos/**',
+        '!src/shared/**',
+        '!src/app/**',
+        '!src/config/**',
+        '!src/server.ts',
+        '!src/middleware/timeoutMiddleware.ts',
+    ],
+};

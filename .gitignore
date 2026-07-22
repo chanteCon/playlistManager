@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+.secrets
+coverage/
+
+/src/generated/prisma
+
+.DS_Store
+.vscode
+*.log
+*.code-workspace
+.env.test

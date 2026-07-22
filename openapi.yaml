@@ -1,0 +1,1719 @@
+openapi: 3.1.0
+info:
+  title: Authentication API
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+    description: Main API server
+paths:
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      description: Creates a new user account and sends a verification code to user.
+        Verify email at api/auth/verify.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              email: user@example.com
+              password: Aa1!xyz
+              username: User_name123
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  pattern: ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+                  description: User email address, must be valid and unique
+                  example: user@example.com
+                password:
+                  type: string
+                  minLength: 6
+                  maxLength: 128
+                  pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{6,}$
+                  description: Password must be 6-128 characters with uppercase, lowercase,
+                    number, and symbol
+                  example: Aa1!xyz
+                username:
+                  description: Username must be unique and between 5 and 30 characters. Can only
+                    contain letters, numbers, dots, underscores, and hyphens
+                  example: User_name123
+                  type: string
+                  minLength: 5
+                  maxLength: 30
+                  pattern: ^[a-zA-Z0-9._-]+$
+              required:
+                - email
+                - password
+                - username
+      responses:
+        "201":
+          description: A code has been sent to the provided email address. Please verify
+            email to continue.
+          content:
+            application/json:
+              example:
+                success: true
+                data: {}
+                message: A code has been sent to the provided email address. Please verify email
+                  to continue.
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    type: string
+                    example: A code has been sent to the provided email address. Please verify email
+                      to continue.
+                  data:
+                    example: {}
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: Validation error messages
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "409":
+          description: Email already in use
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Email already in use
+                errors: Validation error messages
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Email already in use
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/auth/verify:
+    patch:
+      summary: User verifies email address
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              code: "123"
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  description: Six character verification code, expires in 5 minutes
+                  example: 21923c
+              required:
+                - code
+      responses:
+        "200":
+          description: Email successfully verified, please login
+          content:
+            application/json:
+              example:
+                success: true
+                data: {}
+                message: Email successfully verified, please login
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    type: string
+                    example: Email successfully verified, please login
+                  data:
+                    example: {}
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: Validation error messsages
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Invalid or expired verification code.
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid or expired verification code.
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid or expired verification code.
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/auth/login:
+    post:
+      summary: User login
+      description: Sends a verification code for login to user email
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              email: user@example.com
+              password: Aa1!xyz
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  pattern: ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+                  description: User email address, must be valid and unique
+                  example: user@example.com
+                password:
+                  type: string
+              required:
+                - email
+                - password
+      responses:
+        "200":
+          description: If email is valid you will receive a login code
+          content:
+            application/json:
+              example:
+                success: true
+                data: {}
+                message: If email is valid you will receive a login code
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    type: string
+                    example: If email is valid you will receive a login code
+                  data:
+                    example: {}
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: Validation error messages
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Incorrect email or password
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Incorrect email or password
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Incorrect email or password
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/auth/login/MFA:
+    post:
+      summary: User login MFA
+      description: User can enter log in code
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              code: "123"
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  description: Six character verification code, expires in 5 minutes
+                  example: 21923c
+              required:
+                - code
+      responses:
+        "200":
+          description: Successful response
+          headers:
+            Set-Cookie:
+              description: Refresh token cookie, expires in 7 days
+              schema:
+                type: string
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.signature
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                        description: Access token, expires in 30 minutes
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.signature
+                    required:
+                      - accessToken
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: Validation error messages
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Invalid or expired login code
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid or expired login code
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid or expired login code
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/auth/refresh:
+    post:
+      summary: Refresh access token
+      description: Issues new access token and refresh token
+        cookie.             Refresh token cookie must be included in the
+        request. User must be             verified. Generic 401 error if token
+        invalid or user not verified.
+      tags:
+        - Auth
+      responses:
+        "200":
+          description: Successful response
+          headers:
+            Set-Cookie:
+              description: Refresh token cookie, expires in 7 days
+              schema:
+                type: string
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.signature
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                        description: Access token, expires in 30 minutes
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.signature
+                    required:
+                      - accessToken
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Invalid token
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid token
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid token
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/auth/logout:
+    post:
+      summary: User logout
+      description: Clears refresh cookie on logout
+      tags:
+        - Auth
+      security:
+        - BearerAuth: []
+      responses:
+        "201":
+          description: Successfully logged out.
+          content:
+            application/json:
+              example:
+                success: true
+                data: {}
+                message: Successfully logged out.
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    type: string
+                    example: Successfully logged out.
+                  data:
+                    example: {}
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/auth/verification-code-request:
+    post:
+      summary: User can request new verification code for their email address
+      description: Issues a code to verify email and emails to
+        user.                  Verify email with this code at /api/auth/verify.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              email: user@example.com
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  pattern: ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+                  description: User email address, must be valid and unique
+                  example: user@example.com
+              required:
+                - email
+      responses:
+        "200":
+          description: If email is valid you will receive a code
+          content:
+            application/json:
+              example:
+                success: true
+                data: {}
+                message: If email is valid you will receive a code
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    type: string
+                    example: If email is valid you will receive a code
+                  data:
+                    example: {}
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: Validation error messages
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/auth/password-reset-request:
+    post:
+      summary: User request password reset
+      description: >-
+        Issues a code to reset password and emails to user. 
+                        Reset password with this code at /api/auth/password-reset.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              email: user@example.com
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  pattern: ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+                  description: User email address, must be valid and unique
+                  example: user@example.com
+              required:
+                - email
+      responses:
+        "200":
+          description: If email is valid you will receive a code
+          content:
+            application/json:
+              example:
+                success: true
+                data: {}
+                message: If email is valid you will receive a code
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    type: string
+                    example: If email is valid you will receive a code
+                  data:
+                    example: {}
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: Validation error messages
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/auth/password-reset:
+    patch:
+      summary: User reset password
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              code: "123"
+              password: newPassword123!$
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  description: Six character verification code, expires in 5 minutes
+                  example: 21923c
+                password:
+                  type: string
+                  minLength: 6
+                  maxLength: 128
+                  pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{6,}$
+                  description: Password must be 6-128 characters with uppercase, lowercase,
+                    number, and symbol
+                  example: Aa1!xyz
+              required:
+                - code
+                - password
+      responses:
+        "200":
+          description: Password successfully reset
+          content:
+            application/json:
+              example:
+                success: true
+                data: {}
+                message: Password successfully reset
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    type: string
+                    example: Password successfully reset
+                  data:
+                    example: {}
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: Validation error messsages
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Invalid or expired password reset code.
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid or expired password reset code.
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid or expired password reset code.
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/users/me:
+    get:
+      summary: Get authenticated user
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  user:
+                    email: user@example.com
+                    username: User_name123
+                    id: 00000000-0000-0000-0000-000000000000
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            description: The unique ID of the user
+                            example: 00000000-0000-0000-0000-000000000000
+                          username:
+                            description: Username must be unique and between 5 and 30 characters. Can only
+                              contain letters, numbers, dots, underscores, and
+                              hyphens
+                            example: User_name123
+                          email:
+                            type: string
+                            format: email
+                            pattern: ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+                            description: User email address, must be valid and unique
+                            example: user@example.com
+                        required:
+                          - id
+                          - username
+                          - email
+                        additionalProperties: false
+                    required:
+                      - user
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: User not found
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: User not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+    patch:
+      summary: User update information
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              username: newUsername123
+            schema:
+              type: object
+              properties:
+                username:
+                  description: Username must be unique and between 5 and 30 characters. Can only
+                    contain letters, numbers, dots, underscores, and hyphens
+                  example: User_name123
+                  type: string
+                  minLength: 5
+                  maxLength: 30
+                  pattern: ^[a-zA-Z0-9._-]+$
+              required:
+                - username
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  user:
+                    username: newUsername123
+                    id: 00000000-0000-0000-0000-000000000000
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            description: The unique ID of the user
+                            example: 00000000-0000-0000-0000-000000000000
+                          username:
+                            description: Username must be unique and between 5 and 30 characters. Can only
+                              contain letters, numbers, dots, underscores, and
+                              hyphens
+                            example: User_name123
+                        required:
+                          - id
+                          - username
+                        additionalProperties: false
+                    required:
+                      - user
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: "{ password: [ Unrecognized key(s) in object: password ] }"
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "403":
+          description: Email not verified
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Email not verified
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Email not verified
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: User not found
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: User not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+    delete:
+      summary: Delete authenticated user
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: User deleted successfully
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "403":
+          description: Email not verified
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Email not verified
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Email not verified
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: User not found
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: User not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/users/{id}:
+    get:
+      summary: Get user by ID
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            format: uuid
+            example: 00000000-0000-0000-0000-000000000000
+          description: User ID
+      responses:
+        "200":
+          description: User retrieved
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  user:
+                    username: User_name123
+                    id: 00000000-0000-0000-0000-000000000000
+                message: User retrieved
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    type: string
+                    example: User retrieved
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            description: The unique ID of the user
+                            example: 00000000-0000-0000-0000-000000000000
+                          username:
+                            description: Username must be unique and between 5 and 30 characters. Can only
+                              contain letters, numbers, dots, underscores, and
+                              hyphens
+                            example: User_name123
+                        required:
+                          - id
+                          - username
+                        additionalProperties: false
+                    required:
+                      - user
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: "{ id: [ Required] }"
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: User not found
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: User not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/users:
+    get:
+      summary: Get all users
+      tags:
+        - Users
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  - user:
+                      username: User_name123
+                      id: 00000000-0000-0000-0000-000000000000
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                              description: The unique ID of the user
+                              example: 00000000-0000-0000-0000-000000000000
+                            username:
+                              description: Username must be unique and between 5 and 30 characters. Can only
+                                contain letters, numbers, dots, underscores, and
+                                hyphens
+                              example: User_name123
+                          required:
+                            - id
+                            - username
+                          additionalProperties: false
+                      required:
+                        - user
+                      additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/users/update-email:
+    patch:
+      summary: User update email
+      description: |-
+        Sends new verification code to provided email address, 
+                    resets user to unverified state. Verify at /api/auth/verify
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              email: new@email.com.au
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  pattern: ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+                  description: User email address, must be valid and unique
+                  example: user@example.com
+              required:
+                - email
+      responses:
+        "200":
+          description: A verification code has been sent, please check email
+          content:
+            application/json:
+              example:
+                success: true
+                data: {}
+                message: A verification code has been sent, please check email
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    type: string
+                    example: A verification code has been sent, please check email
+                  data:
+                    example: {}
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: Validation error messages
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "403":
+          description: Email not verified
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Email not verified
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Email not verified
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: User not found
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: User not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "409":
+          description: Email already in use
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Email already in use
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Email already in use
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+components:
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+        message:
+          type: string
+        data: {}
+      required:
+        - success
+        - data
+      additionalProperties: false
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: false
+        message:
+          type: string
+        data:
+          type: "null"
+        errors:
+          anyOf:
+            - {}
+            - type: "null"
+      required:
+        - success
+        - message
+        - data
+      additionalProperties: false
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token in Authorization header, e.g., "Bearer <token>"

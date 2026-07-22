@@ -1,0 +1,1 @@
+{ "connectionUri": "postgres://postgres:password@localhost:55039/test_db" }
