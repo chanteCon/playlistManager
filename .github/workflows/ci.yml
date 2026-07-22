@@ -11,12 +11,12 @@ jobs:
         runs-on: ubuntu-latest
 
         env:
-            SERVER_PORT: ${{ secrets.SERVER_PORT }}
-            DATABASE_URL: postgresql://${{ secrets.DATABASE_URL }}
-            ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
             ACCESS_TOKEN_EXPIRES_IN: ${{ secrets.ACCESS_TOKEN_EXPIRES_IN }}
-            REFRESH_TOKEN_EXPIRES_IN: ${{ secrets.REFRESH_TOKEN_EXPIRES_IN }}
+            ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+            DATABASE_URL: ${{ secrets.DATABASE_URL }}
             REDIS_URL: ${{secrets.REDIS_URL}}
+            REFRESH_TOKEN_EXPIRES_IN: ${{ secrets.REFRESH_TOKEN_EXPIRES_IN }}
+            SERVER_PORT: ${{ secrets.SERVER_PORT }}
 
         steps:
             - uses: actions/checkout@v3
