@@ -49,11 +49,15 @@ export const createVideoService = ({ videoRepo, videoMetadataService }: VideoSer
     const addFromUrl = async (url: string): Promise<VideoWithSource> => {
         let existingSource: VideoSource | null = null;
         let metadata: VideoMetadata | undefined = undefined;
+        let storedUrl: string = url;
         let canonicalUrl: string | undefined;
 
         const normalisedURLData = getIdentityFromUrl(url);
+        if (normalisedURLData?.url) {
+            storedUrl = normalisedURLData.url;
+        }
 
-        const existing = await videoRepo.findByUrl(normalisedURLData?.url ?? url);
+        const existing = await videoRepo.findByUrl(storedUrl);
         if (existing) {
             return existing;
         }
@@ -64,13 +68,14 @@ export const createVideoService = ({ videoRepo, videoMetadataService }: VideoSer
         if (platform && platformId) {
             // see if source already exsits
             existingSource = await videoRepo.findByPlatformIdentity({ platform, platformId });
-            let rest: Partial<VideoSource>;
-            ({ canonicalUrl, ...rest } = existingSource ?? {});
-            metadata = {
-                title: rest.title,
-                description: rest.description,
-                thumbnail: rest.thumbnail,
-            };
+            if (existingSource) {
+                canonicalUrl = existingSource.canonicalUrl;
+                metadata = {
+                    title: existingSource?.title,
+                    description: existingSource.description,
+                    thumbnail: existingSource.thumbnail,
+                };
+            }
         }
 
         if (normalisedURLData && !existingSource && platform) {
@@ -84,7 +89,7 @@ export const createVideoService = ({ videoRepo, videoMetadataService }: VideoSer
         }
         const platformIdentity = platform && platformId ? { platform, platformId } : undefined;
         return await videoRepo.ensureExists({
-            url,
+            url: storedUrl,
             canonicalUrl,
             metadata,
             platformIdentity,

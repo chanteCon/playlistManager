@@ -70,7 +70,7 @@ describe('Video Service unit tests', () => {
 
                 expect(mockVideoMetadataService.getExternalData).toHaveBeenCalledWith(expectedUrl);
                 const expectedVideo = {
-                    url: url,
+                    url: expectedUrl,
                     canonicalUrl: expectedUrl,
                     platformIdentity: {
                         platform: expectedPlatform,
