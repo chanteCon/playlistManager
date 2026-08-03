@@ -1,5 +1,5 @@
-import { execSync } from 'child_process';
 import { Client } from 'pg';
+import { logger } from 'shared/logger/logger';
 
 beforeAll(async () => {
     const client = new Client({
@@ -7,15 +7,19 @@ beforeAll(async () => {
     });
 
     await client.connect();
+
     try {
-        await client.query(`CREATE DATABASE "${process.env.JEST_WORKER_ID}"`);
-        execSync('npx prisma migrate deploy', {
-            env: process.env,
-        });
-    } catch (error: any) {
-        if (error?.code !== '42P04') {
-            console.error(error);
+        const workerDb = `test_db_${process.env.JEST_WORKER_ID}`;
+
+        const workerExists = await client.query(`SELECT 1 FROM pg_database WHERE datname = $1`, [
+            workerDb,
+        ]);
+
+        if (workerExists.rowCount === 0) {
+            await client.query(`CREATE DATABASE "${workerDb}" TEMPLATE test_db_template`);
         }
+    } catch (error) {
+        logger.error('error setting up test database', error);
     } finally {
         await client.end();
     }

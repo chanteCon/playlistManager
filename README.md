@@ -1,8 +1,17 @@
-# Backend Authentication API
+# Video Playlist Manager Backend
 
 ---
 
-Authentication API using JWT access tokens and refresh tokens. Includes login MFA, email verification, password reset flows, and user account management.
+Backend API for managing video playlists. Users can save videos from external platforms using URLs, with shared video resources to avoid duplicate storage and metadata fetching where possible.
+
+## Features
+
+- Video URL management
+- Shared video resources across users
+- URL normalisation and platform identity detection
+- Optimistic metadata fetching where supported
+- YouTube metadata extraction (title, description, thumbnail)
+- Fallback to storing URLs when metadata is unavailable
 
 ## Tech Stack
 

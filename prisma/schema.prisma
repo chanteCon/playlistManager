@@ -13,6 +13,7 @@ model User {
   password          String
   username          String @unique
   verified          Boolean @default(false)
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now())
 
@@ -32,4 +33,39 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, revokedAt, deviceId])
+}
+
+enum Platform {
+  youtube 
+  tiktok
+}
+
+model Video {
+  id                String@id@default(uuid())
+  url               String @unique
+
+  sourceId          String?
+  source            VideoSource? @relation(fields: [sourceId], references: [id])
+  createdAt         DateTime @default(now())
+
+  updatedAt         DateTime @updatedAt
+
+}
+
+model VideoSource {
+  id                String@id@default(uuid())
+
+  platform          Platform
+  platformId        String
+  canonicalUrl      String
+  title             String?
+  thumbnail         String?
+  description       String?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  videos            Video[]
+
+  @@unique([platform, platformId])
 }

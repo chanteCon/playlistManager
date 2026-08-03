@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "jest --verbose --coverage",
+        "test": "jest --verbose --coverage --selectProjects unit integration_e2e",
         "verify": "npm run build && npm run lint && jest --verbose --coverage",
         "dev": "npm run docker:up && npm run migrate && cross-env NODE_ENV=development tsx watch src/server.ts",
         "clean": "rimraf dist",
@@ -31,6 +31,7 @@
     "dependencies": {
         "@prisma/client": "^6.19.3",
         "bcryptjs": "^3.0.3",
+        "cheerio": "^1.2.0",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
         "dotenv": "^17.2.3",
