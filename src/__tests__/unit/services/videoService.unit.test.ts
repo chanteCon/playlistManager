@@ -58,15 +58,20 @@ describe('Video Service unit tests', () => {
         ])(
             'Should add normalised url with platform data and fetch metadata for $name',
             async ({ url, expectedPlatform, expectedPlatformId, expectedUrl }) => {
+                mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
+                mockVideoRepo.findByPlatformIdentity.mockResolvedValueOnce(null);
                 mockVideoMetadataService.getExternalData.mockResolvedValue({
-                    title: 'test title',
+                    url: expectedUrl,
+                    metadata: { title: 'test title' },
+                    platformId: expectedPlatformId,
                 });
 
                 await videoService.addFromUrl(url);
 
                 expect(mockVideoMetadataService.getExternalData).toHaveBeenCalledWith(expectedUrl);
                 const expectedVideo = {
-                    url: expectedUrl,
+                    url: url,
+                    canonicalUrl: expectedUrl,
                     platformIdentity: {
                         platform: expectedPlatform,
                         platformId: expectedPlatformId,
@@ -81,7 +86,7 @@ describe('Video Service unit tests', () => {
                 );
             },
         );
-        test('Should add normalised url with platform data if valid url with undefined metadata', async () => {
+        test('Should add url with platform data if valid url with undefined metadata', async () => {
             const expectedVideo = {
                 url: testUrl,
                 platformIdentity: {
@@ -89,6 +94,8 @@ describe('Video Service unit tests', () => {
                     platformId: '7234514172778777874',
                 },
             };
+            mockVideoRepo.findByPlatformIdentity.mockResolvedValueOnce(null);
+            mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
             mockVideoMetadataService.getExternalData.mockResolvedValueOnce(undefined);
             await videoService.addFromUrl(testUrl);
             expect(mockVideoMetadataService.getExternalData).toHaveBeenCalledWith(testUrl);
@@ -96,21 +103,25 @@ describe('Video Service unit tests', () => {
                 expect.objectContaining(expectedVideo),
             );
         });
-        test('Should return existing video data without fetching metadata', async () => {
+        test('Should return existing video without fetching metadata', async () => {
             const storedVideo = buildVideo({ url: testUrl });
             mockVideoRepo.findByUrl.mockResolvedValueOnce(storedVideo);
             await videoService.addFromUrl(testUrl);
+            expect(mockVideoRepo.findByPlatformIdentity).not.toHaveBeenCalled();
             expect(mockVideoMetadataService.getExternalData).not.toHaveBeenCalled();
             expect(mockVideoRepo.ensureExists).not.toHaveBeenCalled();
         });
         test('Should store input URL without platform identity for unknown host', async () => {
+            mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
             const url = 'https://unknown-host.com';
             await videoService.addFromUrl(url);
             expect(mockVideoRepo.ensureExists).toHaveBeenCalledWith(
                 expect.objectContaining({ url }),
             );
+            expect(mockVideoRepo.findByPlatformIdentity).not.toHaveBeenCalled();
         });
         test('Should treat spoofed platform hostname as unknown host', async () => {
+            mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
             const url = 'https://youtubee.com';
             await videoService.addFromUrl(url);
             expect(mockVideoRepo.ensureExists).toHaveBeenCalledWith(
@@ -118,15 +129,32 @@ describe('Video Service unit tests', () => {
             );
         });
         test('Should throw error if youtube id not valid format', async () => {
+            mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
             const url = 'https://www.youtube.com/watch?v=invalid.id';
             await expect(videoService.addFromUrl(url)).rejects.toThrow('url format not supported');
         });
         test('Should throw error if tiktok id not valid format', async () => {
+            mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
             const url = 'https://www.tiktok.com/@cloverthisismycat/video/invalid.id';
             await expect(videoService.addFromUrl(url)).rejects.toThrow('url format not supported');
         });
+        test('Should not identify platform if if could not extract platform id', async () => {
+            mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
+            const url = 'https://www.tiktok.com/@cloverthisismycat/video/';
+            await videoService.addFromUrl(url);
+            expect(mockVideoRepo.ensureExists).toHaveBeenCalledWith(
+                expect.objectContaining({ url }),
+            );
+            expect(mockVideoRepo.findByPlatformIdentity).not.toHaveBeenCalled();
+        });
         test('Should throw error if url is not a valid url', async () => {
+            mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
             const url = 'not url';
+            await expect(videoService.addFromUrl(url)).rejects.toThrow('url format not supported');
+        });
+        test('Should throw error if tiktok uisername is not a valid', async () => {
+            mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
+            const url = 'https://www.tiktok.com/@hello/video/123456789!';
             await expect(videoService.addFromUrl(url)).rejects.toThrow('url format not supported');
         });
     });
@@ -148,7 +176,10 @@ describe('Video Service unit tests', () => {
             const newData = buildMetadata();
             const oldVideo = buildVideoWithSource({ sourceOverrides: { updatedAt: twoMonthsAgo } });
             mockVideoRepo.findById.mockResolvedValueOnce(oldVideo);
-            mockVideoMetadataService.getExternalData.mockResolvedValueOnce(newData);
+            mockVideoMetadataService.getExternalData.mockResolvedValueOnce({
+                url: oldVideo.url,
+                metadata: newData,
+            });
             mockVideoRepo.updateSourceData.mockResolvedValueOnce({
                 ...oldVideo.source!,
                 ...newData,
@@ -178,6 +209,7 @@ describe('Video Service unit tests', () => {
         test('Should return original video if there is no video source', async () => {
             const originalVideo = buildVideo();
             mockVideoRepo.findById.mockResolvedValueOnce(originalVideo);
+            mockVideoRepo.touchSource.mockResolvedValueOnce(originalVideo.source!);
             const result = await videoService.getFreshById(originalVideo.id);
             expect(mockVideoMetadataService.getExternalData).toHaveBeenCalledTimes(0);
             expect(mockVideoRepo.updateSourceData).toHaveBeenCalledTimes(0);

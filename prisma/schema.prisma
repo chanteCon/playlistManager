@@ -57,6 +57,7 @@ model VideoSource {
 
   platform          Platform
   platformId        String
+  canonicalUrl      String
   title             String?
   thumbnail         String?
   description       String?

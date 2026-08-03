@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "jest --verbose --coverage",
+        "test": "jest --verbose --coverage --selectProjects unit integration_e2e",
         "verify": "npm run build && npm run lint && jest --verbose --coverage",
         "dev": "npm run docker:up && npm run migrate && cross-env NODE_ENV=development tsx watch src/server.ts",
         "clean": "rimraf dist",

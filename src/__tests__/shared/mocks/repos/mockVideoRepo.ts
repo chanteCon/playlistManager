@@ -5,4 +5,6 @@ export const mockVideoRepo: jest.Mocked<VideoRepo> = {
     ensureExists: jest.fn(),
     findByUrl: jest.fn(),
     updateSourceData: jest.fn(),
+    findByPlatformIdentity: jest.fn(),
+    touchSource: jest.fn(),
 };

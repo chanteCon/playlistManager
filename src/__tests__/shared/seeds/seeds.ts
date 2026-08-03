@@ -84,9 +84,17 @@ export const seedVideoWithSource = async ({
 }): Promise<VideoWithSource> => {
     const videoWithSource = buildVideoWithSource({ sourceOverrides, videoOverrides });
     const { url, source } = videoWithSource;
-    const { platform, platformId, title, thumbnail, description } = source!;
+    const { platform, platformId, title, thumbnail, description, canonicalUrl } = source!;
     const savedSource = await db.videoSource.create({
-        data: { platform, platformId, title, thumbnail, description, ...sourceOverrides },
+        data: {
+            platform,
+            platformId,
+            title,
+            thumbnail,
+            description,
+            canonicalUrl,
+            ...sourceOverrides,
+        },
     });
     return await db.video.create({
         data: {

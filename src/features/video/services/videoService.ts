@@ -1,22 +1,11 @@
-import { BadInputError, NotFoundError } from 'shared/errors/errors';
+import { NotFoundError } from 'shared/errors/errors';
 import { VideoRepo } from '../repos/videoRepo';
-import { Platform, PlatformIdentity, VideoMetadata, VideoWithSource } from '../types';
+import { VideoMetadata, VideoWithSource } from '../types';
 import { handleNotFoundError } from 'database/prisma/repoError';
 import { VideoMetadataService } from './videoMetadataService';
-
-const VIDEO_DATA_EXP_MS = 30 * 24 * 60 * 60 * 1000;
-const TIKTOK_ID_REGEX = /^\d{10,25}$/;
-const TIKTOK_SHORT_ID_REGEX = /^[A-Za-z0-9]+$/;
-const TIKTOK_USERNAME_REGEX = /^[A-Za-z0-9._]+$/;
-const YOUTUBE_ID_REGEX = /^[A-Za-z0-9_-]{11}$/;
-const YOUTUBE_HOSTS = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be']);
-const TIKTOK_HOSTS = new Set([
-    'tiktok.com',
-    'www.tiktok.com',
-    'm.tiktok.com',
-    'vm.tiktok.com',
-    'vt.tiktok.com',
-]);
+import { VIDEO_DATA_EXP_MS } from '../constants';
+import { getIdentityFromUrl } from '../utils/videoUrl';
+import { VideoSource } from '@prisma/client';
 
 type VideoServiceDeps = { videoRepo: VideoRepo; videoMetadataService: VideoMetadataService };
 
@@ -38,11 +27,16 @@ export const createVideoService = ({ videoRepo, videoMetadataService }: VideoSer
             return video;
         }
         try {
-            const newData = await videoMetadataService.getExternalData(video.url);
-            if (!newData) {
+            const result = await videoMetadataService.getExternalData(video.source.canonicalUrl);
+            if (!result || !result.metadata) {
+                await videoRepo.touchSource(video.source.id);
                 return video;
             }
-            const updatedSource = await videoRepo.updateSourceData(video.source.id, newData);
+            const updatedSource = await videoRepo.updateSourceData(
+                video.source.id,
+                result.url,
+                result.metadata,
+            );
             return { ...video, source: updatedSource };
         } catch (error) {
             handleNotFoundError(error, 'video not found');
@@ -50,133 +44,48 @@ export const createVideoService = ({ videoRepo, videoMetadataService }: VideoSer
         }
     };
 
-    type ParsedURLData = {
-        url: string;
-        platform?: Platform;
-        platformId?: string;
-    };
-
-    const _getIdentityFromUrl = (url: string): ParsedURLData | undefined => {
-        let parsedUrl: URL;
-        try {
-            parsedUrl = new URL(url);
-        } catch {
-            throw new BadInputError('url format not supported');
-        }
-        const hostname = parsedUrl.hostname;
-        if (YOUTUBE_HOSTS.has(hostname)) {
-            return _parseYoutubeUrl(parsedUrl, hostname);
-        }
-        if (TIKTOK_HOSTS.has(hostname)) {
-            return _parseTiktokUrl(parsedUrl, hostname);
-        }
-        return undefined;
-    };
-
-    const _parseYoutubeUrl = (parsedUrl: URL, hostname: string): ParsedURLData | undefined => {
-        let platformId: string | undefined;
-
-        if (hostname === 'youtu.be') {
-            platformId = parsedUrl.pathname.split('/')[1] || undefined;
-        }
-
-        if (
-            hostname === 'www.youtube.com' ||
-            hostname === 'm.youtube.com' ||
-            hostname === 'youtube.com'
-        ) {
-            const parts = parsedUrl.pathname.split('/');
-
-            const shortsIndex = parts.indexOf('shorts');
-
-            if (shortsIndex !== -1) {
-                platformId = parts[shortsIndex + 1] || undefined;
-            } else {
-                platformId = parsedUrl.searchParams.get('v') ?? undefined;
-            }
-        }
-
-        if (!platformId) {
-            return undefined;
-        }
-
-        if (!YOUTUBE_ID_REGEX.test(platformId)) {
-            throw new BadInputError('url format not supported');
-        }
-
-        return {
-            platform: 'youtube',
-            platformId,
-            url: `https://www.youtube.com/watch?v=${platformId}`,
-        };
-    };
-
-    const _parseTiktokUrl = (parsedUrl: URL, hostname: string): ParsedURLData | undefined => {
-        let platformId: string | undefined;
-        let url: string | undefined;
-        if (
-            hostname === 'www.tiktok.com' ||
-            hostname === 'tiktok.com' ||
-            hostname === 'm.tiktok.com'
-        ) {
-            const parts = parsedUrl.pathname.split('/').filter(Boolean);
-            const videoIndex = parts.indexOf('video');
-
-            if (videoIndex !== -1) {
-                platformId = parts[videoIndex + 1];
-
-                if (platformId && parts[0]?.startsWith('@')) {
-                    const username = parts[0].slice(1);
-                    if (!TIKTOK_USERNAME_REGEX.test(username)) {
-                        throw new BadInputError('url format not supported');
-                    }
-                    url = `https://www.tiktok.com/@${username}/video/${platformId}`;
-                }
-            }
-        }
-
-        if (hostname === 'vm.tiktok.com' || hostname === 'vt.tiktok.com') {
-            {
-                platformId = parsedUrl.pathname.split('/')[1];
-            }
-            if (platformId) {
-                url = `https://${hostname}/${platformId}/`;
-            }
-        }
-
-        if (!platformId || !url) {
-            return undefined;
-        }
-
-        if (!TIKTOK_ID_REGEX.test(platformId) && !TIKTOK_SHORT_ID_REGEX.test(platformId)) {
-            throw new BadInputError('url format not supported');
-        }
-
-        return {
-            platform: 'tiktok',
-            platformId,
-            url,
-        };
-    };
-
     /// External /////////////////////////////////////
 
     const addFromUrl = async (url: string): Promise<VideoWithSource> => {
-        const normalisedURLData = _getIdentityFromUrl(url);
-        const storedUrl = normalisedURLData?.url || url;
-        const existing = await videoRepo.findByUrl(storedUrl);
+        let existingSource: VideoSource | null = null;
+        let metadata: VideoMetadata | undefined = undefined;
+        let canonicalUrl: string | undefined;
+
+        const normalisedURLData = getIdentityFromUrl(url);
+
+        const existing = await videoRepo.findByUrl(normalisedURLData?.url ?? url);
         if (existing) {
             return existing;
         }
-        let metadata: VideoMetadata | undefined = undefined;
-        let platformIdentity: PlatformIdentity | undefined = undefined;
-        const { platform, platformId } = normalisedURLData ?? {};
+
+        // eslint-disable-next-line prefer-const
+        let { platform, platformId } = normalisedURLData ?? {};
+
         if (platform && platformId) {
-            metadata = await videoMetadataService.getExternalData(storedUrl);
-            platformIdentity = { platform, platformId };
+            // see if source already exsits
+            existingSource = await videoRepo.findByPlatformIdentity({ platform, platformId });
+            let rest: Partial<VideoSource>;
+            ({ canonicalUrl, ...rest } = existingSource ?? {});
+            metadata = {
+                title: rest.title,
+                description: rest.description,
+                thumbnail: rest.thumbnail,
+            };
         }
+
+        if (normalisedURLData && !existingSource && platform) {
+            // Otherwise need to fetch the canonical url and source data
+            const result = await videoMetadataService.getExternalData(normalisedURLData.url);
+            if (result) {
+                metadata = result.metadata;
+                canonicalUrl = result.url;
+                platformId = result.platformId ?? platformId;
+            }
+        }
+        const platformIdentity = platform && platformId ? { platform, platformId } : undefined;
         return await videoRepo.ensureExists({
-            url: storedUrl,
+            url,
+            canonicalUrl,
             metadata,
             platformIdentity,
         });

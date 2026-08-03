@@ -14,25 +14,45 @@ export const createVideoRepo = ({ db }: VideoRepoDeps) => {
         return await db.video.findUnique({ where: { url }, include: { source: true } });
     };
 
+    const findByPlatformIdentity = async (
+        platformIdentity: PlatformIdentity,
+    ): Promise<VideoSource | null> => {
+        return await db.videoSource.findUnique({
+            where: { platform_platformId: platformIdentity },
+        });
+    };
+
+    const touchSource = async (sourceId: string): Promise<VideoSource> => {
+        return await db.videoSource.update({
+            where: { id: sourceId },
+            data: {
+                updatedAt: new Date(),
+            },
+        });
+    };
+
     const updateSourceData = async (
         sourceId: string,
+        canonicalUrl: string,
         metadata: VideoMetadata,
     ): Promise<VideoSource> => {
         return db.videoSource.update({
             where: {
                 id: sourceId,
             },
-            data: metadata,
+            data: { canonicalUrl, ...metadata },
         });
     };
 
     type UpsertVideoInput = {
         url: string;
+        canonicalUrl?: string;
         platformIdentity?: PlatformIdentity;
         metadata?: VideoMetadata;
     };
 
     const ensureExists = async ({
+        canonicalUrl,
         url,
         platformIdentity,
         metadata,
@@ -40,8 +60,8 @@ export const createVideoRepo = ({ db }: VideoRepoDeps) => {
         return await db.$transaction(async (tx) => {
             let sourceId: string | undefined;
 
-            if (platformIdentity) {
-                sourceId = await upsertSource({ platformIdentity, tx, metadata });
+            if (platformIdentity && canonicalUrl) {
+                sourceId = await upsertSource({ canonicalUrl, platformIdentity, tx, metadata });
             }
 
             return await tx.video.upsert({
@@ -61,16 +81,23 @@ export const createVideoRepo = ({ db }: VideoRepoDeps) => {
     };
 
     type UpsertSourceInput = {
+        canonicalUrl: string;
         platformIdentity: PlatformIdentity;
         tx?: PrismaClientTx;
         metadata?: VideoMetadata;
     };
-    const upsertSource = async ({ platformIdentity, tx = db, metadata }: UpsertSourceInput) => {
+    const upsertSource = async ({
+        canonicalUrl,
+        platformIdentity,
+        tx = db,
+        metadata,
+    }: UpsertSourceInput) => {
         const source = await tx.videoSource.upsert({
             where: {
                 platform_platformId: platformIdentity,
             },
             create: {
+                canonicalUrl,
                 ...platformIdentity,
                 ...metadata,
             },
@@ -80,5 +107,12 @@ export const createVideoRepo = ({ db }: VideoRepoDeps) => {
         return source.id;
     };
 
-    return { findById, ensureExists, findByUrl, updateSourceData };
+    return {
+        findById,
+        ensureExists,
+        findByUrl,
+        touchSource,
+        updateSourceData,
+        findByPlatformIdentity,
+    };
 };

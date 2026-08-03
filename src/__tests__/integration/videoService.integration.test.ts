@@ -32,7 +32,10 @@ describe('Video service integration tests', () => {
     describe('Add from url', () => {
         test('creates video with source and metadata', async () => {
             const metadata = buildMetadata();
-            mockVideoMetadataService.getExternalData.mockResolvedValueOnce(metadata);
+            mockVideoMetadataService.getExternalData.mockResolvedValueOnce({
+                metadata,
+                url: testUrl,
+            });
             const result = await testEnv.videoService.addFromUrl(testUrl);
             const videoInDB = await testEnv.db.video.findUnique({
                 where: { id: result.id },
@@ -66,6 +69,19 @@ describe('Video service integration tests', () => {
             const res2 = expect(await testEnv.db.video.findMany()).toHaveLength(1);
             expect(res1).toEqual(res2);
         });
+        test('Uses existing source if source already exists', async () => {
+            const fullUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+            const shortUrl = 'https://www.youtube.com/shorts/dQw4w9WgXcQ';
+            const metadata = buildMetadata();
+            mockVideoMetadataService.getExternalData.mockResolvedValueOnce({
+                metadata,
+                url: fullUrl,
+            });
+            const firstResult = await testEnv.videoService.addFromUrl(shortUrl);
+            const secondResult = await testEnv.videoService.addFromUrl(fullUrl);
+            expect(firstResult.sourceId).toEqual(secondResult.sourceId);
+            expect(mockVideoMetadataService.getExternalData).toHaveBeenCalledTimes(1);
+        });
     });
     describe('Find by id', () => {
         test('Returns existing video', async () => {
@@ -82,7 +98,10 @@ describe('Video service integration tests', () => {
     describe('Get fresh by id', () => {
         test('updates stale video source data in database', async () => {
             const metadata = buildMetadata();
-            mockVideoMetadataService.getExternalData.mockResolvedValueOnce(metadata);
+            mockVideoMetadataService.getExternalData.mockResolvedValueOnce({
+                metadata,
+                url: testUrl,
+            });
             const twoMonthsAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
             const originalVideo = await seedVideoWithSource({
                 db: testEnv.db,

@@ -63,6 +63,7 @@ export const buildMetadata = (overrides: Partial<VideoMetadata> = {}) => {
 export const buildVideoSource = (overrides: Partial<VideoSource> = {}): VideoSource => {
     return {
         id: randomUUID(),
+        canonicalUrl: faker.internet.url(),
         platform: 'youtube' as Platform,
         platformId: generateYoutubeId(),
         ...buildMetadata(),
