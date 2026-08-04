@@ -1,22 +1,22 @@
 import { createTestInfrastructure, InfraStructure } from '__tests__/setup/infrastructure';
+import { createVideoServiceFixture } from '__tests__/setup/integration';
 import { buildMetadata } from '__tests__/shared/factories/videoFactory';
 import { truncateDbTables } from '__tests__/shared/helpers/dbHelpers';
 import { mockVideoMetadataService } from '__tests__/shared/mocks/services';
 import { seedVideoWithSource } from '__tests__/shared/seeds/seeds';
 import { randomUUID } from 'crypto';
-import { createVideoRepo } from 'features/video/repos/videoRepo';
-import { createVideoService, VideoService } from 'features/video/services/videoService';
+import {} from 'features/video/repos/videoRepo';
+import { VideoService } from 'features/video/services/videoService';
 
 let testEnv: InfraStructure & { videoService: VideoService };
 
 beforeAll(async () => {
     const infra = await createTestInfrastructure();
-    const videoRepo = createVideoRepo(infra);
-    const videoService = createVideoService({
-        videoRepo,
+    const videoFixture = createVideoServiceFixture({
+        ...infra,
         videoMetadataService: mockVideoMetadataService,
     });
-    testEnv = { ...infra, videoService };
+    testEnv = { ...infra, ...videoFixture };
 });
 
 afterAll(async () => {

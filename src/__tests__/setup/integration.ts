@@ -8,18 +8,22 @@ import { createTokenService } from 'features/auth/services/tokenService';
 import { EmailService } from 'shared/email/emailService';
 import { createTransactionRunner } from 'database/transactionRunner';
 import { RedisClientType } from 'redis';
-import { InfraStructure } from './infrastructure';
+import { Infrastructure } from './infrastructure';
+import { createVideoRepo } from 'features/video/repos/videoRepo';
+import { PrismaClient } from '@prisma/client';
+import { createVideoService } from 'features/video/services/videoService';
+import { VideoMetadataService } from 'features/video/services/videoMetadataService';
 
-const createCodeServiceFixture = async (redis: RedisClientType, emailService: EmailService) => {
+const createCodeServiceFixture = (redis: RedisClientType, emailService: EmailService) => {
     const codeRepo = createCodeRepo({ redis });
     const codeService = createCodeService({ codeRepo, emailService });
     return codeService;
 };
 
-type FixtureDeps = InfraStructure & { emailService: EmailService };
+type FixtureDeps = Infrastructure & { emailService: EmailService };
 
-export const createUserServiceFixture = async ({ db, redis, emailService }: FixtureDeps) => {
-    const codeService = await createCodeServiceFixture(redis, emailService);
+export const createUserServiceFixture = ({ db, redis, emailService }: FixtureDeps) => {
+    const codeService = createCodeServiceFixture(redis, emailService);
     const userRepo = createUserRepo({ db });
     return {
         userService: createUserService({ userRepo, codeService }),
@@ -27,8 +31,8 @@ export const createUserServiceFixture = async ({ db, redis, emailService }: Fixt
     };
 };
 
-export const createAuthServiceFixture = async ({ db, redis, emailService }: FixtureDeps) => {
-    const codeService = await createCodeServiceFixture(redis, emailService);
+export const createAuthServiceFixture = ({ db, redis, emailService }: FixtureDeps) => {
+    const codeService = createCodeServiceFixture(redis, emailService);
     const userRepo = createUserRepo({ db });
     const userService = createUserService({ userRepo, codeService });
     const refreshTokenRepo = createTokenRepo({ db });
@@ -39,4 +43,16 @@ export const createAuthServiceFixture = async ({ db, redis, emailService }: Fixt
         txRunner,
     });
     return { authService, codeService, tokenService };
+};
+
+export const createVideoServiceFixture = ({
+    db,
+    videoMetadataService,
+}: {
+    db: PrismaClient;
+    videoMetadataService: VideoMetadataService;
+}) => {
+    const videoRepo = createVideoRepo({ db });
+    const videoService = createVideoService({ videoRepo, videoMetadataService });
+    return { db, videoService };
 };

@@ -66,7 +66,6 @@ module.exports = {
         '!src/database/**',
         '!src/redisClient/redis.ts',
         '!src/middleware/timeoutMiddleware.ts',
-        '!src/middleware/rateLimitMiddleware.ts',
         '!src/**/types.ts',
     ],
 };

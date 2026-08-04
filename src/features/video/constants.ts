@@ -18,3 +18,5 @@ export const TIKTOK_HOSTS = new Set([
 ]);
 
 export const ALLOWED_DOMAINS = new Set([...YOUTUBE_HOSTS, ...TIKTOK_HOSTS]);
+
+export const RENDERABLE_PLATFORMS = new Set(['youtube', 'tiktok']);

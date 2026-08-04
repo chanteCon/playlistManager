@@ -3,6 +3,7 @@ import { ConflictError, NotFoundError, UnauthorisedError } from 'shared/errors/e
 
 export const PRISMA_NOT_FOUND_ERROR = 'P2025';
 export const PRISMA_UNIQUE_CONTSTRAINT_ERROR = 'P2002';
+export const PRISMA_FOREIGN_KEY_ERROR = 'P2003';
 
 export const handleNotFoundError = (error: any, msg: string) => {
     if (isNotFoundError(error)) {
@@ -37,6 +38,18 @@ export const isUniqueConstraintError = (error: any) => {
     );
 };
 
+export const translateForeignKeyError = (
+    error: unknown,
+    ErrorType: new (message: string) => Error,
+    message: string,
+) => {
+    if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === PRISMA_FOREIGN_KEY_ERROR
+    ) {
+        throw new ErrorType(message);
+    }
+};
 export const handleUniqueConstraintError = (error: any) => {
     if (isUniqueConstraintError(error)) {
         const match = error.message.match(/Unique constraint failed on the fields: \(.+\)/);

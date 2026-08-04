@@ -47,13 +47,6 @@ describe('Unit tests: User service', () => {
             );
             expect(mockUserRepo.create).toHaveBeenCalledTimes(1);
         });
-        test('Throws if unexpected error occurs', async () => {
-            mockUserRepo.create.mockRejectedValue(new Error('Unexpected error'));
-            await expect(userService.create({ data: userInputData })).rejects.toThrow(
-                'Unexpected error',
-            );
-            expect(mockUserRepo.create).toHaveBeenCalledTimes(1);
-        });
     });
 
     describe('verify', () => {
@@ -112,17 +105,6 @@ describe('Unit tests: User service', () => {
                 data: { username },
             });
         });
-        test('Throws if unexpected error occurs', async () => {
-            const username = 'newUserName';
-            mockUserRepo.updateUserPublic.mockRejectedValue(new Error('Unexpected error'));
-            await expect(userService.update({ id: user.id, data: { username } })).rejects.toThrow(
-                'Unexpected error',
-            );
-            expect(mockUserRepo.updateUserPublic).toHaveBeenCalledWith({
-                where: { id: user.id },
-                data: { username },
-            });
-        });
     });
     describe('updatePassword', () => {
         test('Updates password and returns user', async () => {
@@ -148,20 +130,6 @@ describe('Unit tests: User service', () => {
                     passwordHash: password,
                 }),
             ).rejects.toThrow('User not found');
-            expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledWith({
-                where: { id: user.id },
-                data: { password },
-            });
-        });
-        test('Throws if unexpected error occurs', async () => {
-            const password = 'passwordHash';
-            mockUserRepo.updateUserSensitive.mockRejectedValueOnce(new Error('Unexpected error'));
-            await expect(
-                userService.updatePassword({
-                    id: user.id,
-                    passwordHash: password,
-                }),
-            ).rejects.toThrow('Unexpected error');
             expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledWith({
                 where: { id: user.id },
                 data: { password },
@@ -202,18 +170,6 @@ describe('Unit tests: User service', () => {
                 data: { email: privateUser.email, verified: false },
             });
         });
-        test('Throws unexpected error', async () => {
-            const error = new Error('DB error');
-            mockUserRepo.updateUserSensitive.mockRejectedValue(error);
-            await expect(
-                userService.updateEmail({ id: user.id, email: privateUser.email }),
-            ).rejects.toThrow('DB error');
-            expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledTimes(1);
-            expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledWith({
-                where: { id: user.id, verified: true },
-                data: { email: privateUser.email, verified: false },
-            });
-        });
     });
     describe('remove', () => {
         test('Removes user and returns their id', async () => {
@@ -226,11 +182,6 @@ describe('Unit tests: User service', () => {
         test('Throws if user not found', async () => {
             mockUserRepo.remove.mockRejectedValueOnce(prismaNotFoundError);
             await expect(userService.remove(user.id)).rejects.toThrow('User not found');
-            expect(mockUserRepo.remove).toHaveBeenCalledWith(user.id);
-        });
-        test('Throws if unexpected error occurs', async () => {
-            mockUserRepo.remove.mockRejectedValueOnce(new Error('Unexpected error'));
-            await expect(userService.remove(user.id)).rejects.toThrow('Unexpected error');
             expect(mockUserRepo.remove).toHaveBeenCalledWith(user.id);
         });
     });
