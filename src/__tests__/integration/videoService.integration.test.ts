@@ -12,11 +12,11 @@ let testEnv: InfraStructure & { videoService: VideoService };
 
 beforeAll(async () => {
     const infra = await createTestInfrastructure();
-    const videoFixture = createVideoServiceFixture({
+    const videoService = createVideoServiceFixture({
         ...infra,
         videoMetadataService: mockVideoMetadataService,
     });
-    testEnv = { ...infra, ...videoFixture };
+    testEnv = { ...infra, videoService };
 });
 
 afterAll(async () => {
@@ -70,6 +70,19 @@ describe('Video service integration tests', () => {
             expect(res1).toEqual(res2);
         });
         test('Uses existing source if source already exists', async () => {
+            const fullUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+            const shortUrl = 'https://www.youtube.com/shorts/dQw4w9WgXcQ';
+            const metadata = buildMetadata();
+            mockVideoMetadataService.getExternalData.mockResolvedValueOnce({
+                metadata,
+                url: fullUrl,
+            });
+            const firstResult = await testEnv.videoService.addFromUrl(shortUrl);
+            const secondResult = await testEnv.videoService.addFromUrl(fullUrl);
+            expect(firstResult.sourceId).toEqual(secondResult.sourceId);
+            expect(mockVideoMetadataService.getExternalData).toHaveBeenCalledTimes(1);
+        });
+        test('returns existing video without duplicate creation from extracting platform data', async () => {
             const fullUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
             const shortUrl = 'https://www.youtube.com/shorts/dQw4w9WgXcQ';
             const metadata = buildMetadata();

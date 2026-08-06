@@ -13,6 +13,9 @@ import { createVideoRepo } from 'features/video/repos/videoRepo';
 import { PrismaClient } from '@prisma/client';
 import { createVideoService } from 'features/video/services/videoService';
 import { VideoMetadataService } from 'features/video/services/videoMetadataService';
+import { createPlaylistRepo } from 'features/playlist/repos/playlistRepo';
+import { createPlaylistVideoRepo } from 'features/playlist/repos/playlistVideoRepo';
+import { createPlaylistService } from 'features/playlist/services/playlistService';
 
 const createCodeServiceFixture = (redis: RedisClientType, emailService: EmailService) => {
     const codeRepo = createCodeRepo({ redis });
@@ -20,9 +23,9 @@ const createCodeServiceFixture = (redis: RedisClientType, emailService: EmailSer
     return codeService;
 };
 
-type FixtureDeps = Infrastructure & { emailService: EmailService };
+type AuthUserFixtureDeps = Infrastructure & { emailService: EmailService };
 
-export const createUserServiceFixture = ({ db, redis, emailService }: FixtureDeps) => {
+export const createUserServiceFixture = ({ db, redis, emailService }: AuthUserFixtureDeps) => {
     const codeService = createCodeServiceFixture(redis, emailService);
     const userRepo = createUserRepo({ db });
     return {
@@ -31,7 +34,7 @@ export const createUserServiceFixture = ({ db, redis, emailService }: FixtureDep
     };
 };
 
-export const createAuthServiceFixture = ({ db, redis, emailService }: FixtureDeps) => {
+export const createAuthServiceFixture = ({ db, redis, emailService }: AuthUserFixtureDeps) => {
     const codeService = createCodeServiceFixture(redis, emailService);
     const userRepo = createUserRepo({ db });
     const userService = createUserService({ userRepo, codeService });
@@ -53,6 +56,19 @@ export const createVideoServiceFixture = ({
     videoMetadataService: VideoMetadataService;
 }) => {
     const videoRepo = createVideoRepo({ db });
-    const videoService = createVideoService({ videoRepo, videoMetadataService });
-    return { db, videoService };
+    return createVideoService({ videoRepo, videoMetadataService });
+};
+
+export const createPlaylistServiceFixture = ({
+    db,
+    videoMetadataService,
+}: {
+    db: PrismaClient;
+    videoMetadataService: VideoMetadataService;
+}) => {
+    const videoService = createVideoServiceFixture({ db, videoMetadataService });
+    const playlistRepo = createPlaylistRepo({ db });
+    const playlistVideoRepo = createPlaylistVideoRepo({ db });
+
+    return createPlaylistService({ playlistRepo, playlistVideoRepo, videoService });
 };

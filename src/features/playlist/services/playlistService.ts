@@ -3,7 +3,7 @@ import { PlaylistRepo } from '../repos/playlistRepo';
 import { PlaylistVideoRepo } from '../repos/playlistVideoRepo';
 import {
     Playlist,
-    PlaylistCreateInput,
+    PlaylistCreateData,
     PlaylistDTO,
     PlaylistUpdateInput,
     PlaylistVideoDTO,
@@ -59,12 +59,12 @@ export const createPlaylistService = ({
     //// External ////////////////////////////////////
 
     /// Playlist /////////////////////////////////////
-    const create = async (data: PlaylistCreateInput): Promise<Playlist> => {
+    const create = async (userId: string, data: PlaylistCreateData): Promise<Playlist> => {
         try {
-            return await playlistRepo.create(data);
+            return await playlistRepo.create({ userId, ...data });
         } catch (error) {
             translateForeignKeyError(error, NotFoundError, 'User not found');
-            handleUniqueConstraintError(error);
+            handleUniqueConstraintError(error, 'You have another playlist with this name');
             throw error;
         }
     };
@@ -87,14 +87,14 @@ export const createPlaylistService = ({
     };
 
     const update = async (
-        playlistId: string,
         userId: string,
+        playlistId: string,
         data: PlaylistUpdateInput,
     ): Promise<Playlist> => {
         try {
             return await playlistRepo.update(playlistId, userId, data);
         } catch (error) {
-            handleUniqueConstraintError(error);
+            handleUniqueConstraintError(error, 'You have another playlist with this name');
             handleNotFoundError(error, 'Playlist not found');
             throw error;
         }
@@ -110,12 +110,34 @@ export const createPlaylistService = ({
     };
 
     /// Playlist Video /////////////////////////////////
-
-    const updateVideo = async (
-        playlistId: string,
-        playlistVideoId: string,
+    type AddVideoData = {
+        playlistId: string;
+        url: string;
+    };
+    const addVideo = async (
         userId: string,
-        data: { customTitle?: string; customDescription?: string },
+        { playlistId, url }: AddVideoData,
+    ): Promise<PlaylistVideoDTO> => {
+        await _ensurePlaylistExistsForUser(playlistId, userId);
+        const video = await videoService.addFromUrl(url);
+        try {
+            const playlistVideo = await playlistVideoRepo.create(playlistId, video.id);
+            return _toPlaylistVideoDto(playlistVideo);
+        } catch (error) {
+            handleUniqueConstraintError(error);
+            translateForeignKeyError(error, NotFoundError, 'Playlist or video not found');
+            throw error;
+        }
+    };
+
+    type UpdatePlaylistVideoData = {
+        playlistId: string;
+        playlistVideoId: string;
+        data: { customTitle?: string; customDescription?: string };
+    };
+    const updateVideo = async (
+        userId: string,
+        { playlistId, playlistVideoId, data }: UpdatePlaylistVideoData,
     ): Promise<PlaylistVideoDTO> => {
         await _ensurePlaylistExistsForUser(playlistId, userId);
         try {
@@ -127,33 +149,19 @@ export const createPlaylistService = ({
         }
     };
 
+    type RemovePlaylistVideoData = {
+        playlistId: string;
+        playlistVideoId: string;
+    };
     const removeVideo = async (
-        playlistId: string,
-        playlistVideoId: string,
         userId: string,
+        { playlistId, playlistVideoId }: RemovePlaylistVideoData,
     ): Promise<void> => {
         await _ensurePlaylistExistsForUser(playlistId, userId);
         try {
             await playlistVideoRepo.deleteFromPlaylist(playlistId, playlistVideoId);
         } catch (error) {
             handleNotFoundError(error, 'Playlist or video not found');
-            throw error;
-        }
-    };
-
-    const addVideo = async (
-        playlistId: string,
-        url: string,
-        userId: string,
-    ): Promise<PlaylistVideoDTO> => {
-        await _ensurePlaylistExistsForUser(playlistId, userId);
-        const video = await videoService.addFromUrl(url);
-        try {
-            const playlistVideo = await playlistVideoRepo.create(playlistId, video.id);
-            return _toPlaylistVideoDto(playlistVideo);
-        } catch (error) {
-            handleUniqueConstraintError(error);
-            translateForeignKeyError(error, NotFoundError, 'Playlist or video not found');
             throw error;
         }
     };

@@ -9,12 +9,14 @@ export type Playlist = PrismaPlaylist;
 export type PlaylistVideo = PrismaPlaylistVideo;
 
 // Inputs
-export type PlaylistCreateInput = {
-    userId: string;
+export type PlaylistCreateData = {
     name: string;
     description?: string;
 };
 
+export type PlaylistCreateInput = PlaylistCreateData & {
+    userId: string;
+};
 export type PlaylistUpdateInput = {
     name?: string;
     description?: string;

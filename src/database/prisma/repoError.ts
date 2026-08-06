@@ -50,8 +50,11 @@ export const translateForeignKeyError = (
         throw new ErrorType(message);
     }
 };
-export const handleUniqueConstraintError = (error: any) => {
+export const handleUniqueConstraintError = (error: any, message?: string) => {
     if (isUniqueConstraintError(error)) {
+        if (message) {
+            throw new ConflictError(message);
+        }
         const match = error.message.match(/Unique constraint failed on the fields: \(.+\)/);
         const field =
             match?.[0]?.slice(match[0].indexOf('(') + 1, match[0].indexOf(')')).replace(/`/g, '') ??

@@ -1,5 +1,10 @@
 import { PrismaClient, VideoSource } from '@prisma/client';
-import { buildCode, buildRefreshToken, buildUser } from '__tests__/shared/factories';
+import {
+    buildCode,
+    buildPlaylistInput,
+    buildRefreshToken,
+    buildUser,
+} from '__tests__/shared/factories';
 import { User } from 'features/user/types';
 import { CodeType, UserCode } from 'features/auth/types';
 import { hashPassword } from 'shared/utils/hashing';
@@ -7,6 +12,7 @@ import { RefreshToken } from '@prisma/client';
 import { RedisClientType } from 'redis';
 import { Video, VideoWithSource } from 'features/video/types';
 import { buildVideoInput, buildVideoWithSource } from '../factories/videoFactory';
+import { Playlist, PlaylistVideo } from 'features/playlist/types';
 
 export const seedUser = async (db: PrismaClient, overrides: Partial<User> = {}): Promise<User> => {
     const user = buildUser(overrides);
@@ -106,4 +112,54 @@ export const seedVideoWithSource = async ({
             source: true,
         },
     });
+};
+
+export const seedPlaylist = async (
+    db: PrismaClient,
+    overrides: Partial<Playlist> = {},
+): Promise<Playlist> => {
+    const playlistInput = buildPlaylistInput();
+    const playlist = await db.playlist.create({
+        data: {
+            ...playlistInput,
+            ...overrides,
+        },
+    });
+    return playlist;
+};
+
+export const seedPlaylists = async (
+    db: PrismaClient,
+    length = 3,
+    overrides: Partial<Playlist>[] = [],
+): Promise<Playlist[]> => {
+    return await Promise.all(
+        Array.from({ length }, (_, i) => seedPlaylist(db, overrides[i] ?? {})),
+    );
+};
+
+type PlaylistVideoInput = { playlistId: string; videoId: string };
+export const seedPlaylistVideo = async (
+    db: PrismaClient,
+    ids: PlaylistVideoInput,
+): Promise<PlaylistVideo> => {
+    return db.playlistVideo.create({ data: ids });
+};
+export const seedPlaylistVideos = async (
+    db: PrismaClient,
+    ids: PlaylistVideoInput[],
+    length = 3,
+) => {
+    return await Promise.all(Array.from({ length }, (_, i) => seedPlaylistVideo(db, ids[i] ?? {})));
+};
+
+export const seedPlaylistWithVideos = async (db: PrismaClient, userId: string) => {
+    const videos = await Promise.all(Array.from({ length: 3 }, (_, _i) => seedVideo(db)));
+    const playlist = await seedPlaylist(db, { userId });
+    const ids = videos.map((video) => ({
+        playlistId: playlist.id,
+        videoId: video.id,
+    }));
+    const playlistVideos = await seedPlaylistVideos(db, ids);
+    return { playlist, playlistVideos, videos };
 };

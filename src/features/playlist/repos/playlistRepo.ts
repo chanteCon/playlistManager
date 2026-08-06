@@ -12,11 +12,7 @@ export type PlaylistRepo = ReturnType<typeof createPlaylistRepo>;
 
 export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
     const create = async (data: PlaylistCreateInput): Promise<Playlist> => {
-        return await db.playlist.create({
-            data: {
-                ...data,
-            },
-        });
+        return await db.playlist.create({ data });
     };
 
     const findUserPlaylists = async (userId: string): Promise<Playlist[]> => {

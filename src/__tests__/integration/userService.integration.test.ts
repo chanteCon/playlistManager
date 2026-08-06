@@ -4,7 +4,7 @@ import { CreateAccountInput } from 'features/auth/types';
 import { randomUUID } from 'crypto';
 import { createUserServiceFixture } from '__tests__/setup/integration';
 import { truncateDbTables } from '__tests__/shared/helpers/dbHelpers';
-import { seedUser } from '__tests__/shared/seeds/seeds';
+import { seedPlaylistWithVideos, seedUser } from '__tests__/shared/seeds/seeds';
 import { UserService } from 'features/user/userService';
 import { createTestInfrastructure, InfraStructure } from '__tests__/setup/infrastructure';
 
@@ -96,12 +96,32 @@ describe('Integration tests: User service', () => {
     });
 
     describe('Remove', () => {
-        test('Should successfully remove user from testEnv.db', async () => {
-            const { id } = await testEnv.userService.create({ data: userInputData });
-            await testEnv.userService.remove(id);
+        test('Should successfully remove user and their playlists', async () => {
+            const user = await seedUser(testEnv.db);
+            const otherUser = await seedUser(testEnv.db);
 
-            const users = await testEnv.db.user.findMany();
-            expect(users).toHaveLength(0);
+            await seedPlaylistWithVideos(testEnv.db, user.id);
+            const otherPlaylist = await seedPlaylistWithVideos(testEnv.db, otherUser.id);
+
+            await testEnv.userService.remove(user.id);
+
+            expect(
+                await testEnv.db.user.findUnique({
+                    where: { id: user.id },
+                }),
+            ).toBeNull();
+
+            expect(
+                await testEnv.db.playlist.findMany({
+                    where: { userId: user.id },
+                }),
+            ).toHaveLength(0);
+
+            expect(
+                await testEnv.db.playlist.findUnique({
+                    where: { id: otherPlaylist.playlist.id },
+                }),
+            ).not.toBeNull();
         });
         test('Throws if user id not not testEnv.db', async () => {
             await expect(testEnv.userService.remove(randomUUID())).rejects.toThrow(
