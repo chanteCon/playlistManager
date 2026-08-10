@@ -19,7 +19,7 @@ export type ConsumedRefreshToken = {
     isReuse: boolean;
 };
 
-export type AuthUser = { id: string; deviceId: string };
+export type AuthUser = { id: string; deviceId?: string };
 export interface AuthRequest<
     Params = any,
     ResBody = any,
