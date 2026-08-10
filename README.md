@@ -2,16 +2,15 @@
 
 ---
 
-Backend API for managing video playlists. Users can save videos from external platforms using URLs, with shared video resources to avoid duplicate storage and metadata fetching where possible.
+Backend API for managing video playlists. Users can add videos from external platforms to playlists using URLs, with metadata fetching where possible.
 
 ## Features
 
-- Video URL management
+- Create and manage playlists
+- Add videos to playlists using external URLs
 - Shared video resources across users
-- URL normalisation and platform identity detection
-- Optimistic metadata fetching where supported
-- YouTube metadata extraction (title, description, thumbnail)
-- Fallback to storing URLs when metadata is unavailable
+- Automatic video metadata fetching where supported
+- URL normalisation and platform detection
 
 ## Tech Stack
 
@@ -31,9 +30,9 @@ Backend API for managing video playlists. Users can save videos from external pl
 Clone and install dependencies:
 
 ```
-git clone git@github.com:chanteCon/authAPI.git
-cd authAPI
-npm install
+git clone git@github.com:chanteCon/playlistManager.git
+cd playlistManager
+npm playlistManager
 ```
 
 Create environment files:
