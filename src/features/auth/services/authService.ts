@@ -107,7 +107,7 @@ export const createAuthService = ({ services, txRunner }: AuthServiceDeps) => {
 
     const logout = async (user: AuthUser) => {
         try {
-            await tokenService.revokeAllForDeviceId({ deviceId: user.deviceId, userId: user.id });
+            await tokenService.revokeAllForDeviceId({ deviceId: user.deviceId!, userId: user.id });
         } catch (error) {
             logger.error(error);
         }
