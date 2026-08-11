@@ -1,7 +1,7 @@
 import { AuthRequest } from 'features/auth/types';
 import { PlaylistService } from '../services/playlistService';
 import { Response } from 'express';
-import { PlaylistVideoUpdateInput } from '../types';
+import { PlaylistVideoReference, PlaylistVideoUpdateInput } from '../types';
 import { canSendResponse } from 'shared/helper';
 
 export const createPlaylistVideoController = (playlistService: PlaylistService) => {
@@ -15,7 +15,7 @@ export const createPlaylistVideoController = (playlistService: PlaylistService) 
         return res.status(201).json({ video });
     };
     const updateVideo = async (
-        req: AuthRequest<{ playlistId: string; videoId: string }, any, PlaylistVideoUpdateInput>,
+        req: AuthRequest<PlaylistVideoReference, any, PlaylistVideoUpdateInput>,
         res: Response,
     ) => {
         const userId = req.user!.id;
@@ -27,10 +27,7 @@ export const createPlaylistVideoController = (playlistService: PlaylistService) 
         });
         return res.status(200).json({ video });
     };
-    const deleteVideo = async (
-        req: AuthRequest<{ playlistId: string; videoId: string }>,
-        res: Response,
-    ) => {
+    const deleteVideo = async (req: AuthRequest<PlaylistVideoReference>, res: Response) => {
         const { playlistId, videoId } = req.params;
         const userId = req.user!.id;
         await playlistService.removeVideo(userId, { playlistId, playlistVideoId: videoId });

@@ -3,34 +3,37 @@ import {
     Playlist as PrismaPlaylist,
     PlaylistVideo as PrismaPlaylistVideo,
 } from '@prisma/client';
+import {
+    playlistCreateSchema,
+    playlistIdSchema,
+    playlistUpdateSchema,
+    playlistVideoRefSchema,
+    updateVideoSchema,
+} from './schemas';
+import { z } from 'zod';
 
 // Database models
 export type Playlist = PrismaPlaylist;
 export type PlaylistVideo = PrismaPlaylistVideo;
 
 // Inputs
-export type PlaylistCreateData = {
-    name: string;
-    description?: string;
-};
+export type PlaylistCreateData = z.infer<typeof playlistCreateSchema>;
 
 export type PlaylistCreateInput = PlaylistCreateData & {
     userId: string;
 };
-export type PlaylistUpdateInput = {
-    name?: string;
-    description?: string;
-};
+export type PlaylistUpdateInput = z.infer<typeof playlistUpdateSchema>;
 
 export type PlaylistVideoCreateInput = {
     playlistId: string;
     videoId: string;
 };
 
-export type PlaylistVideoUpdateInput = {
-    customTitle?: string;
-    customDescription?: string;
-};
+export type PlaylistVideoReference = z.infer<typeof playlistVideoRefSchema>;
+
+export type PlaylistVideoUpdateInput = z.infer<typeof updateVideoSchema>;
+
+export type PlaylistIdParams = z.infer<typeof playlistIdSchema>;
 
 // Prisma
 export const playlistVideoInclude = {

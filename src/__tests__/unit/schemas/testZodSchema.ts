@@ -3,19 +3,20 @@ import { z } from 'zod';
 type SchemaTestConfig = {
     schema: z.ZodTypeAny;
     validInput: Record<string, any>;
-    required: { field: string; badValue: any }[];
+    required: string[];
+    fields: { field: string; badValue: any }[];
     extraFieldKey: string;
 };
 
 export const testZodSchema = (config: SchemaTestConfig) => {
-    const { schema, validInput, required, extraFieldKey } = config;
+    const { schema, validInput, required, extraFieldKey, fields } = config;
     describe(`${schema.type} schema tests`, () => {
         test('Valid input passes', () => {
             const res = schema.safeParse(validInput);
             expect(res.success).toBe(true);
             expect(res.data).toEqual(validInput);
         });
-        required.forEach(({ field }) => {
+        required.forEach((field) => {
             test(`Missing ${field}`, () => {
                 const input = { ...validInput };
                 delete input[field];
@@ -24,7 +25,7 @@ export const testZodSchema = (config: SchemaTestConfig) => {
                 expect(res.error).toBeDefined();
             });
         });
-        required.forEach(({ field, badValue }) => {
+        fields.forEach(({ field, badValue }) => {
             test(`Incorrect type for ${field}`, () => {
                 const input = { ...validInput };
                 input[field] = badValue;
