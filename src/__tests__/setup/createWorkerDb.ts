@@ -3,7 +3,7 @@ import { logger } from 'shared/logger/logger';
 
 beforeAll(async () => {
     const client = new Client({
-        connectionString: process.env.CONTAINER_URI,
+        connectionString: process.env.DB_CONTAINER_URI,
     });
 
     await client.connect();
@@ -20,6 +20,7 @@ beforeAll(async () => {
         }
     } catch (error) {
         logger.error('error setting up test database', error);
+        throw error;
     } finally {
         await client.end();
     }

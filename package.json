@@ -4,8 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "jest --verbose --coverage --selectProjects unit integration_e2e",
-        "verify": "npm run build && npm run lint && jest --verbose --coverage",
+        "test": "jest --verbose --coverage --selectProjects unit integration_e2e --maxWorkers=15",
+        "verify": "npm run build && npm run lint && npm run test",
         "dev": "npm run docker:up && npm run migrate && cross-env NODE_ENV=development tsx watch src/server.ts",
         "clean": "rimraf dist",
         "build": "npm run clean && tsc && tsc-alias",

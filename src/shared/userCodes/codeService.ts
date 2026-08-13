@@ -50,7 +50,7 @@ export const createCodeService = (deps: CodeServiceDeps) => {
             codeType,
         };
         const code = await _generateUserCode({ data: codeData, tx });
-        emailService
+        await emailService
             .sendCodeEmail({ email: user.email, code, codeType })
             .catch((err) => logger.error('Failed to send email:', err));
 
