@@ -20,12 +20,13 @@ module.exports = {
                 '.*__tests__/integration/.*\\.test\\.ts$',
                 '.*__tests__/e2e/.*\\.test\\.ts$',
             ],
-            globalSetup: './src/__tests__/setup/database/dbContainer.ts',
+            globalSetup: './src/__tests__/setup/testContainersSetup.ts',
+            globalTeardown: './src/__tests__/setup/infraTeardown.ts',
             setupFiles: [
                 './src/__tests__/setup/jest.setup.ts',
-                './src/__tests__/setup/database/workerDbUrl.ts',
+                './src/__tests__/setup/workerClientUrls.ts',
             ],
-            setupFilesAfterEnv: ['./src/__tests__/setup/database/createWorkerDb.ts'],
+            setupFilesAfterEnv: ['./src/__tests__/setup/createWorkerDb.ts'],
             extensionsToTreatAsEsm: ['.ts'],
             transform: {
                 '^.+\\.tsx?$': ['@swc/jest'],
@@ -65,5 +66,7 @@ module.exports = {
         '!src/database/**',
         '!src/redisClient/redis.ts',
         '!src/middleware/timeoutMiddleware.ts',
+        '!src/middleware/rateLimitMiddleware.ts',
+        '!src/**/types.ts',
     ],
 };

@@ -38,6 +38,8 @@ describe('e2e tests: Auth Routes - Update email', () => {
         const res = await request(app)
             .post(authPaths.loginMfa)
             .send({ code: extractCodeFromLastEmail(sendMailMock) });
+        expect(res.status).toEqual(200);
+
         token = res.body.data.accessToken;
     });
 
