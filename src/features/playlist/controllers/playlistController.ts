@@ -4,6 +4,7 @@ import { PlaylistCreateData, PlaylistIdParams, PlaylistUpdateInput } from '../ty
 import { Response } from 'express';
 import { canSendResponse } from 'shared/helper';
 
+export type PlaylistController = ReturnType<typeof createPlaylistController>;
 export const createPlaylistController = (playlistService: PlaylistService) => {
     const getAllUserPlaylists = async (req: AuthRequest, res: Response) => {
         const playlists = await playlistService.getUserPlaylists(req.user!.id);
@@ -20,9 +21,9 @@ export const createPlaylistController = (playlistService: PlaylistService) => {
     };
 
     const getPlaylist = async (req: AuthRequest<PlaylistIdParams>, res: Response) => {
-        const { playlistId } = req.params;
+        const { id } = req.params;
         const userId = req.user!.id;
-        const playlist = await playlistService.getPlaylistById(userId, playlistId);
+        const playlist = await playlistService.getPlaylistById(userId, id);
         return res.status(200).json({ playlist });
     };
 
@@ -30,16 +31,16 @@ export const createPlaylistController = (playlistService: PlaylistService) => {
         req: AuthRequest<PlaylistIdParams, any, PlaylistUpdateInput>,
         res: Response,
     ) => {
-        const { playlistId } = req.params;
+        const { id } = req.params;
         const userId = req.user!.id;
-        const playlist = await playlistService.update(userId, playlistId, req.body);
+        const playlist = await playlistService.update(userId, id, req.body);
         return res.status(200).json({ playlist });
     };
 
     const deletePlaylist = async (req: AuthRequest<PlaylistIdParams>, res: Response) => {
-        const { playlistId } = req.params;
+        const { id } = req.params;
         const userId = req.user!.id;
-        await playlistService.remove(userId, playlistId);
+        await playlistService.remove(userId, id);
         if (canSendResponse(res)) {
             return res.status(204).send();
         }

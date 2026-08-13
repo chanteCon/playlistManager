@@ -15,6 +15,7 @@ const videoDTO = {
     url,
     render: true,
 };
+const playlistVideoId = videoDTO.id;
 const { mockRes } = buildExpressMocks();
 const mockReq = { user: { id: userId } } as unknown as AuthRequest;
 const error = new Error('Service error');
@@ -25,7 +26,7 @@ describe('Unit tests: Playlist video controller', () => {
     describe('Add video', () => {
         beforeEach(() => {
             mockReq.body = { url };
-            mockReq.params = { playlistId };
+            mockReq.params = { id: playlistId };
         });
         test('Returns 201 and playlist Video DTO', async () => {
             mockPlaylistService.addVideo.mockResolvedValueOnce(videoDTO);
@@ -36,12 +37,13 @@ describe('Unit tests: Playlist video controller', () => {
         test('Throws service layer error', async () => {
             mockPlaylistService.addVideo.mockRejectedValueOnce(error);
             await expect(playlistVideoController.addVideo(mockReq, mockRes)).rejects.toThrow(error);
+            expect(mockPlaylistService.addVideo).toHaveBeenCalledWith(userId, { playlistId, url });
         });
     });
     describe('Update video', () => {
         beforeEach(() => {
             mockReq.body = { title: videoDTO.title };
-            mockReq.params = { playlistId };
+            mockReq.params = { id: playlistId, playlistVideoId };
         });
 
         test('Returns 200 and updated video', async () => {
@@ -49,29 +51,46 @@ describe('Unit tests: Playlist video controller', () => {
             await playlistVideoController.updateVideo(mockReq, mockRes);
             expectMockResponse({ mockRes, status: 200, json: true, data: { video: videoDTO } });
             await playlistVideoController.updateVideo(mockReq, mockRes);
+            expect(mockPlaylistService.updateVideo).toHaveBeenCalledWith(userId, {
+                playlistId,
+                playlistVideoId,
+                data: { title: videoDTO.title },
+            });
         });
         test('Throws service layer error', async () => {
             mockPlaylistService.updateVideo.mockRejectedValueOnce(error);
             await expect(playlistVideoController.updateVideo(mockReq, mockRes)).rejects.toThrow(
                 error,
             );
+            expect(mockPlaylistService.updateVideo).toHaveBeenCalledWith(userId, {
+                playlistId,
+                playlistVideoId,
+                data: { title: videoDTO.title },
+            });
         });
     });
     describe('Remove video', () => {
         beforeEach(() => {
-            mockReq.params = { playlistId };
+            mockReq.params = { id: playlistId, playlistVideoId };
         });
         test('Returns 204', async () => {
             mockPlaylistService.updateVideo.mockResolvedValueOnce(videoDTO);
             await playlistVideoController.deleteVideo(mockReq, mockRes);
             expectMockResponse({ mockRes, status: 204, json: false });
-            await playlistVideoController.updateVideo(mockReq, mockRes);
+            expect(mockPlaylistService.removeVideo).toHaveBeenCalledWith(userId, {
+                playlistId,
+                playlistVideoId,
+            });
         });
         test('Throws service layer error', async () => {
             mockPlaylistService.removeVideo.mockRejectedValueOnce(error);
             await expect(playlistVideoController.deleteVideo(mockReq, mockRes)).rejects.toThrow(
                 error,
             );
+            expect(mockPlaylistService.removeVideo).toHaveBeenCalledWith(userId, {
+                playlistId,
+                playlistVideoId,
+            });
         });
     });
 });

@@ -4,9 +4,7 @@ import { CreateAccountInput } from 'features/auth/types';
 import { faker } from '@faker-js/faker';
 
 export const buildUserInput = (overrides: Partial<CreateAccountInput> = {}): CreateAccountInput => {
-    const name = faker.name.firstName();
-
-    let username = faker.internet.userName().replace(/[^a-zA-Z0-9._-]/g, '');
+    let username = `user_${randomUUID().replace(/-/g, '').slice(0, 25)}`;
     if (username.length < 5) {
         username = username.padEnd(5, '0');
     }
@@ -16,7 +14,7 @@ export const buildUserInput = (overrides: Partial<CreateAccountInput> = {}): Cre
     const password = `${basePassword}Aa1!`;
 
     return {
-        email: faker.internet.email(name).trim().toLowerCase(),
+        email: faker.internet.email(username).trim().toLowerCase(),
         username,
         password,
         ...overrides,

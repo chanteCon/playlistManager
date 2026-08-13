@@ -8,7 +8,7 @@ import { createTokenService } from 'features/auth/services/tokenService';
 import { EmailService } from 'shared/email/emailService';
 import { createTransactionRunner } from 'database/transactionRunner';
 import { RedisClientType } from 'redis';
-import { Infrastructure } from './infrastructure';
+import { InfraStructure } from './infrastructure';
 import { createVideoRepo } from 'features/video/repos/videoRepo';
 import { PrismaClient } from '@prisma/client';
 import { createVideoService } from 'features/video/services/videoService';
@@ -23,7 +23,7 @@ const createCodeServiceFixture = (redis: RedisClientType, emailService: EmailSer
     return codeService;
 };
 
-type AuthUserFixtureDeps = Infrastructure & { emailService: EmailService };
+type AuthUserFixtureDeps = InfraStructure & { emailService: EmailService };
 
 export const createUserServiceFixture = ({ db, redis, emailService }: AuthUserFixtureDeps) => {
     const codeService = createCodeServiceFixture(redis, emailService);

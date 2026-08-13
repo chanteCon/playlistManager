@@ -1,4 +1,4 @@
-import { createDb, DbInfrastructure } from '__tests__/setup/infrastructure';
+import { createTestInfrastructure, InfraStructure } from '__tests__/setup/infrastructure';
 import { createPlaylistServiceFixture } from '__tests__/setup/integration';
 import { buildPlaylistInput } from '__tests__/shared/factories';
 import { truncateDbTables } from '__tests__/shared/helpers/dbHelpers';
@@ -16,12 +16,12 @@ import { PlaylistService } from 'features/playlist/services/playlistService';
 import { PlaylistCreateData } from 'features/playlist/types';
 import { User } from 'features/user/types';
 
-let testEnv: DbInfrastructure & { playlistService: PlaylistService };
+let testEnv: InfraStructure & { playlistService: PlaylistService };
 let user: User;
 let playlistInput: PlaylistCreateData;
 
 beforeAll(async () => {
-    const infra = await createDb();
+    const infra = await createTestInfrastructure();
     const playlistService = createPlaylistServiceFixture({
         ...infra,
         videoMetadataService: mockVideoMetadataService,
@@ -30,13 +30,10 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+    await truncateDbTables(testEnv.db);
     user = await seedUser(testEnv.db);
     const input = buildPlaylistInput();
     playlistInput = { name: input.name, description: input.description };
-});
-
-afterEach(async () => {
-    await truncateDbTables(testEnv.db);
 });
 
 afterAll(async () => {

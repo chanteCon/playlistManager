@@ -23,7 +23,7 @@ describe('Unit tests: Playlist Schemas', () => {
                 { field: 'description', badValue: 2 },
             ],
             required: ['name'],
-            extraFieldKey: 'id',
+            extraFieldKey: 'userId',
         };
         testZodSchema(config);
         test('Rejects empty name', () => {
@@ -37,9 +37,9 @@ describe('Unit tests: Playlist Schemas', () => {
     describe('Playlist Id Schema', () => {
         const config = {
             schema: playlistIdSchema,
-            validInput: { playlistId: randomUUID() },
-            fields: [{ field: 'playlistId', badValue: 'abc' }],
-            required: ['playlistId'],
+            validInput: { id: randomUUID() },
+            fields: [{ field: 'id', badValue: 'abc' }],
+            required: ['id'],
             extraFieldKey: 'videoId',
         };
         testZodSchema(config);
@@ -54,7 +54,7 @@ describe('Unit tests: Playlist Schemas', () => {
                 { field: 'description', badValue: 2 },
             ],
             required: [],
-            extraFieldKey: 'id',
+            extraFieldKey: 'userId',
         };
         testZodSchema(config);
 
@@ -78,7 +78,7 @@ describe('Unit tests: Playlist Schemas', () => {
             validInput: { url: faker.internet.url() },
             fields: [{ field: 'url', badValue: 'noturl' }],
             required: ['url'],
-            extraFieldKey: 'id',
+            extraFieldKey: 'userId',
         };
         testZodSchema(config);
     });
@@ -94,7 +94,7 @@ describe('Unit tests: Playlist Schemas', () => {
                 { field: 'customDescription', badValue: 2 },
             ],
             required: [],
-            extraFieldKey: 'id',
+            extraFieldKey: 'userId',
         };
 
         testZodSchema(config);
@@ -126,15 +126,15 @@ describe('Unit tests: Playlist Schemas', () => {
         const config = {
             schema: playlistVideoRefSchema,
             validInput: {
-                playlistId: randomUUID(),
-                videoId: randomUUID(),
+                id: randomUUID(),
+                playlistVideoId: randomUUID(),
             },
             fields: [
-                { field: 'playlistId', badValue: 'abc' },
-                { field: 'videoId', badValue: 'abc' },
+                { field: 'id', badValue: 'abc' },
+                { field: 'playlistVideoId', badValue: 'abc' },
             ],
-            required: ['playlistId', 'videoId'],
-            extraFieldKey: 'id',
+            required: ['id', 'playlistVideoId'],
+            extraFieldKey: 'userId',
         };
 
         testZodSchema(config);

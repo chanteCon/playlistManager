@@ -15,7 +15,7 @@ export const buildPlaylistInput = (
 ): PlaylistCreateInput => {
     return {
         userId: randomUUID(),
-        name: faker.lorem.word(),
+        name: `Playlist: ${randomUUID()}`,
         description: faker.lorem.words(10),
         ...overrides,
     };
@@ -25,7 +25,7 @@ export const buildPlaylist = (overrides: Partial<Playlist> = {}): Playlist => {
     return {
         id: randomUUID(),
         userId: randomUUID(),
-        name: faker.lorem.word(),
+        name: `Playlist: ${randomUUID()}`,
         description: null,
         createdAt: new Date(),
         updatedAt: new Date(),

@@ -12,7 +12,7 @@ import { faker } from '@faker-js/faker';
 
 export const buildVideoInput = (overrides: Partial<CreateVideoInput> = {}): CreateVideoInput => {
     return {
-        url: faker.internet.url(),
+        url: `https://example.com/video/${randomUUID()}`,
         ...overrides,
     };
 };
@@ -31,7 +31,7 @@ export const buildSourceInput = (overrides: Partial<CreateSourceInput> = {}): Cr
 export const buildVideo = (overrides: Partial<VideoWithSource> = {}): VideoWithSource => {
     return {
         id: randomUUID(),
-        url: faker.internet.url(),
+        url: `https://example.com/video/${randomUUID()}`,
         sourceId: null,
         source: null,
         createdAt: new Date(),
@@ -63,7 +63,7 @@ export const buildMetadata = (overrides: Partial<VideoMetadata> = {}) => {
 export const buildVideoSource = (overrides: Partial<VideoSource> = {}): VideoSource => {
     return {
         id: randomUUID(),
-        canonicalUrl: faker.internet.url(),
+        canonicalUrl: `https://example.com/video/${randomUUID()}`,
         platform: 'youtube' as Platform,
         platformId: generateYoutubeId(),
         ...buildMetadata(),

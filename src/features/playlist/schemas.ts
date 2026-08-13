@@ -32,7 +32,7 @@ export const playlistCreateSchema = z
         description: desriptionField,
     })
     .strip();
-export const playlistIdSchema = z.object({ playlistId: playlistIdField }).strip();
+export const playlistIdSchema = z.object({ id: playlistIdField }).strip();
 export const playlistUpdateSchema = z
     .object({
         name: playlistNameField.optional(),
@@ -58,5 +58,5 @@ export const updateVideoSchema = z
     });
 
 export const playlistVideoRefSchema = z
-    .object({ playlistId: playlistIdField, videoId: videoIdField })
+    .object({ id: playlistIdField, playlistVideoId: videoIdField })
     .strip();

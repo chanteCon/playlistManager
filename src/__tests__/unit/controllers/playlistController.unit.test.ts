@@ -68,7 +68,7 @@ describe('Unit tests: playlist controller', () => {
             videos: [],
         };
         beforeEach(() => {
-            mockReq.params = { playlistId: id };
+            mockReq.params = { id };
         });
         test('Returns 200 and playlist DTO', async () => {
             mockPlaylistService.getPlaylistById.mockResolvedValueOnce(playlistDTO);
@@ -90,7 +90,7 @@ describe('Unit tests: playlist controller', () => {
     describe('Update playlist', () => {
         const { id, name } = playlists[0];
         beforeEach(() => {
-            mockReq.params = { playlistId: id };
+            mockReq.params = { id };
             mockReq.body = { name };
         });
         test('Returns 200 and updated playlist', async () => {
@@ -120,7 +120,7 @@ describe('Unit tests: playlist controller', () => {
         const { id } = playlists[0];
 
         beforeEach(() => {
-            mockReq.params = { playlistId: id };
+            mockReq.params = { id };
         });
         test('Returns 204', async () => {
             mockPlaylistService.remove.mockResolvedValueOnce(playlists[0]);
