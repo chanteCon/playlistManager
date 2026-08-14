@@ -237,6 +237,12 @@ describe('Playlist service integration tests', () => {
             expect(await testEnv.db.playlist.findUnique({ where: { id: playlist.id } })).toBeNull();
 
             expect(
+                await testEnv.db.playlistVideo.findMany({
+                    where: { playlistId: playlist.id },
+                }),
+            ).toHaveLength(0);
+
+            expect(
                 await testEnv.db.playlist.findUnique({ where: { id: playlist2.id } }),
             ).not.toBeNull();
 
@@ -327,7 +333,7 @@ describe('Playlist service integration tests', () => {
                     playlistId: playlist.id,
                     url: video.url,
                 }),
-            ).rejects.toThrow('already in use');
+            ).rejects.toThrow('You have another playlist with this name');
 
             expect(
                 await testEnv.db.playlistVideo.findMany({

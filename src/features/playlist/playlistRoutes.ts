@@ -8,6 +8,7 @@ import {
     playlistUpdateSchema,
     playlistVideoRefSchema,
     updateVideoSchema,
+    videoUrlSchema,
 } from './schemas';
 
 type PlaylistRoutesDeps = {
@@ -43,6 +44,7 @@ export const createPlaylistRoutes = ({
     router.post(
         '/:id/videos',
         validate(playlistIdSchema, 'params'),
+        validate(videoUrlSchema),
         playlistVideoController.addVideo,
     );
 
@@ -58,4 +60,5 @@ export const createPlaylistRoutes = ({
         validate(playlistVideoRefSchema, 'params'),
         playlistVideoController.deleteVideo,
     );
+    return router;
 };

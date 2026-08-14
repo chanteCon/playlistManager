@@ -22,24 +22,24 @@ describe('Video Service unit tests', () => {
         test.each([
             {
                 name: 'valid youtube url',
-                url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                url: 'https://www.youtube.com/watch?v=zzzzzzzzzzz',
                 expectedPlatform: 'youtube',
-                expectedPlatformId: 'dQw4w9WgXcQ',
-                expectedUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                expectedPlatformId: 'zzzzzzzzzzz',
+                expectedUrl: 'https://www.youtube.com/watch?v=zzzzzzzzzzz',
             },
             {
                 name: 'valid short youtube url',
-                url: 'https://youtu.be/dQw4w9WgXcQ',
+                url: 'https://youtu.be/zzzzzzzzzzz',
                 expectedPlatform: 'youtube',
-                expectedPlatformId: 'dQw4w9WgXcQ',
-                expectedUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                expectedPlatformId: 'zzzzzzzzzzz',
+                expectedUrl: 'https://www.youtube.com/watch?v=zzzzzzzzzzz',
             },
             {
                 name: 'valid youtube shorts url',
-                url: 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
+                url: 'https://www.youtube.com/shorts/zzzzzzzzzzz',
                 expectedPlatform: 'youtube',
-                expectedPlatformId: 'dQw4w9WgXcQ',
-                expectedUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                expectedPlatformId: 'zzzzzzzzzzz',
+                expectedUrl: 'https://www.youtube.com/watch?v=zzzzzzzzzzz',
             },
             {
                 name: 'valid tiktok web url',

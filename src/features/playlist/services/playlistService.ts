@@ -124,7 +124,7 @@ export const createPlaylistService = ({
             const playlistVideo = await playlistVideoRepo.create(playlistId, video.id);
             return _toPlaylistVideoDto(playlistVideo);
         } catch (error) {
-            handleUniqueConstraintError(error);
+            handleUniqueConstraintError(error, 'You have another playlist with this name');
             translateForeignKeyError(error, NotFoundError, 'Playlist or video not found');
             throw error;
         }

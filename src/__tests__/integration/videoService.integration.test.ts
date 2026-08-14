@@ -70,8 +70,8 @@ describe('Video service integration tests', () => {
             expect(res1).toEqual(res2);
         });
         test('Uses existing source if source already exists', async () => {
-            const fullUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-            const shortUrl = 'https://www.youtube.com/shorts/dQw4w9WgXcQ';
+            const fullUrl = 'https://www.youtube.com/watch?v=zzzzzzzzzzz';
+            const shortUrl = 'https://www.youtube.com/shorts/zzzzzzzzzzz';
             const metadata = buildMetadata();
             mockVideoMetadataService.getExternalData.mockResolvedValueOnce({
                 metadata,
@@ -83,8 +83,8 @@ describe('Video service integration tests', () => {
             expect(mockVideoMetadataService.getExternalData).toHaveBeenCalledTimes(1);
         });
         test('returns existing video without duplicate creation from extracting platform data', async () => {
-            const fullUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-            const shortUrl = 'https://www.youtube.com/shorts/dQw4w9WgXcQ';
+            const fullUrl = 'https://www.youtube.com/watch?v=zzzzzzzzzzz';
+            const shortUrl = 'https://www.youtube.com/shorts/zzzzzzzzzzz';
             const metadata = buildMetadata();
             mockVideoMetadataService.getExternalData.mockResolvedValueOnce({
                 metadata,
