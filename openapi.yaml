@@ -351,6 +351,35 @@ paths:
                   - message
                   - data
                 additionalProperties: false
+        "403":
+          description: Email not verified
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Email not verified
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Email not verified
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
   /api/auth/login/MFA:
     post:
       summary: User login MFA
@@ -1146,35 +1175,6 @@ paths:
                   - message
                   - data
                 additionalProperties: false
-        "403":
-          description: Email not verified
-          content:
-            application/json:
-              example:
-                success: false
-                data: null
-                message: Email not verified
-                errors: null
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    const: false
-                  message:
-                    default: Email not verified
-                    type: string
-                  data:
-                    type: "null"
-                  errors:
-                    anyOf:
-                      - {}
-                      - type: "null"
-                required:
-                  - success
-                  - message
-                  - data
-                additionalProperties: false
         "404":
           description: User not found
           content:
@@ -1230,35 +1230,6 @@ paths:
                     const: false
                   message:
                     default: Unauthorized
-                    type: string
-                  data:
-                    type: "null"
-                  errors:
-                    anyOf:
-                      - {}
-                      - type: "null"
-                required:
-                  - success
-                  - message
-                  - data
-                additionalProperties: false
-        "403":
-          description: Email not verified
-          content:
-            application/json:
-              example:
-                success: false
-                data: null
-                message: Email not verified
-                errors: null
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    const: false
-                  message:
-                    default: Email not verified
                     type: string
                   data:
                     type: "null"
@@ -1578,35 +1549,6 @@ paths:
                     const: false
                   message:
                     default: Unauthorized
-                    type: string
-                  data:
-                    type: "null"
-                  errors:
-                    anyOf:
-                      - {}
-                      - type: "null"
-                required:
-                  - success
-                  - message
-                  - data
-                additionalProperties: false
-        "403":
-          description: Email not verified
-          content:
-            application/json:
-              example:
-                success: false
-                data: null
-                message: Email not verified
-                errors: null
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    const: false
-                  message:
-                    default: Email not verified
                     type: string
                   data:
                     type: "null"
@@ -2476,7 +2418,8 @@ paths:
                 url:
                   type: string
                   format: uri
-                  description: The URL of the video to add to the playlist
+                  description: The URL of the video to add to the playlist. Must use HTTP or
+                    HTTPS.
               required:
                 - url
       responses:

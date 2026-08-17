@@ -52,7 +52,6 @@ const paths = {
                     data: { user: { username: 'newUsername123', id } },
                 }),
                 401: errorResponse({ message: 'Unauthorized' }),
-                403: errorResponse({ message: 'Email not verified' }),
                 404: errorResponse({ message: 'User not found' }),
                 400: errorResponse({
                     message: 'Invalid Input',
@@ -69,7 +68,6 @@ const paths = {
                     description: 'User deleted successfully',
                 },
                 401: errorResponse({ message: 'Unauthorized' }),
-                403: errorResponse({ message: 'Email not verified' }),
                 404: errorResponse({ message: 'User not found' }),
             },
         },
@@ -148,9 +146,6 @@ const paths = {
                 }),
                 401: errorResponse({
                     message: 'Unauthorized',
-                }),
-                403: errorResponse({
-                    message: 'Email not verified',
                 }),
                 409: errorResponse({
                     message: 'Email already in use',
