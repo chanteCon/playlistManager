@@ -3,6 +3,7 @@ import { VideoMetadata } from '../types';
 import { load } from 'cheerio';
 import { ALLOWED_DOMAINS } from '../constants';
 import { getIdentityFromUrl } from '../utils/videoUrl';
+import { AppError, BadGatewayError, NotFoundError } from 'shared/errors/errors';
 
 export type VideoMetadataService = ReturnType<typeof createVideoMetadataService>;
 export const createVideoMetadataService = () => {
@@ -38,6 +39,9 @@ export const createVideoMetadataService = () => {
             };
         } catch (error) {
             logger.error({ error }, 'Failed to fetch video metadata');
+            if (error instanceof AppError) {
+                throw error;
+            }
         }
     };
 
@@ -82,7 +86,13 @@ export const createVideoMetadataService = () => {
                 checkUrlAllowed(currentUrl);
                 continue;
             } else if (!response.ok) {
-                throw new Error(`Failed to fetch page: ${response.status}`);
+                if (response.status === 404) {
+                    throw new NotFoundError('Video not found');
+                }
+
+                throw new BadGatewayError(
+                    'Unable to fetch video metadata. Please try again later.',
+                );
             }
 
             const identity = checkUrlAllowed(currentUrl);
