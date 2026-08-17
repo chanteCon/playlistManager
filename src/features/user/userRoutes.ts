@@ -5,15 +5,10 @@ import { UserController } from './userController';
 
 type UserRoutesDeps = {
     userController: UserController;
-    verificationMiddleware: RequestHandler;
     authMiddleware: RequestHandler;
 };
 
-export const createUserRoutes = ({
-    userController,
-    verificationMiddleware,
-    authMiddleware,
-}: UserRoutesDeps) => {
+export const createUserRoutes = ({ userController, authMiddleware }: UserRoutesDeps) => {
     const router = Router();
 
     router.get('/me', authMiddleware, userController.getAuthenticatedUser);
@@ -25,22 +20,15 @@ export const createUserRoutes = ({
     router.patch(
         '/me',
         authMiddleware,
-        verificationMiddleware,
         validate(updateUserSchema),
         userController.updateAuthenticatedUser,
     );
 
-    router.delete(
-        '/me',
-        authMiddleware,
-        verificationMiddleware,
-        userController.deleteAuthenticatedUser,
-    );
+    router.delete('/me', authMiddleware, userController.deleteAuthenticatedUser);
 
     router.patch(
         '/update-email',
         authMiddleware,
-        verificationMiddleware,
         validate(updateEmailSchema),
         userController.updateEmail,
     );

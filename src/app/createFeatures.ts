@@ -10,6 +10,9 @@ import { createCodeRepo } from 'shared/userCodes/codeRepo';
 import { createEmailService } from 'shared/email/emailService';
 import { createTransactionRunner } from 'database/transactionRunner';
 import { createPlaylistFeature } from 'features/playlist';
+import { createVerificationMiddleware } from 'middleware/verificationMiddleware';
+import { createTokenRepo } from 'features/auth/repos/refreshTokenRepo';
+import { createTokenService } from 'features/auth/services/tokenService';
 
 type FeatureDeps = {
     db: PrismaClient;
@@ -19,17 +22,27 @@ type FeatureDeps = {
 export const createFeatures = ({ db, redis, authMiddleware }: FeatureDeps) => {
     const { codeService } = createCodeModule(redis);
     const userRepo = createUserRepo({ db, redis });
-    const userService = createUserService({ userRepo, codeService });
+    const refreshTokenRepo = createTokenRepo({ db, redis });
+
+    // services
+    const tokenService = createTokenService({
+        refreshTokenRepo,
+    });
+    const txRunner = createTransactionRunner(db);
+
+    const userService = createUserService({ userRepo, codeService, tokenService, txRunner });
+    const verificationMiddleware = createVerificationMiddleware(userService);
+
     const userFeature = createUserFeature({
         userService: userService,
         authMiddleware,
     });
-    const txRunner = createTransactionRunner(db);
     const authFeature = createAuthFeature({
         db,
         redis,
-        services: { userService, codeService },
+        services: { userService, codeService, tokenService },
         authMiddleware,
+        verificationMiddleware,
         txRunner,
     });
     const playlistFeature = createPlaylistFeature({ db, authMiddleware });

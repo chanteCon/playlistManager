@@ -99,6 +99,11 @@ describe('E2E Auth Full Flows', () => {
 
         expect(registerRes.status).toBe(201);
 
+        //verify user
+        await request(testEnv.app)
+            .patch(authPaths.verify)
+            .send({ code: extractCodeFromLastEmail(sendMailMock) });
+
         // request code
         const codeRes = await request(testEnv.app).post(authPaths.resetPasswordReq).send({
             email: userData.email,
@@ -110,7 +115,6 @@ describe('E2E Auth Full Flows', () => {
             .patch(authPaths.resetPassword)
             .send({ code: extractCodeFromLastEmail(sendMailMock), password: newPassword });
         expect(resetRes.status).toEqual(200);
-
         // cannot login with old password
         const badLoginRes = await request(testEnv.app)
             .post(authPaths.login)

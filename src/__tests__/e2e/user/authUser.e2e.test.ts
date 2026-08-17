@@ -2,7 +2,7 @@ import { mockLogger } from '__tests__/shared/mocks/mockLogger';
 import { sendMailMock } from '__tests__/shared/mocks/mockSendMail';
 
 import request from 'supertest';
-import { ForbiddenError, UnauthorisedError, ValidationError } from 'shared/errors/errors';
+import { UnauthorisedError, ValidationError } from 'shared/errors/errors';
 import { expectResError, expectWrappedResponse } from '__tests__/e2e/helpers/e2eAssertions';
 import { authPaths, userPaths } from 'routes/path';
 import { User } from 'features/user/types';
@@ -35,7 +35,7 @@ describe('e2e tests: User Routes - authenticated user (/me)', () => {
         await truncateDbTables(db);
         await testEnv.redis.flushDb();
 
-        user = await seedUser(db, { password, verified: false });
+        user = await seedUser(db, { password, verified: true });
 
         const loginRes = await request(app)
             .post(authPaths.login)
@@ -83,15 +83,6 @@ describe('e2e tests: User Routes - authenticated user (/me)', () => {
             const res = await request(app).delete(userPaths.me).send();
 
             expectResError({ res, error: new UnauthorisedError('Unauthorized'), mockLogger });
-        });
-        test('should throw error (403 Forbidden) if not verified in', async () => {
-            const { app } = testEnv;
-            const res = await setAuthHeader({
-                req: request(app).delete(userPaths.me),
-                accessToken,
-            }).send();
-
-            expectResError({ res, error: new ForbiddenError('Email not verified'), mockLogger });
         });
     });
 
@@ -169,15 +160,6 @@ describe('e2e tests: User Routes - authenticated user (/me)', () => {
             const res = await request(app).patch(userPaths.me).send({ username: newUsername });
 
             expectResError({ res, error: new UnauthorisedError('Unauthorized'), mockLogger });
-        });
-        test('should throw error (403 Forbidden) if not verified', async () => {
-            const { app } = testEnv;
-            const res = await setAuthHeader({
-                req: request(app).patch(userPaths.me),
-                accessToken,
-            }).send({ username: newUsername });
-
-            expectResError({ res, error: new ForbiddenError('Email not verified'), mockLogger });
         });
     });
 });

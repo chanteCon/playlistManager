@@ -12,16 +12,21 @@ import { AuthController } from './authController';
 type AuthRoutesDeps = {
     authController: AuthController;
     authMiddleware: RequestHandler;
+    verificationMiddleware: RequestHandler;
 };
 
-export const createAuthRoutes = ({ authController, authMiddleware }: AuthRoutesDeps) => {
+export const createAuthRoutes = ({
+    authController,
+    authMiddleware,
+    verificationMiddleware,
+}: AuthRoutesDeps) => {
     const router = Router();
 
     router.post('/register', validate(createAccountSchema), authController.register);
 
     router.patch('/verify', validate(verificationSchema), authController.verify);
 
-    router.post('/login', validate(loginSchema), authController.startLogin);
+    router.post('/login', validate(loginSchema), verificationMiddleware, authController.startLogin);
 
     router.post('/login/mfa', validate(verificationSchema), authController.loginMfa);
 
