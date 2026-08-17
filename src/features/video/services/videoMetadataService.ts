@@ -3,7 +3,9 @@ import { VideoMetadata } from '../types';
 import { load } from 'cheerio';
 import { ALLOWED_DOMAINS } from '../constants';
 import { getIdentityFromUrl } from '../utils/videoUrl';
-import { AppError, BadGatewayError, NotFoundError } from 'shared/errors/errors';
+import { AppError, BadGatewayError, BadInputError, NotFoundError } from 'shared/errors/errors';
+
+const MAX_HTML_SIZE = 2 * 1024 * 1024; // 2 MiB
 
 export type VideoMetadataService = ReturnType<typeof createVideoMetadataService>;
 export const createVideoMetadataService = () => {
@@ -99,13 +101,42 @@ export const createVideoMetadataService = () => {
             platformId = identity.platformId;
 
             return {
-                html: await response.text(),
+                html: await readResponse(response),
                 resolvedUrl: getCanonicalUrl(currentUrl),
                 platformId: platformId,
             };
         }
 
-        throw new Error('Too many redirects');
+        throw new BadInputError('Too many redirects');
+    };
+
+    const readResponse = async (response: Response): Promise<string> => {
+        const contentLength = response.headers.get('content-length');
+
+        if (contentLength && Number(contentLength) > MAX_HTML_SIZE) {
+            throw new BadInputError('Unable to process video URL');
+        }
+        if (!response.body) {
+            throw new BadInputError('Unable to process video URL');
+        }
+
+        const decoder = new TextDecoder();
+        const chunks: string[] = [];
+        let size = 0;
+
+        for await (const chunk of response.body) {
+            size += chunk.byteLength;
+
+            if (size > MAX_HTML_SIZE) {
+                throw new BadInputError('Unable to process video URL');
+            }
+
+            chunks.push(decoder.decode(chunk, { stream: true }));
+        }
+
+        chunks.push(decoder.decode());
+
+        return chunks.join('');
     };
 
     return { getExternalData };
