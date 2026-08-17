@@ -19,6 +19,7 @@ model User {
 
 
   refreshTokens     RefreshToken[]
+  playlists         Playlist[]
 }
 
 model RefreshToken {
@@ -45,10 +46,11 @@ model Video {
   url               String @unique
 
   sourceId          String?
-  source            VideoSource? @relation(fields: [sourceId], references: [id])
+  source            VideoSource? @relation(fields: [sourceId], references: [id], onDelete: Restrict)
   createdAt         DateTime @default(now())
 
   updatedAt         DateTime @updatedAt
+  playlistVideos    PlaylistVideo[]
 
 }
 
@@ -68,4 +70,34 @@ model VideoSource {
   videos            Video[]
 
   @@unique([platform, platformId])
+}
+
+model Playlist {
+  id                String @id@default(uuid())
+  userId            String
+  name              String
+  description       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playlistVideos    PlaylistVideo[]
+
+  @@unique([userId, name])
+}
+
+model PlaylistVideo {
+  id                String @id@default(uuid())
+  playlistId        String
+  videoId           String
+  createdAt         DateTime @default(now())
+
+  customTitle       String?
+  customDescription String? 
+
+  playlist          Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  video             Video @relation(fields: [videoId], references: [id], onDelete: Restrict)
+
+  @@unique([playlistId, videoId])
+  @@index([playlistId])
 }

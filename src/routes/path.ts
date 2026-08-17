@@ -1,20 +1,33 @@
 export const API_PREFIX = '/api';
 
+const AUTH_PATH = `${API_PREFIX}/auth`;
+
 export const authPaths = {
-    base: `${API_PREFIX}/auth`,
-    register: `${API_PREFIX}/auth/register`,
-    verify: `${API_PREFIX}/auth/verify`,
-    verificationCodeReq: `${API_PREFIX}/auth/verification-code-request`,
-    login: `${API_PREFIX}/auth/login`,
-    loginMfa: `${API_PREFIX}/auth/login/mfa`,
-    logout: `${API_PREFIX}/auth/logout`,
-    refresh: `${API_PREFIX}/auth/refresh`,
-    resetPassword: `${API_PREFIX}/auth/password-reset`,
-    resetPasswordReq: `${API_PREFIX}/auth/password-reset-request`,
+    base: AUTH_PATH,
+    register: `${AUTH_PATH}/register`,
+    verify: `${AUTH_PATH}/verify`,
+    verificationCodeReq: `${AUTH_PATH}/verification-code-request`,
+    login: `${AUTH_PATH}/login`,
+    loginMfa: `${AUTH_PATH}/login/mfa`,
+    logout: `${AUTH_PATH}/logout`,
+    refresh: `${AUTH_PATH}/refresh`,
+    resetPassword: `${AUTH_PATH}/password-reset`,
+    resetPasswordReq: `${AUTH_PATH}/password-reset-request`,
 };
 
+const USER_PATH = `${API_PREFIX}/users`;
 export const userPaths = {
-    base: `${API_PREFIX}/users`,
-    me: `${API_PREFIX}/users/me`,
-    updateEmail: `${API_PREFIX}/users/update-email`,
+    base: USER_PATH,
+    me: `${USER_PATH}/me`,
+    updateEmail: `${USER_PATH}/update-email`,
+};
+
+const PLAYLIST_PATH = `${API_PREFIX}/playlists`;
+
+export const playlistPaths = {
+    base: PLAYLIST_PATH,
+    id: (id: string) => `${PLAYLIST_PATH}/${id}`,
+    videoBase: (playlistId: string) => `${PLAYLIST_PATH}/${playlistId}/videos`,
+    videoId: (playlistId: string, playlistVideoId: string) =>
+        `${PLAYLIST_PATH}/${playlistId}/videos/${playlistVideoId}`,
 };

@@ -9,6 +9,7 @@ import { createCodeService } from 'shared/userCodes/codeService';
 import { createCodeRepo } from 'shared/userCodes/codeRepo';
 import { createEmailService } from 'shared/email/emailService';
 import { createTransactionRunner } from 'database/transactionRunner';
+import { createPlaylistFeature } from 'features/playlist';
 
 type FeatureDeps = {
     db: PrismaClient;
@@ -31,7 +32,9 @@ export const createFeatures = ({ db, redis, authMiddleware }: FeatureDeps) => {
         authMiddleware,
         txRunner,
     });
-    return { userFeature, authFeature };
+    const playlistFeature = createPlaylistFeature({ db, authMiddleware });
+
+    return { userFeature, authFeature, playlistFeature };
 };
 
 export const createCodeModule = (redis: RedisClientType) => {

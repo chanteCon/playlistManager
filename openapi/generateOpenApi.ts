@@ -6,24 +6,28 @@ import { authApiPaths } from './authOpenApi';
 import { userApiPaths } from './userOpenApi';
 import { ErrorResponse, SuccessResponse } from './commonSchemas';
 import dotenv from 'dotenv';
+import { playlistApiPaths } from './playlistOpenApi';
 dotenv.config();
 
 const mergedComponents = {
     schemas: {
         ...authApiPaths.components.schemas,
         ...userApiPaths.components.schemas,
+        ...playlistApiPaths.components.schemas,
         SuccessResponse,
         ErrorResponse,
     },
     securitySchemes: {
         ...authApiPaths.components.securitySchemes,
         ...userApiPaths.components.securitySchemes,
+        ...playlistApiPaths.components.securitySchemes,
     },
 };
 
 const mergedPaths = {
     ...authApiPaths.paths,
     ...userApiPaths.paths,
+    ...playlistApiPaths.paths,
 };
 
 const openApiDoc = createDocument({

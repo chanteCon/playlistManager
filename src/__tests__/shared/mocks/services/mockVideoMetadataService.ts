@@ -3,3 +3,7 @@ import { VideoMetadataService } from 'features/video/services/videoMetadataServi
 export const mockVideoMetadataService: jest.Mocked<VideoMetadataService> = {
     getExternalData: jest.fn(),
 };
+
+jest.mock('features/video/services/videoMetadataService', () => ({
+    createVideoMetadataService: jest.fn(() => mockVideoMetadataService),
+}));

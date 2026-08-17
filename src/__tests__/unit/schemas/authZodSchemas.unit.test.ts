@@ -14,11 +14,12 @@ describe('Unit tests: Auth Schemas', () => {
         const config = {
             schema: createAccountSchema,
             validInput: userInputData,
-            required: [
+            fields: [
                 { field: 'email', badValue: 2 },
                 { field: 'username', badValue: 4.0 },
                 { field: 'password', badValue: 7 },
             ],
+            required: ['email', 'password', 'username'],
             extraFieldKey: 'id',
         };
         testZodSchema(config);
@@ -28,10 +29,11 @@ describe('Unit tests: Auth Schemas', () => {
         const config = {
             schema: loginSchema,
             validInput: { email, password },
-            required: [
+            fields: [
                 { field: 'email', badValue: 2 },
                 { field: 'password', badValue: 7 },
             ],
+            required: ['email', 'password'],
             extraFieldKey: 'id',
         };
         testZodSchema(config);
@@ -41,7 +43,8 @@ describe('Unit tests: Auth Schemas', () => {
         const config = {
             schema: codeReqSchema,
             validInput: { email },
-            required: [{ field: 'email', badValue: 2 }],
+            fields: [{ field: 'email', badValue: 2 }],
+            required: ['email'],
             extraFieldKey: 'id',
         };
         testZodSchema(config);
@@ -51,10 +54,11 @@ describe('Unit tests: Auth Schemas', () => {
         const config = {
             schema: passwordResetSchema,
             validInput: { password, code: '123456' },
-            required: [
+            fields: [
                 { field: 'code', badValue: 2 },
                 { field: 'password', badValue: 3 },
             ],
+            required: ['code', 'password'],
             extraFieldKey: 'id',
         };
         testZodSchema(config);
@@ -64,7 +68,8 @@ describe('Unit tests: Auth Schemas', () => {
         const config = {
             schema: updateEmailSchema,
             validInput: { email },
-            required: [{ field: 'email', badValue: 2 }],
+            fields: [{ field: 'email', badValue: 2 }],
+            required: ['email'],
             extraFieldKey: 'id',
         };
         testZodSchema(config);

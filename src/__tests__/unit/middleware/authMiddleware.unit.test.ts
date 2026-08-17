@@ -6,7 +6,7 @@ import { AuthRequest } from 'features/auth/types';
 import * as jwt from 'jsonwebtoken';
 import { randomBytes, randomUUID } from 'crypto';
 import { UnauthorisedError } from 'shared/errors/errors';
-import { createAuthMiddlware } from 'middleware/authMiddleware';
+import { createAuthMiddlware } from 'features/video/authMiddleware';
 
 const authMiddleware = createAuthMiddlware();
 

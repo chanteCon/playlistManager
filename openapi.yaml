@@ -1677,6 +1677,1295 @@ paths:
                   - message
                   - data
                 additionalProperties: false
+  /api/playlists/:
+    post:
+      summary: Create playlist
+      tags:
+        - Playlist
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              name: My Playlist
+              description: My playlist description
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+                  description: Name must be between 1 and 50 characters. A user cannot have two
+                    playlists with the same name
+                  example: Playlist one
+                description:
+                  description: Description is optional and is between 0 and 500 characters
+                  example: This is a description example.
+                  type: string
+                  maxLength: 500
+              required:
+                - name
+      responses:
+        "201":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  playlist:
+                    id: 00000000-0000-0000-0000-000000000000
+                    userId: 00000000-0000-0000-0000-000000000000
+                    name: My Playlist
+                    description: null
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      playlist:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          userId:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          name:
+                            type: string
+                          description:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                        required:
+                          - id
+                          - userId
+                          - name
+                          - description
+                        additionalProperties: false
+                    required:
+                      - playlist
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "409":
+          description: You have another playlist with this name
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: You have another playlist with this name
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: You have another playlist with this name
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+    get:
+      summary: Get all user playlists
+      tags:
+        - Playlist
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  playlists:
+                    - id: 00000000-0000-0000-0000-000000000000
+                      userId: 00000000-0000-0000-0000-000000000000
+                      name: Playlist 1
+                      description: null
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      playlists:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            userId:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            name:
+                              type: string
+                            description:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                          required:
+                            - id
+                            - userId
+                            - name
+                            - description
+                          additionalProperties: false
+                    required:
+                      - playlists
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/playlists/{id}:
+    get:
+      summary: Get playlist
+      tags:
+        - Playlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - &a1
+          in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            description: The unique ID of the playlist
+            example: 00000000-0000-0000-0000-000000000000
+          required: true
+          description: The unique ID of the playlist
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  playlist:
+                    id: 00000000-0000-0000-0000-000000000000
+                    name: My Playlist
+                    description: My playlist description
+                    videos:
+                      - id: 00000000-0000-0000-0000-000000000000
+                        title: Test Video
+                        description: Test description
+                        thumbnail: https://example.com/thumbnail.jpg
+                        url: https://www.youtube.com/watch?v=zzzzzzzzzzz
+                        platform: youtube
+                        platformId: zzzzzzzzzzz
+                        render: false
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      playlist:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          name:
+                            type: string
+                          description:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          videos:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                title:
+                                  type: string
+                                description:
+                                  type: string
+                                thumbnail:
+                                  type: string
+                                url:
+                                  type: string
+                                platform:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                platformId:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                render:
+                                  type: boolean
+                              required:
+                                - id
+                                - title
+                                - url
+                                - render
+                              additionalProperties: false
+                        required:
+                          - id
+                          - name
+                          - videos
+                        additionalProperties: false
+                    required:
+                      - playlist
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: Playlist not found
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Playlist not found
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Playlist not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+    patch:
+      summary: Update playlist
+      tags:
+        - Playlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - *a1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            description: At least one or name or description must be provided.
+            example:
+              name: Updated Playlist
+              description: Updated description
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+                  description: Name must be between 1 and 50 characters. A user cannot have two
+                    playlists with the same name
+                  example: Playlist one
+                description:
+                  description: Description is optional and is between 0 and 500 characters
+                  example: This is a description example.
+                  type: string
+                  maxLength: 500
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  playlist:
+                    id: 00000000-0000-0000-0000-000000000000
+                    userId: 00000000-0000-0000-0000-000000000000
+                    name: Updated Playlist
+                    description: Updated description
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      playlist:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          userId:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          name:
+                            type: string
+                          description:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                        required:
+                          - id
+                          - userId
+                          - name
+                          - description
+                        additionalProperties: false
+                    required:
+                      - playlist
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: Playlist not found
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Playlist not found
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Playlist not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "409":
+          description: You have another playlist with this name
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: You have another playlist with this name
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: You have another playlist with this name
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+    delete:
+      summary: Delete playlist
+      tags:
+        - Playlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - *a1
+      responses:
+        "204":
+          description: Playlist deleted successfully
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: Playlist not found
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Playlist not found
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Playlist not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/playlists/{id}/videos:
+    post:
+      summary: Add video to playlist
+      tags:
+        - Playlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - *a1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              url: https://www.youtube.com/watch?v=zzzzzzzzzzz
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  description: The URL of the video to add to the playlist
+              required:
+                - url
+      responses:
+        "201":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  video:
+                    id: 00000000-0000-0000-0000-000000000000
+                    title: Test Video
+                    description: Test description
+                    thumbnail: https://example.com/thumbnail.jpg
+                    url: https://www.youtube.com/watch?v=zzzzzzzzzzz
+                    platform: youtube
+                    platformId: zzzzzzzzzzz
+                    render: false
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      video:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          title:
+                            type: string
+                          description:
+                            type: string
+                          thumbnail:
+                            type: string
+                          url:
+                            type: string
+                          platform:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          platformId:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          render:
+                            type: boolean
+                        required:
+                          - id
+                          - title
+                          - url
+                          - render
+                        additionalProperties: false
+                    required:
+                      - video
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: Playlist not found
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Playlist not found
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Playlist not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "409":
+          description: You have already added this video to the playlist
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: You have already added this video to the playlist
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: You have already added this video to the playlist
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/playlists/{id}/videos/{playlistVideoId}:
+    patch:
+      summary: Update playlist video
+      tags:
+        - Playlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - *a1
+        - &a2
+          in: path
+          name: playlistVideoId
+          schema:
+            type: string
+            format: uuid
+            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            description: The unique ID of the playlist video
+            example: 00000000-0000-0000-0000-000000000000
+          required: true
+          description: The unique ID of the playlist video
+      requestBody:
+        required: true
+        content:
+          application/json:
+            description: At least one of title or description must be provided.
+            example:
+              title: Updated title
+              description: Updated description
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+                  description: Title must be between 1 and 50 characters. Playlists cannot have
+                    two videos with the same custom title
+                  example: Video one
+                description:
+                  description: Description is optional and is between 0 and 500 characters
+                  example: This is a description example.
+                  type: string
+                  maxLength: 500
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  video:
+                    id: 00000000-0000-0000-0000-000000000000
+                    title: Updated title
+                    description: Test description
+                    thumbnail: https://example.com/thumbnail.jpg
+                    url: https://www.youtube.com/watch?v=zzzzzzzzzzz
+                    platform: youtube
+                    platformId: zzzzzzzzzzz
+                    render: false
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      video:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          title:
+                            type: string
+                          description:
+                            type: string
+                          thumbnail:
+                            type: string
+                          url:
+                            type: string
+                          platform:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          platformId:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          render:
+                            type: boolean
+                        required:
+                          - id
+                          - title
+                          - url
+                          - render
+                        additionalProperties: false
+                    required:
+                      - video
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: Playlist not found
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Playlist not found
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Playlist not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+    delete:
+      summary: Remove video from playlist
+      tags:
+        - Playlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - *a1
+        - *a2
+      responses:
+        "204":
+          description: Video removed from playlist successfully
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: Playlist not found
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Playlist not found
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Playlist not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
 components:
   schemas:
     SuccessResponse:

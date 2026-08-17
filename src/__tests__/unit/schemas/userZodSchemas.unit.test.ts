@@ -9,7 +9,8 @@ describe('Unit tests: User Schemas', () => {
         const config = {
             schema: updateUserSchema,
             validInput: { username: userInputData.username },
-            required: [{ field: 'username', badValue: 4.0 }],
+            fields: [{ field: 'username', badValue: 4.0 }],
+            required: ['username'],
             extraFieldKey: 'password',
         };
         testZodSchema(config);
@@ -18,7 +19,8 @@ describe('Unit tests: User Schemas', () => {
         const config = {
             schema: userIdSchema,
             validInput: { id: randomUUID() },
-            required: [{ field: 'id', badValue: 4.0 }],
+            fields: [{ field: 'id', badValue: 4.0 }],
+            required: ['id'],
             extraFieldKey: 'password',
         };
         testZodSchema(config);

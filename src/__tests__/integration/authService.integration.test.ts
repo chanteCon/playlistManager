@@ -25,7 +25,7 @@ const emailService = mockEmailService;
 
 beforeAll(async () => {
     const infra = await createTestInfrastructure();
-    const auth = await createAuthServiceFixture({
+    const auth = createAuthServiceFixture({
         ...infra,
         emailService: mockEmailService,
     });

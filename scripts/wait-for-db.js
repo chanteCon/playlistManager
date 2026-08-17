@@ -7,9 +7,10 @@ const sleep = promisify(setTimeout);
     const MAX = 30;
 
     console.log('Waiting for Postgres...');
+
     for (let i = 0; i < MAX; i++) {
         try {
-            const output = execSync('docker exec postgres-db pg_isready -U postgres', {
+            const output = execSync('docker compose exec -T db pg_isready -U postgres', {
                 encoding: 'utf-8',
                 stdio: 'pipe',
             });
@@ -19,7 +20,7 @@ const sleep = promisify(setTimeout);
                 return;
             }
         } catch {
-            // do nothing
+            // Postgres isn't ready yet
         }
 
         await sleep(1000);

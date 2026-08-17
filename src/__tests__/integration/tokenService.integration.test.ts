@@ -15,7 +15,7 @@ let testEnv: InfraStructure & { authService: AuthService; tokenService: TokenSer
 
 beforeAll(async () => {
     const infra = await createTestInfrastructure();
-    const auth = await createAuthServiceFixture({
+    const auth = createAuthServiceFixture({
         ...infra,
         emailService: mockEmailService,
     });

@@ -32,7 +32,7 @@ export const createTokenService = ({ refreshTokenRepo }: TokenServiceDeps) => {
             data: {
                 userId: authUser.id,
                 tokenHash,
-                deviceId: authUser.deviceId,
+                deviceId: authUser.deviceId!,
                 expiresAt: new Date(Date.now() + expiresMs),
             },
         });

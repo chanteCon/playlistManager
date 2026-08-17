@@ -16,7 +16,7 @@ import { RedisClientType } from 'redis';
 import { PrismaClient } from '@prisma/client';
 import { createFeatures } from 'app/createFeatures';
 import { setUpRoutes } from './setupRoutes';
-import { createAuthMiddlware } from 'middleware/authMiddleware';
+import { createAuthMiddlware } from 'features/video/authMiddleware';
 import { timeout } from 'middleware/timeoutMiddleware';
 
 type AppDeps = {

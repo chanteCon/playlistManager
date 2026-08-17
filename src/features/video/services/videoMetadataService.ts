@@ -28,7 +28,6 @@ export const createVideoMetadataService = () => {
         }
         try {
             const result = await fetchHTML(url);
-            console.log(result.html);
             if (!result.platformId) {
                 return undefined;
             }
