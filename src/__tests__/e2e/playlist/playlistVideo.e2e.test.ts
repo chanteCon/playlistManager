@@ -189,6 +189,34 @@ describe('e2e tests Playlist Routes', () => {
             });
         });
 
+        test('Should return bad request error (400) if url protocol is not HTTPs', async () => {
+            const { app, db } = testEnv;
+
+            const playlist = await seedPlaylist(db, {
+                userId: user.id,
+            });
+
+            const res = await setAuthHeader({
+                req: request(app).post(playlistPaths.videoBase(playlist.id)),
+                accessToken,
+            }).send({
+                url: 'http://www.youtube.com/watch?v=zzzzzzzzzzz',
+            });
+
+            expectResError({
+                res,
+                error: new ValidationError('Invalid Input'),
+                errors: [],
+                mockLogger,
+            });
+
+            expect(res.body.errors).toEqual(
+                expect.objectContaining({
+                    url: ['URL must use HTTPS'],
+                }),
+            );
+        });
+
         test('Should return unauthorised error (401) if user is not authenticated', async () => {
             const { app, db } = testEnv;
 

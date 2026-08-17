@@ -9,7 +9,6 @@ import {
 } from 'features/playlist/schemas';
 import { testZodSchema } from './testZodSchema';
 import { randomUUID } from 'crypto';
-import { faker } from '@faker-js/faker';
 
 describe('Unit tests: Playlist Schemas', () => {
     const playlistInputData = buildPlaylistInput();
@@ -75,7 +74,7 @@ describe('Unit tests: Playlist Schemas', () => {
     describe('Video url schema', () => {
         const config = {
             schema: videoUrlSchema,
-            validInput: { url: faker.internet.url() },
+            validInput: { url: 'https://example.com.au' },
             fields: [{ field: 'url', badValue: 'noturl' }],
             required: ['url'],
             extraFieldKey: 'userId',

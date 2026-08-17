@@ -53,9 +53,27 @@ export const playlistUpdateSchema = z
     });
 
 export const videoUrlSchema = z
-    .object({ url: z.url().meta({ description: 'The URL of the video to add to the playlist' }) })
+    .object({
+        url: z
+            .url()
+            .refine(
+                (url) => {
+                    try {
+                        const protocol = new URL(url).protocol;
+                        return protocol === 'https:';
+                    } catch {
+                        return false;
+                    }
+                },
+                {
+                    message: 'URL must use HTTPS',
+                },
+            )
+            .meta({
+                description: 'The URL of the video to add to the playlist. Must use HTTP or HTTPS.',
+            }),
+    })
     .strip();
-
 export const updateVideoSchema = z
     .object({
         title: videoTitleField.optional(),
