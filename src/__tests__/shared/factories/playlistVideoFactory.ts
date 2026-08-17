@@ -36,8 +36,8 @@ export const buildCustomPlaylistVideoInput = (
     return {
         playlistId: randomUUID(),
         videoId: randomUUID(),
-        customDescription: faker.lorem.words(10),
-        customTitle: faker.lorem.words(1),
+        description: faker.lorem.words(10),
+        title: faker.lorem.words(1),
         ...overrides,
     };
 };

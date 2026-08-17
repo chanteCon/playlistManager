@@ -229,8 +229,8 @@ describe('Unit tests: playlist service', () => {
             });
 
             const updateData = {
-                customTitle: 'updated title',
-                customDescription: 'updated description',
+                title: 'updated title',
+                description: 'updated description',
             };
 
             mockPlaylistRepo.existsForUser.mockResolvedValueOnce(true);
@@ -247,18 +247,17 @@ describe('Unit tests: playlist service', () => {
                 playlist.userId,
             );
 
-            expect(mockPlaylistVideoRepo.update).toHaveBeenCalledWith(
-                savedVideo.id,
-                playlist.id,
-                updateData,
-            );
+            expect(mockPlaylistVideoRepo.update).toHaveBeenCalledWith(savedVideo.id, playlist.id, {
+                customTitle: updateData.title,
+                customDescription: updateData.description,
+            });
 
             const savedSource = savedVideo.video.source!;
 
             expectPlaylistVideoDTO(result, {
                 id: savedVideo.id,
-                title: updateData.customTitle,
-                description: updateData.customDescription,
+                title: updateData.title,
+                description: updateData.description,
                 url: savedSource.canonicalUrl,
                 platform: savedSource.platform,
                 render: true,
@@ -270,7 +269,7 @@ describe('Unit tests: playlist service', () => {
             const input = {
                 playlistId: playlist.id,
                 playlistVideoId: 'playlist-video-id',
-                data: { customTitle: 'updated title' },
+                data: { title: 'updated title' },
             };
             await expect(playlistService.updateVideo(playlist.userId, input)).rejects.toThrow(
                 'Playlist not found',

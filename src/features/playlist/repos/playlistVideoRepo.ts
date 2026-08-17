@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { PlaylistVideoUpdateInput, PlaylistVideoWithInclude, playlistVideoInclude } from '../types';
+import { PlaylistVideoWithInclude, playlistVideoInclude } from '../types';
 
 type PlaylistVideoRepoDeps = { db: PrismaClient };
 export type PlaylistVideoRepo = ReturnType<typeof createPlaylistVideoRepo>;
@@ -21,7 +21,7 @@ export const createPlaylistVideoRepo = ({ db }: PlaylistVideoRepoDeps) => {
     const update = async (
         id: string,
         playlistId: string,
-        data: PlaylistVideoUpdateInput,
+        data: { customTitle?: string; customDescription?: string },
     ): Promise<PlaylistVideoWithInclude> => {
         return await db.playlistVideo.update({
             where: { playlistId, id },

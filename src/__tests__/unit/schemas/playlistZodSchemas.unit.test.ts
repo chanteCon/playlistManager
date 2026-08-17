@@ -86,12 +86,12 @@ describe('Unit tests: Playlist Schemas', () => {
         const config = {
             schema: updateVideoSchema,
             validInput: {
-                customTitle: 'Video one',
-                customDescription: 'This is a description example.',
+                title: 'Video one',
+                description: 'This is a description example.',
             },
             fields: [
-                { field: 'customTitle', badValue: 2 },
-                { field: 'customDescription', badValue: 2 },
+                { field: 'title', badValue: 2 },
+                { field: 'description', badValue: 2 },
             ],
             required: [],
             extraFieldKey: 'userId',
@@ -107,15 +107,15 @@ describe('Unit tests: Playlist Schemas', () => {
 
         test('Accepts custom title only', () => {
             const res = updateVideoSchema.safeParse({
-                customTitle: 'Video one',
+                title: 'Video one',
             });
 
             expect(res.success).toBe(true);
         });
 
-        test('Accepts custom description only', () => {
+        test('Accepts description only', () => {
             const res = updateVideoSchema.safeParse({
-                customDescription: 'This is a description example.',
+                description: 'This is a description example.',
             });
 
             expect(res.success).toBe(true);

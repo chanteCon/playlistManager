@@ -333,7 +333,7 @@ describe('Playlist service integration tests', () => {
                     playlistId: playlist.id,
                     url: video.url,
                 }),
-            ).rejects.toThrow('You have another playlist with this name');
+            ).rejects.toThrow('You have already added this video to the playlist');
 
             expect(
                 await testEnv.db.playlistVideo.findMany({
@@ -354,7 +354,7 @@ describe('Playlist service integration tests', () => {
                 playlistId: playlist.id,
                 playlistVideoId: playlistVideos[0].id,
                 data: {
-                    customTitle,
+                    title: customTitle,
                 },
             });
 
@@ -388,7 +388,7 @@ describe('Playlist service integration tests', () => {
                     playlistId: playlist.id,
                     playlistVideoId: playlistVideos[0].id,
                     data: {
-                        customTitle: 'Updated title',
+                        title: 'Updated title',
                     },
                 }),
             ).rejects.toThrow('Playlist not found');
@@ -417,7 +417,7 @@ describe('Playlist service integration tests', () => {
                     playlistId: playlist2.id,
                     playlistVideoId: playlistVideo.id,
                     data: {
-                        customTitle: 'Should fail',
+                        title: 'Should fail',
                     },
                 }),
             ).rejects.toThrow('Playlist video not found');
@@ -441,7 +441,7 @@ describe('Playlist service integration tests', () => {
                     playlistId: playlist.id,
                     playlistVideoId: randomUUID(),
                     data: {
-                        customTitle: 'Updated title',
+                        title: 'Updated title',
                     },
                 }),
             ).rejects.toThrow('Playlist video not found');

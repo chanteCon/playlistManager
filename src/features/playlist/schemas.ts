@@ -17,13 +17,22 @@ const desriptionField = z.string().trim().max(500).optional().meta({
     example: 'This is a description example.',
 });
 
-const playlistIdField = z.uuid().meta({
+export const playlistIdField = z.uuid().meta({
     description: 'The unique ID of the playlist',
     example: '00000000-0000-0000-0000-000000000000',
+    param: {
+        name: 'id',
+        in: 'path',
+    },
 });
-const videoIdField = z.uuid().meta({
+
+export const videoIdField = z.uuid().meta({
     description: 'The unique ID of the playlist video',
     example: '00000000-0000-0000-0000-000000000000',
+    param: {
+        name: 'playlistVideoId',
+        in: 'path',
+    },
 });
 
 export const playlistCreateSchema = z
@@ -49,11 +58,11 @@ export const videoUrlSchema = z
 
 export const updateVideoSchema = z
     .object({
-        customTitle: videoTitleField.optional(),
-        customDescription: desriptionField,
+        title: videoTitleField.optional(),
+        description: desriptionField,
     })
     .strip()
-    .refine((data) => data.customTitle !== undefined || data.customDescription !== undefined, {
+    .refine((data) => data.title !== undefined || data.description !== undefined, {
         message: 'Title or description field must be provided',
     });
 

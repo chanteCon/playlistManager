@@ -162,7 +162,7 @@ describe('e2e tests Playlist Routes', () => {
 
             expectResError({
                 res,
-                error: new ConflictError('You have another playlist with this name'),
+                error: new ConflictError('You have already added this video to the playlist'),
                 mockLogger,
             });
         });
@@ -228,7 +228,7 @@ describe('e2e tests Playlist Routes', () => {
                 req: request(app).patch(playlistPaths.videoId(playlist.id, playlistVideo.id)),
                 accessToken,
             }).send({
-                customTitle: 'Updated title',
+                title: 'Updated title',
                 render: true,
             });
 
@@ -265,7 +265,7 @@ describe('e2e tests Playlist Routes', () => {
                 ),
                 accessToken,
             }).send({
-                customTitle: 'Updated title',
+                title: 'Updated title',
             });
 
             expectResError({
@@ -299,7 +299,7 @@ describe('e2e tests Playlist Routes', () => {
                 req: request(app).patch(playlistPaths.videoId(playlist.id, playlistVideo.id)),
                 accessToken,
             }).send({
-                customTitle: 'Updated title',
+                title: 'Updated title',
             });
 
             expectResError({
@@ -316,7 +316,7 @@ describe('e2e tests Playlist Routes', () => {
                 req: request(app).patch(playlistPaths.videoId('invalid-id', 'valid-video-id')),
                 accessToken,
             }).send({
-                customTitle: 'Updated title',
+                title: 'Updated title',
             });
 
             expectResError({
