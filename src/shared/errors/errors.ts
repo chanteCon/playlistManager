@@ -46,3 +46,9 @@ export class ConflictError extends AppError {
         super(message, 409);
     }
 }
+
+export class BadGatewayError extends AppError {
+    constructor(message = 'Bad gateway') {
+        super(message, 502);
+    }
+}
