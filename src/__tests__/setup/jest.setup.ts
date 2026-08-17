@@ -6,3 +6,9 @@ dotenv.config({ path: '.env.test', quiet: true });
 jest.mock('shared/logger/logger', () => ({
     logger: mockLogger,
 }));
+
+jest.mock('nodemailer', () => ({
+    createTransport: jest.fn(() => ({
+        sendMail: jest.fn(),
+    })),
+}));

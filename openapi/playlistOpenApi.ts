@@ -69,7 +69,7 @@ const videoResponseSchema = z.object({
 });
 
 const paths = {
-    '/api/playlist/': {
+    '/api/playlists/': {
         post: {
             summary: 'Create playlist',
             tags: ['Playlist'],
@@ -135,7 +135,7 @@ const paths = {
         },
     },
 
-    '/api/playlist/{id}': {
+    '/api/playlists/{id}': {
         get: {
             summary: 'Get playlist',
             tags: ['Playlist'],
@@ -243,7 +243,7 @@ const paths = {
         },
     },
 
-    '/api/playlist/{id}/videos': {
+    '/api/playlists/{id}/videos': {
         post: {
             summary: 'Add video to playlist',
             tags: ['Playlist'],
@@ -292,7 +292,7 @@ const paths = {
         },
     },
 
-    '/api/playlist/{id}/videos/{playlistVideoId}': {
+    '/api/playlists/{id}/videos/{playlistVideoId}': {
         patch: {
             summary: 'Update playlist video',
             tags: ['Playlist'],

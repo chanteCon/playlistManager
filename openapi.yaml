@@ -1677,7 +1677,7 @@ paths:
                   - message
                   - data
                 additionalProperties: false
-  /api/playlist/:
+  /api/playlists/:
     post:
       summary: Create playlist
       tags:
@@ -1950,7 +1950,7 @@ paths:
                   - message
                   - data
                 additionalProperties: false
-  /api/playlist/{id}:
+  /api/playlists/{id}:
     get:
       summary: Get playlist
       tags:
@@ -2455,7 +2455,7 @@ paths:
                   - message
                   - data
                 additionalProperties: false
-  /api/playlist/{id}/videos:
+  /api/playlists/{id}/videos:
     post:
       summary: Add video to playlist
       tags:
@@ -2666,7 +2666,7 @@ paths:
                   - message
                   - data
                 additionalProperties: false
-  /api/playlist/{id}/videos/{playlistVideoId}:
+  /api/playlists/{id}/videos/{playlistVideoId}:
     patch:
       summary: Update playlist video
       tags:
