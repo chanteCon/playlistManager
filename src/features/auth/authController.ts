@@ -28,9 +28,13 @@ export const createAuthController = ({ services }: AuthControllerDeps) => {
     };
 
     const verify = async (req: Request<any, any, { code: string }>, res: Response) => {
-        await authService.verifyUser(req.body.code);
-        res.locals.message = 'Email successfully verified, please login';
-        return res.status(200).json({});
+        const existingDeviceId = req.cookies?.deviceId;
+        const { accessToken, refreshToken, deviceId } = await authService.verifyUser(
+            req.body.code,
+            existingDeviceId,
+        );
+        setCookie(res, deviceId!, 'deviceId');
+        return sendAuthTokens(res, accessToken, refreshToken);
     };
 
     const requestVerificationCode = async (

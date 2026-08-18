@@ -59,7 +59,6 @@ describe('e2e tests: Auth - verify', () => {
             });
         expectWrappedResponse({
             res: successfulVerify,
-            message: 'Email successfully verified, please login',
         });
         expect(sendMailMock).toHaveBeenCalledTimes(2);
     });

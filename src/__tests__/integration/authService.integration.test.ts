@@ -183,6 +183,20 @@ describe('Integration tests: Auth service', () => {
                 'Invalid or expired login code',
             );
         });
+        test('Should throw  unauthorised if user not found', async () => {
+            const existingDeviceId = 'existingDeviceId';
+            await seedRefreshToken(testEnv.db, {
+                deviceId: existingDeviceId,
+                userId: user.id,
+            });
+            await testEnv.db.user.delete({ where: { id: user.id } });
+            await expect(
+                testEnv.authService.loginMfa({
+                    code: codePlainStr,
+                    existingDeviceId,
+                }),
+            ).rejects.toThrow('User not found');
+        });
     });
     describe('logout', () => {
         let accessToken: string;

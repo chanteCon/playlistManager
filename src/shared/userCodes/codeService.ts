@@ -76,8 +76,13 @@ export const createCodeService = (deps: CodeServiceDeps) => {
         }
     };
 
+    const removeAllForUser = async (userId: string): Promise<void> => {
+        await codeRepo.removeAllForUser(userId);
+    };
+
     return {
         issueCodeForUser,
         verifyCode,
+        removeAllForUser,
     };
 };

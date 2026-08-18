@@ -13,6 +13,7 @@ import { handleNotFoundError, handleUniqueConstraintError } from 'database/prism
 import { CodeService } from 'shared/userCodes/codeService';
 import { TokenService } from 'features/auth/services/tokenService';
 import { PrismaClientTx, TxRunner } from 'database/prisma/dbType';
+import { logger } from 'shared/logger/logger';
 
 type UserServiceDeps = {
     userRepo: UserRepo;
@@ -119,6 +120,9 @@ export const createUserService = ({
     const remove = async (id: string): Promise<string> => {
         try {
             const user = await userRepo.remove(id);
+            await codeService.removeAllForUser(id).catch(() => {
+                logger.warn('Failed to remove user codes from Redis', { userId: id });
+            });
             return user.id;
         } catch (error) {
             handleNotFoundError(error, 'User not found');
