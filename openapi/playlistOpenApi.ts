@@ -277,16 +277,19 @@ const paths = {
                     },
                 }),
                 400: errorResponse({
-                    message: 'Invalid Input',
+                    message: 'Invalid input or unable to process video URL',
                 }),
                 401: errorResponse({
                     message: 'Unauthorized',
                 }),
                 404: errorResponse({
-                    message: 'Playlist not found',
+                    message: 'Playlist or Viideo not found',
                 }),
                 409: errorResponse({
                     message: 'You have already added this video to the playlist',
+                }),
+                502: errorResponse({
+                    message: 'Unable to fetch video metadata. Please try again later.',
                 }),
             },
         },

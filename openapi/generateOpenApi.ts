@@ -32,7 +32,13 @@ const mergedPaths = {
 
 const openApiDoc = createDocument({
     openapi: '3.1.0',
-    info: { title: 'Authentication API', version: '1.0.0' },
+    info: {
+        title: 'Playlist Manager API',
+        version: '1.0.0',
+        description: `Playlist Manager is an API for managing users, playlists, and video collections.
+    It provides authentication, playlist management, and video integration features.
+    Requests are rate limited .`,
+    },
     servers: [
         {
             url: `${process.env.SERVER_URL}:${process.env.SERVER_PORT}`,

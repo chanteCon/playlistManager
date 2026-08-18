@@ -1,7 +1,12 @@
 openapi: 3.1.0
 info:
-  title: Authentication API
+  title: Playlist Manager API
   version: 1.0.0
+  description: >-
+    Playlist Manager is an API for managing users, playlists, and video
+    collections.
+        It provides authentication, playlist management, and video integration features.
+        Requests are rate limited .
 servers:
   - url: http://localhost:4000
     description: Main API server
@@ -1271,186 +1276,6 @@ paths:
                   - message
                   - data
                 additionalProperties: false
-  /api/users/{id}:
-    get:
-      summary: Get user by ID
-      tags:
-        - Users
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            format: uuid
-            example: 00000000-0000-0000-0000-000000000000
-          description: User ID
-      responses:
-        "200":
-          description: User retrieved
-          content:
-            application/json:
-              example:
-                success: true
-                data:
-                  user:
-                    username: User_name123
-                    id: 00000000-0000-0000-0000-000000000000
-                message: User retrieved
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    const: true
-                  message:
-                    type: string
-                    example: User retrieved
-                  data:
-                    type: object
-                    properties:
-                      user:
-                        type: object
-                        properties:
-                          id:
-                            type: string
-                            format: uuid
-                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                            description: The unique ID of the user
-                            example: 00000000-0000-0000-0000-000000000000
-                          username:
-                            description: Username must be unique and between 5 and 30 characters. Can only
-                              contain letters, numbers, dots, underscores, and
-                              hyphens
-                            example: User_name123
-                        required:
-                          - id
-                          - username
-                        additionalProperties: false
-                    required:
-                      - user
-                    additionalProperties: false
-                required:
-                  - success
-                  - message
-                  - data
-                additionalProperties: false
-        "400":
-          description: Invalid Input
-          content:
-            application/json:
-              example:
-                success: false
-                data: null
-                message: Invalid Input
-                errors: "{ id: [ Required] }"
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    const: false
-                  message:
-                    default: Invalid Input
-                    type: string
-                  data:
-                    type: "null"
-                  errors:
-                    anyOf:
-                      - {}
-                      - type: "null"
-                required:
-                  - success
-                  - message
-                  - data
-                additionalProperties: false
-        "404":
-          description: User not found
-          content:
-            application/json:
-              example:
-                success: false
-                data: null
-                message: User not found
-                errors: null
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    const: false
-                  message:
-                    default: User not found
-                    type: string
-                  data:
-                    type: "null"
-                  errors:
-                    anyOf:
-                      - {}
-                      - type: "null"
-                required:
-                  - success
-                  - message
-                  - data
-                additionalProperties: false
-  /api/users:
-    get:
-      summary: Get all users
-      tags:
-        - Users
-      responses:
-        "200":
-          description: Successful response
-          content:
-            application/json:
-              example:
-                success: true
-                data:
-                  - user:
-                      username: User_name123
-                      id: 00000000-0000-0000-0000-000000000000
-                message: null
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    const: true
-                  message:
-                    anyOf:
-                      - type: string
-                      - type: "null"
-                    example: null
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        user:
-                          type: object
-                          properties:
-                            id:
-                              type: string
-                              format: uuid
-                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                              description: The unique ID of the user
-                              example: 00000000-0000-0000-0000-000000000000
-                            username:
-                              description: Username must be unique and between 5 and 30 characters. Can only
-                                contain letters, numbers, dots, underscores, and
-                                hyphens
-                              example: User_name123
-                          required:
-                            - id
-                            - username
-                          additionalProperties: false
-                      required:
-                        - user
-                      additionalProperties: false
-                required:
-                  - success
-                  - message
-                  - data
-                additionalProperties: false
   /api/users/update-email:
     patch:
       summary: User update email
@@ -2494,13 +2319,13 @@ paths:
                   - data
                 additionalProperties: false
         "400":
-          description: Invalid Input
+          description: Invalid input or nnable to process video URL
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Invalid Input
+                message: Invalid input or nnable to process video URL
                 errors: null
               schema:
                 type: object
@@ -2509,7 +2334,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Invalid Input
+                    default: Invalid input or nnable to process video URL
                     type: string
                   data:
                     type: "null"
@@ -2552,13 +2377,13 @@ paths:
                   - data
                 additionalProperties: false
         "404":
-          description: Playlist not found
+          description: Playlist or Viideo not found
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Playlist not found
+                message: Playlist or Viideo not found
                 errors: null
               schema:
                 type: object
@@ -2567,7 +2392,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Playlist not found
+                    default: Playlist or Viideo not found
                     type: string
                   data:
                     type: "null"
@@ -2597,6 +2422,35 @@ paths:
                     const: false
                   message:
                     default: You have already added this video to the playlist
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - {}
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "502":
+          description: Unable to fetch video metadata. Please try again later.
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unable to fetch video metadata. Please try again later.
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unable to fetch video metadata. Please try again later.
                     type: string
                   data:
                     type: "null"
