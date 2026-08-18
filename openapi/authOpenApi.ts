@@ -73,7 +73,18 @@ const paths = {
                 },
             },
             responses: {
-                200: successResponse({ message: 'Email successfully verified, please login' }),
+                200: successResponse({
+                    dataSchema: z.object({ accessToken: authSchemas.accessTokenField }),
+                    data: {
+                        accessToken,
+                    },
+                    headers: {
+                        'Set-Cookie': {
+                            description: 'Refresh token cookie, expires in 7 days',
+                            schema: { type: 'string' },
+                        },
+                    },
+                }),
                 400: errorResponse({
                     message: 'Invalid Input',
                     errors: 'Validation error messsages',
