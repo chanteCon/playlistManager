@@ -74,6 +74,7 @@ export const videoUrlSchema = z
             }),
     })
     .strip();
+
 export const updateVideoSchema = z
     .object({
         title: videoTitleField.optional(),

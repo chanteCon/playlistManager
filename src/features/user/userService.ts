@@ -11,15 +11,24 @@ import {
 import { UserRepo } from './repos/userRepo';
 import { handleNotFoundError, handleUniqueConstraintError } from 'database/prisma/repoError';
 import { CodeService } from 'shared/userCodes/codeService';
+import { TokenService } from 'features/auth/services/tokenService';
+import { PrismaClientTx, TxRunner } from 'database/prisma/dbType';
 
 type UserServiceDeps = {
     userRepo: UserRepo;
     codeService: CodeService;
+    tokenService: TokenService;
+    txRunner: TxRunner;
 };
 
 export type UserService = ReturnType<typeof createUserService>;
 
-export const createUserService = ({ userRepo, codeService }: UserServiceDeps) => {
+export const createUserService = ({
+    userRepo,
+    codeService,
+    tokenService,
+    txRunner,
+}: UserServiceDeps) => {
     const create = async ({ data }: CreateUserParams): Promise<User> => {
         try {
             const user = await userRepo.create({ data });
@@ -42,6 +51,16 @@ export const createUserService = ({ userRepo, codeService }: UserServiceDeps) =>
     const findVerifiedById = async (id: string): Promise<PublicUser> => {
         const verifiedUser = await userRepo.findUserPublicByFilter({
             filter: { id, verified: true },
+        });
+        if (!verifiedUser) {
+            throw new NotFoundError('User not found');
+        }
+        return verifiedUser;
+    };
+
+    const findVerifiedByEmail = async (email: string): Promise<PublicUser> => {
+        const verifiedUser = await userRepo.findUserPublicByFilter({
+            filter: { email, verified: true },
         });
         if (!verifiedUser) {
             throw new NotFoundError('User not found');
@@ -78,11 +97,18 @@ export const createUserService = ({ userRepo, codeService }: UserServiceDeps) =>
 
     const updateEmail = async ({ id, email }: { id: string; email: string }): Promise<void> => {
         try {
-            const user = await userRepo.updateUserSensitive({
-                where: { id, verified: true },
-                data: { email, verified: false },
+            await txRunner.run(async (tx: PrismaClientTx) => {
+                const user = await userRepo.updateUserSensitive({
+                    where: { id, verified: true },
+                    data: { email, verified: false },
+                    tx,
+                });
+                await codeService.issueCodeForUser({
+                    data: { user, codeType: 'VERIFICATION' },
+                    tx,
+                });
+                await tokenService.revokeAllForUser(id, tx);
             });
-            await codeService.issueCodeForUser({ data: { user, codeType: 'VERIFICATION' } });
         } catch (error) {
             handleUniqueConstraintError(error);
             handleNotFoundError(error, 'User not found');
@@ -137,5 +163,6 @@ export const createUserService = ({ userRepo, codeService }: UserServiceDeps) =>
         verify,
         findVerifiedById,
         updateEmail,
+        findVerifiedByEmail,
     };
 };

@@ -16,7 +16,6 @@ import { RedisClientType } from 'redis';
 import { PrismaClient } from '@prisma/client';
 import { createFeatures } from 'app/createFeatures';
 import { setUpRoutes } from './setupRoutes';
-import { createAuthMiddlware } from 'features/video/authMiddleware';
 import { timeout } from 'middleware/timeoutMiddleware';
 
 type AppDeps = {
@@ -41,11 +40,9 @@ export const createApp = (appDeps: AppDeps): Application => {
         setUpDocs(app);
     }
 
-    const authMiddleware = createAuthMiddlware();
     const features = createFeatures({
         db,
         redis,
-        authMiddleware,
     });
 
     setUpRoutes(app, features);
@@ -59,10 +56,11 @@ const setUpRequestParsing = (app: Application) => {
 };
 
 const setUpRateLimiters = (app: Application, redis: RedisClientType) => {
-    const globalRateLimiter = createRateLimiter(redis, { max: 100 });
-    const authLimiter = createRateLimiter(redis, { max: 20, keyPrefix: 'auth' });
+    const globalRateLimiter = createRateLimiter(redis, { type: 'IP', max: 300 });
+    const authRouteLimiter = createRateLimiter(redis, { type: 'IP', max: 20, keyPrefix: 'auth' });
     app.use(API_PREFIX, globalRateLimiter);
-    app.use(`${API_PREFIX}/auth`, authLimiter);
+    app.use(`${API_PREFIX}/auth`, authRouteLimiter);
+    return authRouteLimiter;
 };
 
 const setUpSecurityMiddleware = (app: Application) => {

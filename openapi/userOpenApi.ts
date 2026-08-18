@@ -1,7 +1,6 @@
 import * as userSchemas from '../src/features/user/schemas';
 import { ZodOpenApiComponentsObject, ZodOpenApiSecuritySchemeObject } from 'zod-openapi';
 import { successResponse, errorResponse } from './commonSchemas';
-import z from 'zod';
 const email = 'user@example.com';
 const username = 'User_name123';
 const id = '00000000-0000-0000-0000-000000000000';
@@ -52,7 +51,6 @@ const paths = {
                     data: { user: { username: 'newUsername123', id } },
                 }),
                 401: errorResponse({ message: 'Unauthorized' }),
-                403: errorResponse({ message: 'Email not verified' }),
                 404: errorResponse({ message: 'User not found' }),
                 400: errorResponse({
                     message: 'Invalid Input',
@@ -69,50 +67,7 @@ const paths = {
                     description: 'User deleted successfully',
                 },
                 401: errorResponse({ message: 'Unauthorized' }),
-                403: errorResponse({ message: 'Email not verified' }),
                 404: errorResponse({ message: 'User not found' }),
-            },
-        },
-    },
-    '/api/users/{id}': {
-        get: {
-            summary: 'Get user by ID',
-            tags: ['Users'],
-            parameters: [
-                {
-                    name: 'id',
-                    in: 'path' as const,
-                    required: true,
-                    schema: {
-                        format: 'uuid',
-                        example: '00000000-0000-0000-0000-000000000000',
-                    },
-                    description: 'User ID',
-                },
-            ],
-            responses: {
-                200: successResponse({
-                    dataSchema: userSchemas.publicUserSchema,
-                    data: { user: { username, id } },
-                    message: 'User retrieved',
-                }),
-                404: errorResponse({ message: 'User not found' }),
-                400: errorResponse({
-                    message: 'Invalid Input',
-                    errors: `{ id: [ Required] }`,
-                }),
-            },
-        },
-    },
-    '/api/users': {
-        get: {
-            summary: 'Get all users',
-            tags: ['Users'],
-            responses: {
-                200: successResponse({
-                    dataSchema: z.array(userSchemas.publicUserSchema),
-                    data: [{ user: { username, id } }],
-                }),
             },
         },
     },
@@ -148,9 +103,6 @@ const paths = {
                 }),
                 401: errorResponse({
                     message: 'Unauthorized',
-                }),
-                403: errorResponse({
-                    message: 'Email not verified',
                 }),
                 409: errorResponse({
                     message: 'Email already in use',

@@ -250,4 +250,57 @@ describe('Integration tests: User service', () => {
             expect(mockEmailService.sendCodeEmail).toHaveBeenCalledTimes(0);
         });
     });
+    describe('Find verified by id', () => {
+        test('Successfully retrieves verified user from testEnv.db', async () => {
+            const user = await seedUser(testEnv.db, {
+                verified: true,
+            });
+
+            const dbUser = await testEnv.userService.findVerifiedById(user.id);
+
+            expect(dbUser.id).toEqual(user.id);
+            expect(dbUser.username).toEqual(user.username);
+        });
+
+        test('Throws if user does not exist or is not verified', async () => {
+            const user = await seedUser(testEnv.db, {
+                verified: false,
+            });
+
+            await expect(testEnv.userService.findVerifiedById(user.id)).rejects.toThrow(
+                'User not found',
+            );
+
+            await expect(testEnv.userService.findVerifiedById(randomUUID())).rejects.toThrow(
+                'User not found',
+            );
+        });
+    });
+
+    describe('Find verified by email', () => {
+        test('Successfully retrieves verified user from testEnv.db', async () => {
+            const user = await seedUser(testEnv.db, {
+                verified: true,
+            });
+
+            const dbUser = await testEnv.userService.findVerifiedByEmail(user.email);
+
+            expect(dbUser.id).toEqual(user.id);
+            expect(dbUser.username).toEqual(user.username);
+        });
+
+        test('Throws if user does not exist or is not verified', async () => {
+            const user = await seedUser(testEnv.db, {
+                verified: false,
+            });
+
+            await expect(testEnv.userService.findVerifiedByEmail(user.email)).rejects.toThrow(
+                'User not found',
+            );
+
+            await expect(
+                testEnv.userService.findVerifiedByEmail('nonexistent@email.com'),
+            ).rejects.toThrow('User not found');
+        });
+    });
 });

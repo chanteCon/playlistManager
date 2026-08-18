@@ -2,7 +2,7 @@ import { mockLogger } from '__tests__/shared/mocks/mockLogger';
 import { sendMailMock } from '__tests__/shared/mocks/mockSendMail';
 import request from 'supertest';
 import * as jwt from 'jsonwebtoken';
-import { UnauthorisedError } from 'shared/errors/errors';
+import { ForbiddenError, UnauthorisedError } from 'shared/errors/errors';
 import {
     expectCookie,
     expectResError,
@@ -38,7 +38,7 @@ describe('e2e tests: Auth Routes - Login', () => {
         await truncateDbTables(testEnv.db);
         jest.clearAllMocks();
         ({ password } = buildUser());
-        user = await seedUser(testEnv.db, { password });
+        user = await seedUser(testEnv.db, { password, verified: true });
     });
     test('should successfully login user and return access token', async () => {
         const { app, db } = testEnv;
@@ -78,12 +78,12 @@ describe('e2e tests: Auth Routes - Login', () => {
         expect(res.headers['set-cookie']).toBeUndefined();
     });
 
-    test('Should throw error (401 Unauthorised)if user does not exist', async () => {
+    test('Should throw error (403 Forbidden)if user does not exist', async () => {
         const { app } = testEnv;
         const res = await request(app)
             .post(authPaths.login)
             .send({ email: 'nonexistent@email.com', password });
-        const error = new UnauthorisedError('Incorrect email or password');
+        const error = new ForbiddenError('Email not verified');
         expectResError({ res, error, mockLogger });
         expect(res.headers['set-cookie']).toBeUndefined();
     });
@@ -123,6 +123,18 @@ describe('e2e tests: Auth Routes - Login', () => {
         expectResError({
             res: loginMfaRes,
             error: new UnauthorisedError('Invalid or expired login code'),
+            mockLogger,
+        });
+    });
+    test('Should throw error (403 forbidden) if user is not verified', async () => {
+        const { app, db } = testEnv;
+        await db.user.update({ where: { id: user.id }, data: { verified: false } });
+        const loginRes = await request(app)
+            .post(authPaths.login)
+            .send({ email: user.email, password });
+        expectResError({
+            res: loginRes,
+            error: new ForbiddenError('Email not verified'),
             mockLogger,
         });
     });

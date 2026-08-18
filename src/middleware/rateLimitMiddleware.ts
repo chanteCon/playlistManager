@@ -1,11 +1,18 @@
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
+import { AuthRequest } from 'features/auth/types';
 import RedisStore from 'rate-limit-redis';
 import { RedisClientType } from 'redis';
-type RateLimitOptions = { max?: number; windowMs?: number; message?: string; keyPrefix?: string };
+type RateLimitOptions = {
+    type: 'USER' | 'IP';
+    max?: number;
+    windowMs?: number;
+    message?: string;
+    keyPrefix?: string;
+};
 
 export const createRateLimiter = (
     redisClient: RedisClientType,
-    { max, windowMs, message, keyPrefix }: RateLimitOptions,
+    { max, windowMs, message, keyPrefix, type }: RateLimitOptions,
 ) => {
     return rateLimit({
         store: new RedisStore({
@@ -18,8 +25,13 @@ export const createRateLimiter = (
         message: message ?? 'Too many requests, try again later',
         standardHeaders: 'draft-8',
         legacyHeaders: false,
-        keyGenerator: (req) => {
-            return `${keyPrefix ?? 'global'}:ip:${ipKeyGenerator(req.ip as string)}`;
-        },
+        keyGenerator:
+            type === 'IP'
+                ? (req) => {
+                      return `${keyPrefix ?? 'global'}:ip:${ipKeyGenerator(req.ip as string)}`;
+                  }
+                : (req) => {
+                      return `user:${(req as AuthRequest).user!.id}`;
+                  },
     });
 };

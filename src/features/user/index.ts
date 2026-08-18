@@ -1,20 +1,17 @@
+import { RequestHandler } from 'express';
 import { createUserController } from './userController';
 import { createUserRoutes } from './userRoutes';
-import { createVerificationMiddleware } from 'middleware/verificationMiddleware';
-import { RequestHandler } from 'express';
 import { UserService } from './userService';
 
 type UserFeatureDeps = {
     userService: UserService;
-    authMiddleware: RequestHandler;
+    authUserLimiter: RequestHandler;
 };
 
-export const createUserFeature = ({ userService, authMiddleware }: UserFeatureDeps) => {
+export const createUserFeature = ({ userService, authUserLimiter }: UserFeatureDeps) => {
     const userController = createUserController(userService);
-    const verificationMiddleware = createVerificationMiddleware(userService);
-
     return {
-        routes: createUserRoutes({ userController, verificationMiddleware, authMiddleware }),
+        routes: createUserRoutes({ userController, authUserLimiter }),
         userService,
     };
 };

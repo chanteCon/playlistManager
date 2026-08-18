@@ -1,7 +1,7 @@
 import { createUserService } from 'features/user/userService';
 
 import { mockUserRepo } from '__tests__/shared/mocks/repos';
-import { mockCodeService } from '__tests__/shared/mocks/services';
+import { mockCodeService, mockTokenService } from '__tests__/shared/mocks/services';
 
 import { buildPublicUser } from '__tests__/shared/factories';
 import { buildUserInput, buildUser, buildUsers } from '__tests__/shared/factories';
@@ -14,13 +14,20 @@ import {
     prismaUniqueConstraintError,
 } from '__tests__/shared/helpers/dbHelpers';
 import { ConflictError } from 'shared/errors/errors';
+import { fakeTx, mockTxRunner } from '__tests__/shared/mocks/mockTxRunner';
 let userInputData: CreateAccountInput;
 let user: PublicUser;
 let privateUser: User;
-const userService = createUserService({ userRepo: mockUserRepo, codeService: mockCodeService });
+const userService = createUserService({
+    userRepo: mockUserRepo,
+    codeService: mockCodeService,
+    tokenService: mockTokenService,
+    txRunner: mockTxRunner,
+});
 describe('Unit tests: User service', () => {
     beforeEach(() => {
         jest.resetAllMocks();
+        (mockTxRunner.run as jest.Mock).mockImplementation(async (fn) => fn(fakeTx));
         userInputData = buildUserInput();
         user = buildPublicUser(userInputData);
         privateUser = buildUser(user);
@@ -41,7 +48,7 @@ describe('Unit tests: User service', () => {
             );
         });
         test('Throws if email already exists', async () => {
-            mockUserRepo.create.mockRejectedValue(prismaUniqueConstraintError);
+            mockUserRepo.create.mockRejectedValueOnce(prismaUniqueConstraintError);
             await expect(userService.create({ data: userInputData })).rejects.toThrow(
                 'Value already in use',
             );
@@ -60,12 +67,12 @@ describe('Unit tests: User service', () => {
             });
         });
         test('Throws if user not found', async () => {
-            mockUserRepo.updateUserSensitive.mockRejectedValue(prismaNotFoundError);
+            mockUserRepo.updateUserSensitive.mockRejectedValueOnce(prismaNotFoundError);
             await expect(userService.verify(user.id)).rejects.toThrow('User not found');
             expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledTimes(1);
         });
         test('Throws if unexpected error occurs', async () => {
-            mockUserRepo.updateUserSensitive.mockRejectedValue(new Error('Unexpected error'));
+            mockUserRepo.updateUserSensitive.mockRejectedValueOnce(new Error('Unexpected error'));
             await expect(userService.verify(user.id)).rejects.toThrow('Unexpected error');
             expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledTimes(1);
         });
@@ -85,7 +92,7 @@ describe('Unit tests: User service', () => {
         test('Throws if user not found', async () => {
             const username = 'newUserName';
 
-            mockUserRepo.updateUserPublic.mockRejectedValue(prismaNotFoundError);
+            mockUserRepo.updateUserPublic.mockRejectedValueOnce(prismaNotFoundError);
             await expect(userService.update({ id: user.id, data: { username } })).rejects.toThrow(
                 'User not found',
             );
@@ -96,7 +103,7 @@ describe('Unit tests: User service', () => {
         });
         test('Throws if username already exists', async () => {
             const username = 'newUserName';
-            mockUserRepo.updateUserPublic.mockRejectedValue(prismaUniqueConstraintError);
+            mockUserRepo.updateUserPublic.mockRejectedValueOnce(prismaUniqueConstraintError);
             await expect(userService.update({ id: user.id, data: { username } })).rejects.toThrow(
                 'Value already in use',
             );
@@ -146,10 +153,11 @@ describe('Unit tests: User service', () => {
             expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledWith({
                 where: { id: user.id, verified: true },
                 data: { email: fullUser.email, verified: false },
+                tx: fakeTx,
             });
         });
         test('Throws error if email is taken', async () => {
-            mockUserRepo.updateUserSensitive.mockRejectedValue(prismaUniqueConstraintError);
+            mockUserRepo.updateUserSensitive.mockRejectedValueOnce(prismaUniqueConstraintError);
             await expect(
                 userService.updateEmail({ id: user.id, email: privateUser.email }),
             ).rejects.toThrow('Value already in use');
@@ -157,10 +165,11 @@ describe('Unit tests: User service', () => {
             expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledWith({
                 where: { id: user.id, verified: true },
                 data: { email: privateUser.email, verified: false },
+                tx: fakeTx,
             });
         });
         test('Throws error if user not found', async () => {
-            mockUserRepo.updateUserSensitive.mockRejectedValue(prismaNotFoundError);
+            mockUserRepo.updateUserSensitive.mockRejectedValueOnce(prismaNotFoundError);
             await expect(
                 userService.updateEmail({ id: user.id, email: privateUser.email }),
             ).rejects.toThrow('User not found');
@@ -168,7 +177,30 @@ describe('Unit tests: User service', () => {
             expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledWith({
                 where: { id: user.id, verified: true },
                 data: { email: privateUser.email, verified: false },
+                tx: fakeTx,
             });
+        });
+        const code = 'emailCode';
+        test('Succesfully updates user email and issues new verification code', async () => {
+            const email = 'new@email.com';
+            mockCodeService.issueCodeForUser.mockResolvedValueOnce(code);
+            mockTokenService.revokeAllForUser.mockResolvedValueOnce();
+
+            await userService.updateEmail({ id: user.id, email });
+
+            expect(mockCodeService.issueCodeForUser).toHaveBeenCalledTimes(1);
+        });
+        test('Throws if user not found throws', async () => {
+            const email = 'new@email.com';
+            mockCodeService.issueCodeForUser.mockResolvedValueOnce(code);
+            mockUserRepo.updateUserSensitive.mockRejectedValueOnce(
+                new ConflictError('Email already in use'),
+            );
+
+            await expect(userService.updateEmail({ id: user.id, email })).rejects.toThrow(
+                'Email already in use',
+            );
+            expect(mockCodeService.issueCodeForUser).toHaveBeenCalledTimes(0);
         });
     });
     describe('remove', () => {
@@ -243,30 +275,6 @@ describe('Unit tests: User service', () => {
             const retrievedUsers = await userService.findAll();
             expect(retrievedUsers).toEqual([]);
             expect(mockUserRepo.findAll).toHaveBeenCalledWith({ verified: true });
-        });
-    });
-
-    describe('Update email', () => {
-        const code = 'emailCode';
-        test('Succesfully updates user email and issues new verification code', async () => {
-            const email = 'new@email.com';
-            mockCodeService.issueCodeForUser.mockResolvedValueOnce(code);
-
-            await userService.updateEmail({ id: user.id, email });
-
-            expect(mockCodeService.issueCodeForUser).toHaveBeenCalledTimes(1);
-        });
-        test('Throws if user not found throws', async () => {
-            const email = 'new@email.com';
-            mockCodeService.issueCodeForUser.mockResolvedValueOnce(code);
-            mockUserRepo.updateUserSensitive.mockRejectedValueOnce(
-                new ConflictError('Email already in use'),
-            );
-
-            await expect(userService.updateEmail({ id: user.id, email })).rejects.toThrow(
-                'Email already in use',
-            );
-            expect(mockCodeService.issueCodeForUser).toHaveBeenCalledTimes(0);
         });
     });
 });

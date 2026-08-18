@@ -10,5 +10,6 @@ export const mockUserService: jest.Mocked<UserService> = {
     updatePassword: jest.fn(),
     verify: jest.fn(),
     findVerifiedById: jest.fn(),
+    findVerifiedByEmail: jest.fn(),
     updateEmail: jest.fn(),
 };

@@ -10,20 +10,22 @@ import {
     updateVideoSchema,
     videoUrlSchema,
 } from './schemas';
+import { authMiddleware } from 'features/video/authMiddleware';
 
 type PlaylistRoutesDeps = {
     playlistController: PlaylistController;
     playlistVideoController: PlaylistVideoController;
-    authMiddleware: RequestHandler;
+    authUserLimiter: RequestHandler;
 };
 
 export const createPlaylistRoutes = ({
     playlistController,
     playlistVideoController,
-    authMiddleware,
+    authUserLimiter,
 }: PlaylistRoutesDeps) => {
     const router = Router();
     router.use(authMiddleware);
+    router.use(authUserLimiter);
     // Playlist
     router.post('/', validate(playlistCreateSchema), playlistController.createPlaylist);
 

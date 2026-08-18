@@ -23,13 +23,24 @@ const createCodeServiceFixture = (redis: RedisClientType, emailService: EmailSer
     return codeService;
 };
 
+const createTokenServiceFixture = (db: PrismaClient) => {
+    const refreshTokenRepo = createTokenRepo({ db });
+    return createTokenService({ refreshTokenRepo });
+};
+
 type AuthUserFixtureDeps = InfraStructure & { emailService: EmailService };
 
 export const createUserServiceFixture = ({ db, redis, emailService }: AuthUserFixtureDeps) => {
     const codeService = createCodeServiceFixture(redis, emailService);
+    const tokenService = createTokenServiceFixture(db);
     const userRepo = createUserRepo({ db });
     return {
-        userService: createUserService({ userRepo, codeService }),
+        userService: createUserService({
+            userRepo,
+            codeService,
+            tokenService,
+            txRunner: createTransactionRunner(db),
+        }),
         codeService,
     };
 };
@@ -37,10 +48,9 @@ export const createUserServiceFixture = ({ db, redis, emailService }: AuthUserFi
 export const createAuthServiceFixture = ({ db, redis, emailService }: AuthUserFixtureDeps) => {
     const codeService = createCodeServiceFixture(redis, emailService);
     const userRepo = createUserRepo({ db });
-    const userService = createUserService({ userRepo, codeService });
-    const refreshTokenRepo = createTokenRepo({ db });
-    const tokenService = createTokenService({ refreshTokenRepo });
+    const tokenService = createTokenServiceFixture(db);
     const txRunner = createTransactionRunner(db);
+    const userService = createUserService({ userRepo, codeService, tokenService, txRunner });
     const authService = createAuthService({
         services: { userService, codeService, tokenService },
         txRunner,
