@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { RequestHandler } from 'express';
 import { createPlaylistRepo } from './repos/playlistRepo';
 import { createVideoRepo } from 'features/video/repos/videoRepo';
 import { createVideoMetadataService } from 'features/video/services/videoMetadataService';
@@ -9,13 +8,14 @@ import { createPlaylistService } from './services/playlistService';
 import { createPlaylistController } from './controllers/playlistController';
 import { createPlaylistRoutes } from './playlistRoutes';
 import { createPlaylistVideoController } from './controllers/playlistVideoController';
+import { RequestHandler } from 'express';
 
 type PlaylistFeatureDeps = {
     db: PrismaClient;
-    authMiddleware: RequestHandler;
+    authUserLimiter: RequestHandler;
 };
 
-export const createPlaylistFeature = ({ db, authMiddleware }: PlaylistFeatureDeps) => {
+export const createPlaylistFeature = ({ db, authUserLimiter }: PlaylistFeatureDeps) => {
     // video feature
     const videoRepo = createVideoRepo({ db });
     const videoMetadataService = createVideoMetadataService();
@@ -35,7 +35,7 @@ export const createPlaylistFeature = ({ db, authMiddleware }: PlaylistFeatureDep
         routes: createPlaylistRoutes({
             playlistController,
             playlistVideoController,
-            authMiddleware,
+            authUserLimiter,
         }),
     };
 };

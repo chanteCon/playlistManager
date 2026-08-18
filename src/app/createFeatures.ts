@@ -2,7 +2,6 @@ import { PrismaClient } from '@prisma/client';
 import { createAuthFeature } from '../features/auth';
 import { createUserFeature } from '../features/user';
 import { RedisClientType } from 'redis';
-import { RequestHandler } from 'express';
 import { createUserRepo } from 'features/user/repos/userRepo';
 import { createUserService } from 'features/user/userService';
 import { createCodeService } from 'shared/userCodes/codeService';
@@ -13,13 +12,14 @@ import { createPlaylistFeature } from 'features/playlist';
 import { createVerificationMiddleware } from 'middleware/verificationMiddleware';
 import { createTokenRepo } from 'features/auth/repos/refreshTokenRepo';
 import { createTokenService } from 'features/auth/services/tokenService';
+import { createRateLimiter } from 'middleware/rateLimitMiddleware';
 
 type FeatureDeps = {
     db: PrismaClient;
     redis: RedisClientType;
-    authMiddleware: RequestHandler;
 };
-export const createFeatures = ({ db, redis, authMiddleware }: FeatureDeps) => {
+export const createFeatures = ({ db, redis }: FeatureDeps) => {
+    const authUserLimiter = createRateLimiter(redis, { type: 'USER', max: 300 });
     const { codeService } = createCodeModule(redis);
     const userRepo = createUserRepo({ db, redis });
     const refreshTokenRepo = createTokenRepo({ db, redis });
@@ -34,18 +34,17 @@ export const createFeatures = ({ db, redis, authMiddleware }: FeatureDeps) => {
     const verificationMiddleware = createVerificationMiddleware(userService);
 
     const userFeature = createUserFeature({
-        userService: userService,
-        authMiddleware,
+        userService,
+        authUserLimiter,
     });
     const authFeature = createAuthFeature({
         db,
         redis,
         services: { userService, codeService, tokenService },
-        authMiddleware,
-        verificationMiddleware,
+        middleware: { authUserLimiter, verificationMiddleware },
         txRunner,
     });
-    const playlistFeature = createPlaylistFeature({ db, authMiddleware });
+    const playlistFeature = createPlaylistFeature({ db, authUserLimiter });
 
     return { userFeature, authFeature, playlistFeature };
 };

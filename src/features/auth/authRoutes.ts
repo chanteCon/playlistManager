@@ -8,17 +8,18 @@ import {
     verificationSchema,
 } from './schemas';
 import { AuthController } from './authController';
+import { authMiddleware } from 'features/video/authMiddleware';
 
 type AuthRoutesDeps = {
     authController: AuthController;
-    authMiddleware: RequestHandler;
     verificationMiddleware: RequestHandler;
+    authUserLimiter: RequestHandler;
 };
 
 export const createAuthRoutes = ({
     authController,
-    authMiddleware,
     verificationMiddleware,
+    authUserLimiter,
 }: AuthRoutesDeps) => {
     const router = Router();
 
@@ -32,7 +33,7 @@ export const createAuthRoutes = ({
 
     router.post('/refresh', authController.rotateTokens);
 
-    router.post('/logout', authMiddleware, authController.logout);
+    router.post('/logout', authMiddleware, authUserLimiter, authController.logout);
 
     router.post(
         '/verification-code-request',

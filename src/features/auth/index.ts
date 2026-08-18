@@ -17,21 +17,17 @@ type AuthFeatureDeps = {
         codeService: CodeService;
         tokenService: TokenService;
     };
-    authMiddleware: RequestHandler;
-    verificationMiddleware: RequestHandler;
+    middleware: { authUserLimiter: RequestHandler; verificationMiddleware: RequestHandler };
     txRunner: TxRunner;
 };
 
-export const createAuthFeature = ({
-    services,
-    authMiddleware,
-    verificationMiddleware,
-    txRunner,
-}: AuthFeatureDeps) => {
+export const createAuthFeature = ({ services, middleware, txRunner }: AuthFeatureDeps) => {
     const authService = createAuthService({ services: { ...services }, txRunner });
     const authController = createAuthController({
         services: { authService, tokenService: services.tokenService },
     });
 
-    return { routes: createAuthRoutes({ authController, authMiddleware, verificationMiddleware }) };
+    return {
+        routes: createAuthRoutes({ authController, ...middleware }),
+    };
 };
