@@ -195,7 +195,7 @@ describe('Integration tests: Auth service', () => {
                     code: codePlainStr,
                     existingDeviceId,
                 }),
-            ).rejects.toThrow('User not found');
+            ).rejects.toThrow('Invalid or expired verification code');
         });
     });
     describe('logout', () => {

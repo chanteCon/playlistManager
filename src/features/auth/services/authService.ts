@@ -105,9 +105,17 @@ export const createAuthService = ({ services, txRunner }: AuthServiceDeps) => {
         code,
         existingDeviceId,
     }: LoginMfaInput): Promise<Tokens & { deviceId: string }> => {
-        const userId = await codeService.verifyCode({ code, codeType: 'LOGIN' });
-        await userService.findAuthUserById(userId);
-        return await _login(existingDeviceId, userId);
+        try {
+            const userId = await codeService.verifyCode({ code, codeType: 'LOGIN' });
+
+            await userService.findAuthUserById(userId);
+            return await _login(existingDeviceId, userId);
+        } catch (error) {
+            if (error instanceof NotFoundError) {
+                throw new UnauthorisedError('Invalid or expired verification code');
+            }
+            throw error;
+        }
     };
 
     const logout = async (user: AuthUser) => {
