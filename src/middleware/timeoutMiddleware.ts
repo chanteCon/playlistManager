@@ -5,7 +5,7 @@ export const timeout = (ms: number) => {
     return (_req: Request, res: Response, next: NextFunction) => {
         const timer = setTimeout(() => {
             if (canSendResponse(res)) {
-                res.status(408).json({ message: 'Request has timed out', success: false });
+                res.status(503).json({ message: 'Request has timed out', success: false });
             }
         }, ms);
 

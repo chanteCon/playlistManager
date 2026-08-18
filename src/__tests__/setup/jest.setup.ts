@@ -12,3 +12,7 @@ jest.mock('nodemailer', () => ({
         sendMail: jest.fn(),
     })),
 }));
+
+jest.mock('middleware/rateLimitMiddleware', () => ({
+    createRateLimiter: jest.fn(() => (_req: any, _res: any, next: any) => next()),
+}));

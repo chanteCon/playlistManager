@@ -6,9 +6,7 @@ import { AuthRequest } from 'features/auth/types';
 import * as jwt from 'jsonwebtoken';
 import { randomBytes, randomUUID } from 'crypto';
 import { UnauthorisedError } from 'shared/errors/errors';
-import { createAuthMiddlware } from 'features/video/authMiddleware';
-
-const authMiddleware = createAuthMiddlware();
+import { authMiddleware } from 'features/video/authMiddleware';
 
 describe('Unit tests: Auth middleware', () => {
     let mockNext: jest.MockedFunction<NextFunction>;
