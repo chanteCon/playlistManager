@@ -122,6 +122,7 @@ describe('Unit tests: Auth service', () => {
                 accessToken: 'accessToken',
                 refreshToken: 'refreshToken',
             });
+            mockUserService.findAuthUserById.mockResolvedValueOnce(user);
             const { accessToken, refreshToken } = await authService.loginMfa({ code });
 
             expect(accessToken).toEqual('accessToken');
@@ -136,6 +137,7 @@ describe('Unit tests: Auth service', () => {
             const id = randomUUID();
             const existingDeviceId = generateRandomString(32);
             mockCodeService.verifyCode.mockResolvedValueOnce(id);
+            mockUserService.findAuthUserById.mockResolvedValueOnce(user);
             mockTokenService.generateTokens.mockResolvedValueOnce({
                 accessToken: 'accessToken',
                 refreshToken: 'refreshToken',
@@ -197,11 +199,14 @@ describe('Unit tests: Auth service', () => {
             privateUser = buildUser({ ...user, verified: false });
         });
 
-        test('Should verify user', async () => {
+        test('Should verify user and log them in', async () => {
             const codeData: UserCode = buildCode('VERIFICATION', { userId: user.id, codeHash });
-
             mockCodeService.verifyCode.mockResolvedValueOnce(codeData.userId);
             mockUserService.verify.mockResolvedValueOnce();
+            mockTokenService.generateTokens.mockResolvedValueOnce({
+                accessToken: 'accessToken',
+                refreshToken: 'refreshToken',
+            });
 
             await expect(authService.verifyUser(code)).resolves.not.toThrow();
 
@@ -210,6 +215,9 @@ describe('Unit tests: Auth service', () => {
                 codeType: 'VERIFICATION',
             });
             expect(mockUserService.verify).toHaveBeenCalledWith(privateUser.id);
+            expect(mockTokenService.generateTokens).toHaveBeenCalledWith({
+                authUser: expect.objectContaining({ id: user.id }),
+            });
         });
 
         test('Should throw if code service fails', async () => {

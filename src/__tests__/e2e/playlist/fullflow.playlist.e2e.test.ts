@@ -42,19 +42,7 @@ describe('Full flow, playlist tests', () => {
             .send({ code: extractCodeFromLastEmail(sendMailMock) });
 
         expect(verifyRes.status).toBe(200);
-
-        // login
-        const loginRes = await request(testEnv.app).post(authPaths.login).send(userData);
-        expect(loginRes.status).toBe(200);
-
-        // login MFA
-        const loginMfaRes = await request(testEnv.app)
-            .post(authPaths.loginMfa)
-            .send({ code: extractCodeFromLastEmail(sendMailMock) });
-
-        expect(loginMfaRes.status).toBe(200);
-
-        const { accessToken } = loginMfaRes.body.data;
+        const { accessToken } = verifyRes.body.data;
 
         // create playlist
         const createPlaylistRes = await setAuthHeader({

@@ -65,6 +65,18 @@ export const createAuthService = ({ services, txRunner }: AuthServiceDeps) => {
         }
     };
 
+    const _login = async (existingDeviceId: string | undefined, userId: string) => {
+        if (existingDeviceId) {
+            await tokenService.revokeAllForDeviceId({ deviceId: existingDeviceId, userId });
+        }
+        const deviceId = existingDeviceId
+            ? existingDeviceId
+            : generateRandomString(DEVICE_ID_BYTES);
+        const authUser = { id: userId, deviceId };
+        const { accessToken, refreshToken } = await tokenService.generateTokens({ authUser });
+        return { accessToken, refreshToken, deviceId };
+    };
+
     ////////////// Exported functions ////////////////
 
     const register = async ({ email, password, username }: CreateAccountInput): Promise<void> => {
@@ -93,16 +105,17 @@ export const createAuthService = ({ services, txRunner }: AuthServiceDeps) => {
         code,
         existingDeviceId,
     }: LoginMfaInput): Promise<Tokens & { deviceId: string }> => {
-        const userId = await codeService.verifyCode({ code, codeType: 'LOGIN' });
-        if (existingDeviceId) {
-            await tokenService.revokeAllForDeviceId({ deviceId: existingDeviceId, userId });
+        try {
+            const userId = await codeService.verifyCode({ code, codeType: 'LOGIN' });
+
+            await userService.findAuthUserById(userId);
+            return await _login(existingDeviceId, userId);
+        } catch (error) {
+            if (error instanceof NotFoundError) {
+                throw new UnauthorisedError('Invalid or expired verification code');
+            }
+            throw error;
         }
-        const deviceId = existingDeviceId
-            ? existingDeviceId
-            : generateRandomString(DEVICE_ID_BYTES);
-        const authUser = { id: userId, deviceId };
-        const { accessToken, refreshToken } = await tokenService.generateTokens({ authUser });
-        return { accessToken, refreshToken, deviceId };
     };
 
     const logout = async (user: AuthUser) => {
@@ -113,10 +126,14 @@ export const createAuthService = ({ services, txRunner }: AuthServiceDeps) => {
         }
     };
 
-    const verifyUser = async (code: string): Promise<void> => {
+    const verifyUser = async (
+        code: string,
+        existingDeviceId?: string,
+    ): Promise<Tokens & { deviceId: string }> => {
         try {
             const userId = await codeService.verifyCode({ code, codeType: 'VERIFICATION' });
             await userService.verify(userId);
+            return await _login(existingDeviceId, userId);
         } catch (error) {
             if (error instanceof NotFoundError) {
                 throw new UnauthorisedError('Invalid or expired verification code');

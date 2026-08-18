@@ -220,19 +220,23 @@ describe('Unit tests: Auth controllers', () => {
             mockReq = { body: { code: 'testCode' } } as unknown as Request;
         });
         test('Returns 200 and message on success', async () => {
-            mockAuthService.verifyUser.mockResolvedValueOnce();
+            mockAuthService.verifyUser.mockResolvedValueOnce({
+                accessToken,
+                refreshToken,
+                deviceId,
+            });
             await authController.verify(mockReq, mockRes);
             expectMockResponse({
                 mockRes,
                 message: 'Email successfully verified, please startLogin',
             });
-            expect(mockAuthService.verifyUser).toHaveBeenCalledWith('testCode');
+            expect(mockAuthService.verifyUser).toHaveBeenCalledWith('testCode', undefined);
         });
         test('Throws error', async () => {
             const error = new Error('Service error');
             mockAuthService.verifyUser.mockRejectedValueOnce(error);
             await expect(authController.verify(mockReq, mockRes)).rejects.toThrow(error);
-            expect(mockAuthService.verifyUser).toHaveBeenCalledWith('testCode');
+            expect(mockAuthService.verifyUser).toHaveBeenCalledWith('testCode', undefined);
         });
     });
     describe('Request verification code', () => {

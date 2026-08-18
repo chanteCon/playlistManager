@@ -165,13 +165,19 @@ paths:
                 - code
       responses:
         "200":
-          description: Email successfully verified, please login
+          description: Successful response
+          headers:
+            Set-Cookie:
+              description: Refresh token cookie, expires in 7 days
+              schema:
+                type: string
           content:
             application/json:
               example:
                 success: true
-                data: {}
-                message: Email successfully verified, please login
+                data:
+                  accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.signature
+                message: null
               schema:
                 type: object
                 properties:
@@ -179,10 +185,20 @@ paths:
                     type: boolean
                     const: true
                   message:
-                    type: string
-                    example: Email successfully verified, please login
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
                   data:
-                    example: {}
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                        description: Access token, expires in 30 minutes
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.signature
+                    required:
+                      - accessToken
+                    additionalProperties: false
                 required:
                   - success
                   - message

@@ -58,8 +58,14 @@ export const createCodeRepo = ({ redis }: CodeRepoDeps) => {
         return codeData as UserCode;
     };
 
+    const removeAllForUser = async (userId: string): Promise<void> => {
+        await redis.del(`user-code:${userId}:VERIFICATION`);
+        await redis.del(`user-code:${userId}:LOGIN`);
+    };
+
     return {
         save,
         remove,
+        removeAllForUser,
     };
 };

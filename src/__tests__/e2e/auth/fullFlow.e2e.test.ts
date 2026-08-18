@@ -38,16 +38,8 @@ describe('E2E Auth Full Flows', () => {
             .patch(authPaths.verify)
             .send({ code: extractCodeFromLastEmail(sendMailMock) });
         expect(verifyRes.status).toBe(200);
-
-        const loginRes = await request(testEnv.app).post(authPaths.login).send(userData);
-        expect(loginRes.status).toBe(200);
-
-        const loginMfaRes = await request(testEnv.app)
-            .post(authPaths.loginMfa)
-            .send({ code: extractCodeFromLastEmail(sendMailMock) });
-        expect(loginMfaRes.status).toBe(200);
-        const { accessToken } = loginMfaRes.body.data;
-        const refreshToken = extractCookie({ res: loginMfaRes, name: 'refreshToken' });
+        const { accessToken } = verifyRes.body.data;
+        const refreshToken = extractCookie({ res: verifyRes, name: 'refreshToken' });
         const cookieValue = refreshToken?.split(';')[0];
 
         // protected route

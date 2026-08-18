@@ -206,6 +206,7 @@ describe('Unit tests: User service', () => {
     describe('remove', () => {
         test('Removes user and returns their id', async () => {
             mockUserRepo.remove.mockResolvedValueOnce(user);
+            mockCodeService.removeAllForUser.mockResolvedValueOnce();
             const deletedId = await userService.remove(user.id);
             expect(deletedId).toEqual(user.id);
             expect(mockUserRepo.remove).toHaveBeenCalledTimes(1);
