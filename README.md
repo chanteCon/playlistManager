@@ -2,15 +2,16 @@
 
 ---
 
-Backend API for managing video playlists. Users can add videos from external platforms to playlists using URLs, with metadata fetching where possible.
+Backend API for managing video playlists. Users can create playlists and add videos from supported external platforms using URLs.
 
 ## Features
 
-- Create and manage playlists
-- Add videos to playlists using external URLs
-- Shared video resources across users
-- Automatic video metadata fetching where supported
-- URL normalisation and platform detection
+- Manage users, playlists, and playlist videos
+- Authentication, email verification, and rate limiting
+- Video URL validation, normalisation, and platform detection
+- Shared video resources to avoid duplicate metadata fetching
+- Per-playlist video customisation
+- YouTube metadata fetching, with additional platforms planned
 
 ## Tech Stack
 
