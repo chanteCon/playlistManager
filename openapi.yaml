@@ -111,6 +111,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -141,6 +144,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -260,6 +266,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -297,6 +306,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -388,6 +400,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -423,6 +438,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -524,6 +542,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -561,6 +582,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -646,6 +670,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -714,6 +741,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -800,6 +830,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -887,6 +920,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -984,6 +1020,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1021,6 +1060,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1123,6 +1165,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1158,6 +1203,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1272,6 +1320,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1307,6 +1358,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1342,6 +1396,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1379,6 +1436,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1423,6 +1483,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1458,6 +1521,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1547,6 +1613,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1582,6 +1651,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1617,6 +1689,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1654,6 +1729,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1783,6 +1861,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1818,6 +1899,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1855,6 +1939,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -1957,6 +2044,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2108,6 +2198,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2143,6 +2236,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2178,6 +2274,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2307,6 +2406,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2342,6 +2444,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2377,6 +2482,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2414,6 +2522,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2462,6 +2573,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2497,6 +2611,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2532,6 +2649,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2658,6 +2778,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2739,6 +2862,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2769,6 +2895,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2852,6 +2981,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -2887,6 +3019,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -3031,6 +3166,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -3094,6 +3232,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -3124,6 +3265,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -3194,6 +3338,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -3229,6 +3376,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -3259,6 +3409,9 @@ paths:
                   data:
                     type: "null"
                   errors:
+                    example:
+                      field:
+                        - Validation error
                     anyOf:
                       - type: object
                         propertyNames:
@@ -3318,6 +3471,9 @@ components:
         data:
           type: "null"
         errors:
+          example:
+            field:
+              - Validation error
           anyOf:
             - type: object
               propertyNames:
