@@ -68,7 +68,7 @@ export const createCodeService = (deps: CodeServiceDeps) => {
 
         try {
             const codeHash = hashString(code);
-            const cachedCode = await codeRepo.remove(codeHash);
+            const cachedCode = await codeRepo.remove(codeHash, codeType);
             return cachedCode.userId;
         } catch (error) {
             translateNotFoundToUnAuth(error, `Could not verify ${codeTypeStr} code`, {
