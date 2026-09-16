@@ -84,14 +84,21 @@ paths:
                   - data
                 additionalProperties: false
         "400":
-          description: Invalid Input
+          description: Invalid input
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Invalid Input
-                errors: Validation error messages
+                message: Invalid input
+                errors:
+                  email:
+                    - Invalid email address
+                  username:
+                    - Username must be at least 5 characters
+                  password:
+                    - Password must contain uppercase, lowercase, number, and
+                      symbol, and no invalid characters
               schema:
                 type: object
                 properties:
@@ -99,7 +106,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Invalid Input
+                    default: Invalid input
                     type: string
                   data:
                     type: "null"
@@ -119,14 +126,9 @@ paths:
                   - data
                 additionalProperties: false
         "409":
-          description: Email already in use
+          description: Conflict
           content:
             application/json:
-              example:
-                success: false
-                data: null
-                message: Email already in use
-                errors: Validation error messages
               schema:
                 type: object
                 properties:
@@ -134,7 +136,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Email already in use
+                    default: Conflict
                     type: string
                   data:
                     type: "null"
@@ -153,6 +155,25 @@ paths:
                   - message
                   - data
                 additionalProperties: false
+              examples:
+                emailAlreadyInUse:
+                  summary: Email already in use
+                  value:
+                    success: false
+                    data: null
+                    message: Email already in use
+                    errors:
+                      email:
+                        - Email already in use
+                usernameAlreadyInUse:
+                  summary: Username already in use
+                  value:
+                    success: false
+                    data: null
+                    message: Username already in use
+                    errors:
+                      username:
+                        - Username already in use
   /api/auth/verify:
     patch:
       summary: User verifies email address
@@ -224,7 +245,9 @@ paths:
                 success: false
                 data: null
                 message: Invalid Input
-                errors: Validation error messsages
+                errors:
+                  code:
+                    - "Too small: expected string to have >=6 characters"
               schema:
                 type: object
                 properties:
@@ -252,14 +275,16 @@ paths:
                   - data
                 additionalProperties: false
         "401":
-          description: Invalid or expired verification code.
+          description: Could not verify verification code
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Invalid or expired verification code.
-                errors: null
+                message: Could not verify verification code
+                errors:
+                  code:
+                    - Invalid or expired verification code
               schema:
                 type: object
                 properties:
@@ -267,7 +292,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Invalid or expired verification code.
+                    default: Could not verify verification code
                     type: string
                   data:
                     type: "null"
@@ -339,14 +364,18 @@ paths:
                   - data
                 additionalProperties: false
         "400":
-          description: Invalid Input
+          description: Invalid input
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Invalid Input
-                errors: Validation error messages
+                message: Invalid input
+                errors:
+                  email:
+                    - Invalid email address
+                  password:
+                    - Password must be a string
               schema:
                 type: object
                 properties:
@@ -354,7 +383,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Invalid Input
+                    default: Invalid input
                     type: string
                   data:
                     type: "null"
@@ -480,7 +509,9 @@ paths:
                 success: false
                 data: null
                 message: Invalid Input
-                errors: Validation error messages
+                errors:
+                  code:
+                    - "Too small: expected string to have >=6 characters"
               schema:
                 type: object
                 properties:
@@ -508,14 +539,16 @@ paths:
                   - data
                 additionalProperties: false
         "401":
-          description: Invalid or expired login code
+          description: Could not verify code
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Invalid or expired login code
-                errors: null
+                message: Could not verify code
+                errors:
+                  code:
+                    - Invalid or expired login code
               schema:
                 type: object
                 properties:
@@ -523,7 +556,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Invalid or expired login code
+                    default: Could not verify code
                     type: string
                   data:
                     type: "null"
@@ -752,7 +785,9 @@ paths:
                 success: false
                 data: null
                 message: Invalid Input
-                errors: Validation error messages
+                errors:
+                  email:
+                    - Invalid email address
               schema:
                 type: object
                 properties:
@@ -837,7 +872,9 @@ paths:
                 success: false
                 data: null
                 message: Invalid Input
-                errors: Validation error messages
+                errors:
+                  email:
+                    - Invalid email address
               schema:
                 type: object
                 properties:
@@ -922,14 +959,19 @@ paths:
                   - data
                 additionalProperties: false
         "400":
-          description: Invalid Input
+          description: Invalid input
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Invalid Input
-                errors: Validation error messsages
+                message: Invalid input
+                errors:
+                  password:
+                    - Password must contain uppercase, lowercase, number, and
+                      symbol, and no invalid characters
+                  code:
+                    - "Too small: expected string to have >=6 characters"
               schema:
                 type: object
                 properties:
@@ -937,7 +979,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Invalid Input
+                    default: Invalid input
                     type: string
                   data:
                     type: "null"
@@ -957,14 +999,16 @@ paths:
                   - data
                 additionalProperties: false
         "401":
-          description: Invalid or expired password reset code.
+          description: Could not verify code
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Invalid or expired password reset code.
-                errors: null
+                message: Could not verify code
+                errors:
+                  code:
+                    - Invalid or expired login code
               schema:
                 type: object
                 properties:
@@ -972,7 +1016,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Invalid or expired password reset code.
+                    default: Could not verify code
                     type: string
                   data:
                     type: "null"
@@ -1206,14 +1250,16 @@ paths:
                   - data
                 additionalProperties: false
         "400":
-          description: Invalid Input
+          description: Invalid input
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Invalid Input
-                errors: "{ password: [ Unrecognized key(s) in object: password ] }"
+                message: Invalid input
+                errors:
+                  username:
+                    - Username must be at least 5 characters
               schema:
                 type: object
                 properties:
@@ -1221,7 +1267,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Invalid Input
+                    default: Invalid input
                     type: string
                   data:
                     type: "null"
@@ -1292,6 +1338,43 @@ paths:
                     const: false
                   message:
                     default: User not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Conflict
+                errors:
+                  username:
+                    - Username already in use
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Conflict
                     type: string
                   data:
                     type: "null"
@@ -1442,14 +1525,16 @@ paths:
                   - data
                 additionalProperties: false
         "400":
-          description: Invalid Input
+          description: Invalid input
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Invalid Input
-                errors: Validation error messages
+                message: Invalid input
+                errors:
+                  email:
+                    - Invalid email address
               schema:
                 type: object
                 properties:
@@ -1457,7 +1542,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Invalid Input
+                    default: Invalid input
                     type: string
                   data:
                     type: "null"
@@ -1547,14 +1632,16 @@ paths:
                   - data
                 additionalProperties: false
         "409":
-          description: Email already in use
+          description: Conflict
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Email already in use
-                errors: null
+                message: Conflict
+                errors:
+                  email:
+                    - Email already in use
               schema:
                 type: object
                 properties:
@@ -1562,7 +1649,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Email already in use
+                    default: Conflict
                     type: string
                   data:
                     type: "null"
@@ -1672,14 +1759,18 @@ paths:
                   - data
                 additionalProperties: false
         "400":
-          description: Invalid Input
+          description: Invalid input
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Invalid Input
-                errors: null
+                message: Invalid input
+                errors:
+                  name:
+                    - Playlist name must be between 1 and 50 characters
+                  description:
+                    - Description must be 500 characters or fewer
               schema:
                 type: object
                 properties:
@@ -1687,7 +1778,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Invalid Input
+                    default: Invalid input
                     type: string
                   data:
                     type: "null"
@@ -1742,14 +1833,16 @@ paths:
                   - data
                 additionalProperties: false
         "409":
-          description: You have another playlist with this name
+          description: Could not add playlist
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: You have another playlist with this name
-                errors: null
+                message: Could not add playlist
+                errors:
+                  name:
+                    - You already have a playlist with this name
               schema:
                 type: object
                 properties:
@@ -1757,7 +1850,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: You have another playlist with this name
+                    default: Could not add playlist
                     type: string
                   data:
                     type: "null"
@@ -2000,7 +2093,9 @@ paths:
                 success: false
                 data: null
                 message: Invalid Input
-                errors: null
+                errors:
+                  id:
+                    - Invalid UUID
               schema:
                 type: object
                 properties:
@@ -2188,14 +2283,18 @@ paths:
                   - data
                 additionalProperties: false
         "400":
-          description: Invalid Input
+          description: Invalid input
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Invalid Input
-                errors: null
+                message: Invalid input
+                errors:
+                  name:
+                    - Playlist name must be between 1 and 50 characters
+                  description:
+                    - Description must be 500 characters or fewer
               schema:
                 type: object
                 properties:
@@ -2203,7 +2302,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Invalid Input
+                    default: Invalid input
                     type: string
                   data:
                     type: "null"
@@ -2293,14 +2392,16 @@ paths:
                   - data
                 additionalProperties: false
         "409":
-          description: You have another playlist with this name
+          description: Could not update playlist
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: You have another playlist with this name
-                errors: null
+                message: Could not update playlist
+                errors:
+                  name:
+                    - You already have a playlist with this name
               schema:
                 type: object
                 properties:
@@ -2308,7 +2409,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: You have another playlist with this name
+                    default: Could not update playlist
                     type: string
                   data:
                     type: "null"
@@ -2346,7 +2447,9 @@ paths:
                 success: false
                 data: null
                 message: Invalid Input
-                errors: null
+                errors:
+                  id:
+                    - Invalid UUID
               schema:
                 type: object
                 properties:
@@ -2543,11 +2646,6 @@ paths:
           description: Invalid input or unable to process video URL
           content:
             application/json:
-              example:
-                success: false
-                data: null
-                message: Invalid input or unable to process video URL
-                errors: null
               schema:
                 type: object
                 properties:
@@ -2574,6 +2672,52 @@ paths:
                   - message
                   - data
                 additionalProperties: false
+              examples:
+                invalidPlaylistId:
+                  summary: Invalid playlist id
+                  value:
+                    success: false
+                    data: null
+                    message: Invalid input
+                    errors:
+                      url:
+                        - Invalid UUID
+                invalidUrl:
+                  summary: Invalid URL
+                  value:
+                    success: false
+                    data: null
+                    message: Invalid input
+                    errors:
+                      url:
+                        - Invalid URL
+                unsupportedUrl:
+                  summary: Unsupported video URL
+                  value:
+                    success: false
+                    data: null
+                    message: Unsupported video URL
+                    errors:
+                      url:
+                        - Unsupported video URL
+                tooManyRedirects:
+                  summary: Too many redirects
+                  value:
+                    success: false
+                    data: null
+                    message: Too many redirects
+                    errors:
+                      url:
+                        - Too many redirects
+                unableToProcess:
+                  summary: Unable to process video URL
+                  value:
+                    success: false
+                    data: null
+                    message: Unable to process video URL
+                    errors:
+                      url:
+                        - Unable to process video URL
         "401":
           description: Unauthorized
           content:
@@ -2610,14 +2754,9 @@ paths:
                   - data
                 additionalProperties: false
         "404":
-          description: Playlist or Viideo not found
+          description: Invalid input or unable to process video URL
           content:
             application/json:
-              example:
-                success: false
-                data: null
-                message: Playlist or Viideo not found
-                errors: null
               schema:
                 type: object
                 properties:
@@ -2625,7 +2764,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Playlist or Viideo not found
+                    default: Invalid input or unable to process video URL
                     type: string
                   data:
                     type: "null"
@@ -2644,15 +2783,63 @@ paths:
                   - message
                   - data
                 additionalProperties: false
+              examples:
+                invalidPlaylistId:
+                  summary: Invalid playlist id
+                  value:
+                    success: false
+                    data: null
+                    message: Invalid input
+                    errors:
+                      url:
+                        - Invalid UUID
+                invalidUrl:
+                  summary: Invalid URL
+                  value:
+                    success: false
+                    data: null
+                    message: Invalid input
+                    errors:
+                      url:
+                        - Invalid URL
+                unsupportedUrl:
+                  summary: Unsupported video URL
+                  value:
+                    success: false
+                    data: null
+                    message: Unsupported video URL
+                    errors:
+                      url:
+                        - Unsupported video URL
+                tooManyRedirects:
+                  summary: Too many redirects
+                  value:
+                    success: false
+                    data: null
+                    message: Too many redirects
+                    errors:
+                      url:
+                        - Too many redirects
+                unableToProcess:
+                  summary: Unable to process video URL
+                  value:
+                    success: false
+                    data: null
+                    message: Unable to process video URL
+                    errors:
+                      url:
+                        - Unable to process video URL
         "409":
-          description: You have already added this video to the playlist
+          description: Cannot add video
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: You have already added this video to the playlist
-                errors: null
+                message: Cannot add video
+                errors:
+                  url:
+                    - You have already added this video to the playlist
               schema:
                 type: object
                 properties:
@@ -2660,7 +2847,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: You have already added this video to the playlist
+                    default: Cannot add video
                     type: string
                   data:
                     type: "null"
@@ -2829,14 +3016,9 @@ paths:
                   - data
                 additionalProperties: false
         "400":
-          description: Invalid Input
+          description: Invalid input
           content:
             application/json:
-              example:
-                success: false
-                data: null
-                message: Invalid Input
-                errors: null
               schema:
                 type: object
                 properties:
@@ -2844,7 +3026,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Invalid Input
+                    default: Invalid input
                     type: string
                   data:
                     type: "null"
@@ -2863,6 +3045,34 @@ paths:
                   - message
                   - data
                 additionalProperties: false
+              examples:
+                invalidTitle:
+                  summary: Invalid title
+                  value:
+                    success: false
+                    data: null
+                    message: Invalid input
+                    errors:
+                      title:
+                        - Title must be between 1 and 50 characters
+                invalidDescription:
+                  summary: Invalid description
+                  value:
+                    success: false
+                    data: null
+                    message: Invalid input
+                    errors:
+                      description:
+                        - Description must be 500 characters or fewer
+                noFieldsProvided:
+                  summary: No fields provided
+                  value:
+                    success: false
+                    data: null
+                    message: Invalid input
+                    errors:
+                      title:
+                        - Title or description field must be provided
         "401":
           description: Unauthorized
           content:
@@ -2899,14 +3109,9 @@ paths:
                   - data
                 additionalProperties: false
         "404":
-          description: Playlist not found
+          description: Playlist or video not found
           content:
             application/json:
-              example:
-                success: false
-                data: null
-                message: Playlist not found
-                errors: null
               schema:
                 type: object
                 properties:
@@ -2914,7 +3119,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Playlist not found
+                    default: Playlist or video not found
                     type: string
                   data:
                     type: "null"
@@ -2933,6 +3138,25 @@ paths:
                   - message
                   - data
                 additionalProperties: false
+              examples:
+                playilstNotFound:
+                  summary: Playlist not found
+                  value:
+                    success: false
+                    data: null
+                    message: Playlist not found
+                    errors:
+                      playlist:
+                        - Playlist not found
+                videoNotFound:
+                  summary: Video not found
+                  value:
+                    success: false
+                    data: null
+                    message: Video not found
+                    errors:
+                      playlist:
+                        - Video not found
     delete:
       summary: Remove video from playlist
       tags:
@@ -2953,7 +3177,11 @@ paths:
                 success: false
                 data: null
                 message: Invalid Input
-                errors: null
+                errors:
+                  id:
+                    - invalid UUID
+                  videoId:
+                    - Invalid UUID
               schema:
                 type: object
                 properties:
@@ -3016,14 +3244,9 @@ paths:
                   - data
                 additionalProperties: false
         "404":
-          description: Playlist not found
+          description: Playlist or video not found
           content:
             application/json:
-              example:
-                success: false
-                data: null
-                message: Playlist not found
-                errors: null
               schema:
                 type: object
                 properties:
@@ -3031,7 +3254,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Playlist not found
+                    default: Playlist or video not found
                     type: string
                   data:
                     type: "null"
@@ -3050,6 +3273,25 @@ paths:
                   - message
                   - data
                 additionalProperties: false
+              examples:
+                playilstNotFound:
+                  summary: Playlist not found
+                  value:
+                    success: false
+                    data: null
+                    message: Playlist not found
+                    errors:
+                      playlist:
+                        - Playlist not found
+                videoNotFound:
+                  summary: Video not found
+                  value:
+                    success: false
+                    data: null
+                    message: Video not found
+                    errors:
+                      playlist:
+                        - Video not found
 components:
   schemas:
     SuccessResponse:

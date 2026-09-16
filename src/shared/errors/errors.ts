@@ -18,8 +18,8 @@ export class NotFoundError extends AppError {
 }
 
 export class BadInputError extends AppError {
-    constructor(message = 'Invalid input') {
-        super(message, 400);
+    constructor(message = 'Invalid input', errors?: any) {
+        super(message, 400, errors);
     }
 }
 

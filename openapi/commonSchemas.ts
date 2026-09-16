@@ -20,12 +20,6 @@ type SuccessParams = {
     headers?: Record<string, any>;
 };
 
-type ErrorParams = {
-    message?: string;
-    status?: number;
-    errors?: any;
-};
-
 function createSuccessSchema<T extends z.ZodTypeAny>(dataSchema: T, message?: string) {
     return SuccessResponse.extend({
         data: dataSchema ? dataSchema : z.any().meta({ example: {} }),
@@ -62,18 +56,39 @@ function createErrorSchema(message?: string) {
     });
 }
 
-export function errorResponse({ message, errors }: ErrorParams) {
+type ErrorParams = {
+    message?: string;
+    errors?: unknown;
+    examples?: Record<
+        string,
+        {
+            summary: string;
+            value: {
+                success: false;
+                data: null;
+                message: string;
+                errors: unknown;
+            };
+        }
+    >;
+};
+
+export function errorResponse({ message, errors, examples }: ErrorParams) {
     return {
         description: message || 'Error response',
         content: {
             'application/json': {
                 schema: createErrorSchema(message),
-                example: {
-                    success: false,
-                    data: null,
-                    message,
-                    errors: errors || null,
-                },
+                ...(examples
+                    ? { examples }
+                    : {
+                          example: {
+                              success: false,
+                              data: null,
+                              message,
+                              errors: errors || null,
+                          },
+                      }),
             },
         },
     };

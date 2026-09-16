@@ -131,12 +131,12 @@ describe('Video Service unit tests', () => {
         test('Should throw error if youtube id not valid format', async () => {
             mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
             const url = 'https://www.youtube.com/watch?v=invalid.id';
-            await expect(videoService.addFromUrl(url)).rejects.toThrow('url format not supported');
+            await expect(videoService.addFromUrl(url)).rejects.toThrow('Invalid input');
         });
         test('Should throw error if tiktok id not valid format', async () => {
             mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
             const url = 'https://www.tiktok.com/@cloverthisismycat/video/invalid.id';
-            await expect(videoService.addFromUrl(url)).rejects.toThrow('url format not supported');
+            await expect(videoService.addFromUrl(url)).rejects.toThrow('Invalid input');
         });
         test('Should not identify platform if if could not extract platform id', async () => {
             mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
@@ -150,12 +150,12 @@ describe('Video Service unit tests', () => {
         test('Should throw error if url is not a valid url', async () => {
             mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
             const url = 'not url';
-            await expect(videoService.addFromUrl(url)).rejects.toThrow('url format not supported');
+            await expect(videoService.addFromUrl(url)).rejects.toThrow('Invalid input');
         });
         test('Should throw error if tiktok uisername is not a valid', async () => {
             mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
             const url = 'https://www.tiktok.com/@hello/video/123456789!';
-            await expect(videoService.addFromUrl(url)).rejects.toThrow('url format not supported');
+            await expect(videoService.addFromUrl(url)).rejects.toThrow('Invalid input');
         });
     });
     describe('Find by id', () => {
