@@ -55,7 +55,7 @@ describe('e2e tests: Auth - verify', () => {
     });
     test('Should throw error (401 Unauthorised) if user not found', async () => {
         const { app, db } = testEnv;
-        const error = new UnauthorisedError('Invalid or expired verification code');
+        const error = new UnauthorisedError('Could not verify verification code');
         await db.user.delete({ where: { email: userData.email } });
         const res = await request(app)
             .patch(authPaths.verify)
@@ -64,7 +64,7 @@ describe('e2e tests: Auth - verify', () => {
     });
     test('Should throw error (401 Unauthorised) if code not found', async () => {
         const { app } = testEnv;
-        const error = new UnauthorisedError('Invalid or expired verification code');
+        const error = new UnauthorisedError('Could not verify verification code');
         const res = await request(app)
             .patch(authPaths.verify)
             .send({ code: randomBytes(3).toString('hex') });

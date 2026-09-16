@@ -36,7 +36,7 @@ export const createPlaylistService = ({
     ): Promise<void> => {
         const playlistExsists = await playlistRepo.existsForUser(playlistId, userId);
         if (!playlistExsists) {
-            throw new NotFoundError('Playlist not found');
+            throw new NotFoundError('Playlist not found', { playlist: ['Playlist not found'] });
         }
     };
 
@@ -64,7 +64,9 @@ export const createPlaylistService = ({
             return await playlistRepo.create({ userId, ...data });
         } catch (error) {
             translateForeignKeyError(error, NotFoundError, 'User not found');
-            handleUniqueConstraintError(error, 'You have another playlist with this name');
+            handleUniqueConstraintError(error, 'Could not add playlist', {
+                name: ['You already have a playlist with this name'],
+            });
             throw error;
         }
     };
@@ -94,7 +96,9 @@ export const createPlaylistService = ({
         try {
             return await playlistRepo.update(playlistId, userId, data);
         } catch (error) {
-            handleUniqueConstraintError(error, 'You have another playlist with this name');
+            handleUniqueConstraintError(error, 'Could not update playlist', {
+                name: ['You already have a playlist with this name'],
+            });
             handleNotFoundError(error, 'Playlist not found');
             throw error;
         }
@@ -124,7 +128,9 @@ export const createPlaylistService = ({
             const playlistVideo = await playlistVideoRepo.create(playlistId, video.id);
             return _toPlaylistVideoDto(playlistVideo);
         } catch (error) {
-            handleUniqueConstraintError(error, 'You have already added this video to the playlist');
+            handleUniqueConstraintError(error, 'Cannot add video', {
+                url: ['You have already added this video to the playlist'],
+            });
             translateForeignKeyError(error, NotFoundError, 'Playlist or video not found');
             throw error;
         }
@@ -147,7 +153,9 @@ export const createPlaylistService = ({
             });
             return _toPlaylistVideoDto(playlistVideo);
         } catch (error) {
-            handleNotFoundError(error, 'Playlist video not found');
+            handleNotFoundError(error, 'Playlist video not found', {
+                video: ['Video not found in playlist'],
+            });
             throw error;
         }
     };
@@ -164,7 +172,9 @@ export const createPlaylistService = ({
         try {
             await playlistVideoRepo.deleteFromPlaylist(playlistId, playlistVideoId);
         } catch (error) {
-            handleNotFoundError(error, 'Playlist or video not found');
+            handleNotFoundError(error, 'Playlist or video not found', {
+                video: ['This video no longer exists in this playlist'],
+            });
             throw error;
         }
     };

@@ -10,7 +10,15 @@ export const ErrorResponse = z.object({
     success: z.literal(false),
     message: z.string(),
     data: z.null(),
-    errors: z.any().nullable().optional(),
+    errors: z
+        .record(z.string(), z.array(z.string()))
+        .nullable()
+        .optional()
+        .meta({
+            example: {
+                field: ['Validation error'],
+            },
+        }),
 });
 
 type SuccessParams = {
@@ -18,12 +26,6 @@ type SuccessParams = {
     dataSchema?: any;
     message?: string;
     headers?: Record<string, any>;
-};
-
-type ErrorParams = {
-    message?: string;
-    status?: number;
-    errors?: any;
 };
 
 function createSuccessSchema<T extends z.ZodTypeAny>(dataSchema: T, message?: string) {
@@ -62,18 +64,39 @@ function createErrorSchema(message?: string) {
     });
 }
 
-export function errorResponse({ message, errors }: ErrorParams) {
+type ErrorParams = {
+    message?: string;
+    errors?: unknown;
+    examples?: Record<
+        string,
+        {
+            summary: string;
+            value: {
+                success: false;
+                data: null;
+                message: string;
+                errors: unknown;
+            };
+        }
+    >;
+};
+
+export function errorResponse({ message, errors, examples }: ErrorParams) {
     return {
         description: message || 'Error response',
         content: {
             'application/json': {
                 schema: createErrorSchema(message),
-                example: {
-                    success: false,
-                    data: null,
-                    message,
-                    errors: errors || null,
-                },
+                ...(examples
+                    ? { examples }
+                    : {
+                          example: {
+                              success: false,
+                              data: null,
+                              message,
+                              errors: errors || null,
+                          },
+                      }),
             },
         },
     };

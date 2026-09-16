@@ -6,7 +6,7 @@ import { seedCode, seedUser } from '__tests__/shared/seeds/seeds';
 import { seedRefreshToken } from '__tests__/shared/seeds/seeds';
 import { randomBytes } from 'crypto';
 import { expectResError, expectWrappedResponse } from '__tests__/e2e/helpers/e2eAssertions';
-import { ForbiddenError, UnauthorisedError } from 'shared/errors/errors';
+import { UnauthorisedError } from 'shared/errors/errors';
 import { hashString } from 'shared/utils/hashing';
 import { createTestApp, TestAppEnv } from '__tests__/setup/e2e';
 
@@ -65,13 +65,13 @@ describe('e2e tests: Auth Routes - Reset Password', () => {
             .send({ code: codeStr, password: 'newPassword123$!' });
         expectResError({
             res,
-            error: new UnauthorisedError('Invalid or expired password reset code'),
+            error: new UnauthorisedError('Could not verify password reset code'),
             mockLogger,
         });
         const dbToken = await db.refreshToken.findFirst({ where: { userId: user.id } });
         expect(dbToken!.revokedAt).toBeNull();
     });
-    test('Should throw error (403 Forbidden) if user not found', async () => {
+    test('Should throw error (401 Unauthorsied) if user not found', async () => {
         const { app, db, redis } = testEnv;
         const user = await seedUser(db);
         const codeStr = randomBytes(3).toString('hex');
@@ -86,7 +86,7 @@ describe('e2e tests: Auth Routes - Reset Password', () => {
             .send({ code: codeStr, password: 'newPassword123$!' });
         expectResError({
             res,
-            error: new ForbiddenError('Invalid or expired password reset code'),
+            error: new UnauthorisedError('Could not verify password reset code'),
             mockLogger,
         });
         const cachedCode = await redis.get(`user-code:${user.id}:${'PASSWORD_RESET'}`);

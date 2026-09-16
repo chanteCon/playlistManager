@@ -105,7 +105,7 @@ describe('Unit tests: User service', () => {
             const username = 'newUserName';
             mockUserRepo.updateUserPublic.mockRejectedValueOnce(prismaUniqueConstraintError);
             await expect(userService.update({ id: user.id, data: { username } })).rejects.toThrow(
-                'Value already in use',
+                'Username must be unique',
             );
             expect(mockUserRepo.updateUserPublic).toHaveBeenCalledWith({
                 where: { id: user.id },
@@ -160,7 +160,7 @@ describe('Unit tests: User service', () => {
             mockUserRepo.updateUserSensitive.mockRejectedValueOnce(prismaUniqueConstraintError);
             await expect(
                 userService.updateEmail({ id: user.id, email: privateUser.email }),
-            ).rejects.toThrow('Value already in use');
+            ).rejects.toThrow('Email must be unique');
             expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledTimes(1);
             expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledWith({
                 where: { id: user.id, verified: true },

@@ -222,11 +222,11 @@ describe('Unit tests: Auth service', () => {
 
         test('Should throw if code service fails', async () => {
             mockCodeService.verifyCode.mockRejectedValue(
-                new UnauthorisedError('Invalid or expired verification code'),
+                new UnauthorisedError('Could not verify verification code'),
             );
 
             await expect(authService.verifyUser(code)).rejects.toThrow(
-                new UnauthorisedError('Invalid or expired verification code'),
+                new UnauthorisedError('Could not verify verification code'),
             );
 
             expect(mockCodeService.verifyCode).toHaveBeenCalledWith({
@@ -241,7 +241,7 @@ describe('Unit tests: Auth service', () => {
             mockUserService.verify.mockRejectedValueOnce(new NotFoundError('User not found'));
 
             await expect(authService.verifyUser(code)).rejects.toThrow(
-                new UnauthorisedError('Invalid or expired verification code'),
+                new UnauthorisedError('Could not verify verification code'),
             );
 
             expect(mockCodeService.verifyCode).toHaveBeenCalledWith({
@@ -274,11 +274,11 @@ describe('Unit tests: Auth service', () => {
         });
         test('Throws if code verification fails', async () => {
             mockCodeService.verifyCode.mockRejectedValueOnce(
-                new UnauthorisedError('Invalid or expired password reset code'),
+                new UnauthorisedError('Could not verify password reset code'),
             );
 
             await expect(authService.resetPassword({ code, password })).rejects.toThrow(
-                'Invalid or expired password reset code',
+                'Could not verify password reset code',
             );
 
             expect(mockCodeService.verifyCode).toHaveBeenCalledWith({
@@ -294,7 +294,7 @@ describe('Unit tests: Auth service', () => {
             );
 
             await expect(authService.resetPassword({ code, password })).rejects.toThrow(
-                'Invalid or expired password reset code',
+                'Could not verify password reset code',
             );
 
             expect(mockUserService.updatePassword).toHaveBeenCalledWith(

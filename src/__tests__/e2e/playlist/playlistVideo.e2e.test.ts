@@ -162,7 +162,7 @@ describe('e2e tests Playlist Routes', () => {
 
             expectResError({
                 res,
-                error: new ConflictError('You have already added this video to the playlist'),
+                error: new ConflictError('Cannot add video'),
                 mockLogger,
             });
         });

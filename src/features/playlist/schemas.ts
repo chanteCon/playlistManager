@@ -50,6 +50,7 @@ export const playlistUpdateSchema = z
     .strip()
     .refine((data) => data.name !== undefined || data.description !== undefined, {
         message: 'Name or description field must be provided',
+        path: ['name'],
     });
 
 export const videoUrlSchema = z
@@ -83,6 +84,7 @@ export const updateVideoSchema = z
     .strip()
     .refine((data) => data.title !== undefined || data.description !== undefined, {
         message: 'Title or description field must be provided',
+        path: ['title'],
     });
 
 export const playlistVideoRefSchema = z

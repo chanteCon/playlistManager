@@ -11,7 +11,7 @@ export const setAuthHeader = ({ req, accessToken }: { req: Request; accessToken:
 };
 
 const extractCodeFromEmail = (email: any) => {
-    return email.html.match(/<br>([a-z0-9]+)/i)?.[1];
+    return email.html.match(/<span[^>]*>\s*([a-z0-9]{6})\s*<\/span>/i)?.[1];
 };
 
 export const getLastEmail = (sendMailMock: any) => {

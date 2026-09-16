@@ -50,11 +50,19 @@ const paths = {
                     dataSchema: userSchemas.publicUserSchema,
                     data: { user: { username: 'newUsername123', id } },
                 }),
+                400: errorResponse({
+                    message: 'Invalid input',
+                    errors: {
+                        username: ['Username must be at least 5 characters'],
+                    },
+                }),
                 401: errorResponse({ message: 'Unauthorized' }),
                 404: errorResponse({ message: 'User not found' }),
-                400: errorResponse({
-                    message: 'Invalid Input',
-                    errors: `{ password: [ Unrecognized key(s) in object: password ] }`,
+                409: errorResponse({
+                    message: 'Conflict',
+                    errors: {
+                        username: ['Username already in use'],
+                    },
                 }),
             },
         },
@@ -95,17 +103,18 @@ const paths = {
                     message: 'A verification code has been sent, please check email',
                 }),
                 400: errorResponse({
-                    message: 'Invalid Input',
-                    errors: 'Validation error messages',
+                    message: 'Invalid input',
+                    errors: {
+                        email: ['Invalid email address'],
+                    },
                 }),
-                404: errorResponse({
-                    message: 'User not found',
-                }),
-                401: errorResponse({
-                    message: 'Unauthorized',
-                }),
+                401: errorResponse({ message: 'Unauthorized' }),
+                404: errorResponse({ message: 'User not found' }),
                 409: errorResponse({
-                    message: 'Email already in use',
+                    message: 'Conflict',
+                    errors: {
+                        email: ['Email already in use'],
+                    },
                 }),
             },
         },

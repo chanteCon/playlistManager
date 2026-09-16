@@ -5,22 +5,26 @@ export const PRISMA_NOT_FOUND_ERROR = 'P2025';
 export const PRISMA_UNIQUE_CONTSTRAINT_ERROR = 'P2002';
 export const PRISMA_FOREIGN_KEY_ERROR = 'P2003';
 
-export const handleNotFoundError = (error: any, msg: string) => {
+export const handleNotFoundError = (error: any, msg: string, errors?: Record<string, string[]>) => {
     if (isNotFoundError(error)) {
-        throw new NotFoundError(msg);
+        throw new NotFoundError(msg, errors);
     }
     throw error;
 };
 
-export const translateNotFoundToUnAuth = (error: any, msg: string) => {
+export const translateNotFoundToUnAuth = (
+    error: any,
+    msg: string,
+    errors?: Record<string, string[]>,
+) => {
     if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === PRISMA_NOT_FOUND_ERROR
     ) {
-        throw new UnauthorisedError(msg);
+        throw new UnauthorisedError(msg, errors);
     }
     if (error instanceof NotFoundError) {
-        throw new UnauthorisedError(msg);
+        throw new UnauthorisedError(msg, errors);
     }
 };
 
@@ -50,16 +54,21 @@ export const translateForeignKeyError = (
         throw new ErrorType(message);
     }
 };
-export const handleUniqueConstraintError = (error: any, message?: string) => {
+export const handleUniqueConstraintError = (
+    error: any,
+    message?: string,
+    errors?: Record<string, string[]>,
+) => {
     if (isUniqueConstraintError(error)) {
         if (message) {
-            throw new ConflictError(message);
+            throw new ConflictError(message, errors);
         }
         const match = error.message.match(/Unique constraint failed on the fields: \(.+\)/);
         const field =
             match?.[0]?.slice(match[0].indexOf('(') + 1, match[0].indexOf(')')).replace(/`/g, '') ??
             'value';
         const fieldsStr = field[0].toUpperCase() + field.slice(1);
-        throw new ConflictError(`${fieldsStr} already in use`);
+        const fieldMessage = `${fieldsStr} already in use`;
+        throw new ConflictError(fieldMessage, { [fieldsStr.toLowerCase()]: [fieldMessage] });
     }
 };

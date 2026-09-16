@@ -44,12 +44,15 @@ export const createCodeRepo = ({ redis }: CodeRepoDeps) => {
         handleMultiError(res);
     };
 
-    const remove = async (codeHash: string): Promise<UserCode> => {
+    const remove = async (codeHash: string, codeType: string): Promise<UserCode> => {
         const code = await redis.get(`user-code:${codeHash}`);
         if (!code) {
             throw new NotFoundError(`Code not found`);
         }
         const codeData = JSON.parse(code) as UserCode;
+        if (codeData.codeType !== codeType) {
+            throw new NotFoundError(`Code not found`);
+        }
         const multi = redis.multi();
         multi.del(`user-code:${codeHash}`);
         multi.del(`user-code:${codeData.userId}:${codeData.codeType}`);

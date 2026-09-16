@@ -245,7 +245,7 @@ describe('Integration tests: User service', () => {
                     id,
                     email: user2.email,
                 }),
-            ).rejects.toThrow('Email already in use');
+            ).rejects.toThrow('Email must be unique');
 
             expect(mockEmailService.sendCodeEmail).toHaveBeenCalledTimes(0);
         });

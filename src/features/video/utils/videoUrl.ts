@@ -43,7 +43,7 @@ const _parseYoutubeUrl = (parsedUrl: URL, hostname: string): ParsedURLData | und
     }
 
     if (!YOUTUBE_ID_REGEX.test(platformId)) {
-        throw new BadInputError('url format not supported');
+        throw new BadInputError('Invalid input', { url: 'url format not supported' });
     }
 
     return {
@@ -64,7 +64,7 @@ const _parseTiktokUrl = (parsedUrl: URL, hostname: string): ParsedURLData | unde
             if (platformId && parts[0]?.startsWith('@')) {
                 const username = parts[0].slice(1);
                 if (!TIKTOK_USERNAME_REGEX.test(username)) {
-                    throw new BadInputError('url format not supported');
+                    throw new BadInputError('Invalid input', { url: ['url format not supported'] });
                 }
                 url = `https://www.tiktok.com/@${username}/video/${platformId}`;
             }
@@ -85,7 +85,9 @@ const _parseTiktokUrl = (parsedUrl: URL, hostname: string): ParsedURLData | unde
     }
 
     if (!TIKTOK_ID_REGEX.test(platformId) && !TIKTOK_SHORT_ID_REGEX.test(platformId)) {
-        throw new BadInputError('url format not supported');
+        throw new BadInputError('Invalid input', {
+            url: ['url format not supported'],
+        });
     }
 
     return {
@@ -101,7 +103,9 @@ export const getIdentityFromUrl = (url: string): ParsedURLData | undefined => {
     try {
         parsedUrl = new URL(url);
     } catch {
-        throw new BadInputError('url format not supported');
+        throw new BadInputError('Invalid input', {
+            url: ['url format not supported'],
+        });
     }
     const hostname = parsedUrl.hostname;
     if (YOUTUBE_HOSTS.has(hostname)) {

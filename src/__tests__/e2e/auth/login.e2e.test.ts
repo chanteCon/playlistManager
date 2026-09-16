@@ -78,12 +78,12 @@ describe('e2e tests: Auth Routes - Login', () => {
         expect(res.headers['set-cookie']).toBeUndefined();
     });
 
-    test('Should throw error (403 Forbidden)if user does not exist', async () => {
+    test('Should throw error (401 Unauthorised)if user does not exist', async () => {
         const { app } = testEnv;
         const res = await request(app)
             .post(authPaths.login)
             .send({ email: 'nonexistent@email.com', password });
-        const error = new ForbiddenError('Email not verified');
+        const error = new UnauthorisedError('Incorrect email or password');
         expectResError({ res, error, mockLogger });
         expect(res.headers['set-cookie']).toBeUndefined();
     });
@@ -103,7 +103,7 @@ describe('e2e tests: Auth Routes - Login', () => {
 
         expectResError({
             res: loginMfaRes,
-            error: new UnauthorisedError('Invalid or expired login code'),
+            error: new UnauthorisedError('Could not verify login code'),
             mockLogger,
         });
     });
@@ -122,11 +122,11 @@ describe('e2e tests: Auth Routes - Login', () => {
 
         expectResError({
             res: loginMfaRes,
-            error: new UnauthorisedError('Invalid or expired login code'),
+            error: new UnauthorisedError('Could not verify login code'),
             mockLogger,
         });
     });
-    test('Should throw error (403 forbidden) if user is not verified', async () => {
+    test('Should throw error (401 Unauthorised) if user is not verified', async () => {
         const { app, db } = testEnv;
         await db.user.update({ where: { id: user.id }, data: { verified: false } });
         const loginRes = await request(app)
@@ -134,7 +134,7 @@ describe('e2e tests: Auth Routes - Login', () => {
             .send({ email: user.email, password });
         expectResError({
             res: loginRes,
-            error: new ForbiddenError('Email not verified'),
+            error: new UnauthorisedError('Incorrect email or password'),
             mockLogger,
         });
     });

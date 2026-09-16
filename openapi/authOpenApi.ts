@@ -47,12 +47,41 @@ const paths = {
                         'A code has been sent to the provided email address. Please verify email to continue.',
                 }),
                 400: errorResponse({
-                    message: 'Invalid Input',
-                    errors: 'Validation error messages',
+                    message: 'Invalid input',
+                    errors: {
+                        email: ['Invalid email address'],
+                        username: ['Username must be at least 5 characters'],
+                        password: [
+                            'Password must contain uppercase, lowercase, number, and symbol, and no invalid characters',
+                        ],
+                    },
                 }),
                 409: errorResponse({
-                    message: 'Email already in use',
-                    errors: 'Validation error messages',
+                    message: 'Conflict',
+                    examples: {
+                        emailAlreadyInUse: {
+                            summary: 'Email already in use',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Email already in use',
+                                errors: {
+                                    email: ['Email already in use'],
+                                },
+                            },
+                        },
+                        usernameAlreadyInUse: {
+                            summary: 'Username already in use',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Username already in use',
+                                errors: {
+                                    username: ['Username already in use'],
+                                },
+                            },
+                        },
+                    },
                 }),
             },
         },
@@ -87,10 +116,15 @@ const paths = {
                 }),
                 400: errorResponse({
                     message: 'Invalid Input',
-                    errors: 'Validation error messsages',
+                    errors: {
+                        code: ['Too small: expected string to have >=6 characters'],
+                    },
                 }),
                 401: errorResponse({
-                    message: 'Invalid or expired verification code.',
+                    message: 'Could not verify verification code',
+                    errors: {
+                        code: ['Invalid or expired verification code'],
+                    },
                 }),
             },
         },
@@ -114,11 +148,13 @@ const paths = {
                     message: 'If email is valid you will receive a login code',
                 }),
                 400: errorResponse({
-                    message: 'Invalid Input',
-                    errors: 'Validation error messages',
+                    message: 'Invalid input',
+                    errors: {
+                        email: ['Invalid email address'],
+                        password: ['Password must be a string'],
+                    },
                 }),
                 401: errorResponse({ message: 'Incorrect email or password' }),
-                403: errorResponse({ message: 'Email not verified' }),
             },
         },
     },
@@ -151,9 +187,14 @@ const paths = {
                 }),
                 400: errorResponse({
                     message: 'Invalid Input',
-                    errors: 'Validation error messages',
+                    errors: {
+                        code: ['Too small: expected string to have >=6 characters'],
+                    },
                 }),
-                401: errorResponse({ message: 'Invalid or expired login code' }),
+                401: errorResponse({
+                    message: 'Could not verify code',
+                    errors: { code: ['Invalid or expired login code'] },
+                }),
             },
         },
     },
@@ -219,7 +260,7 @@ const paths = {
                 }),
                 400: errorResponse({
                     message: 'Invalid Input',
-                    errors: 'Validation error messages',
+                    errors: { email: ['Invalid email address'] },
                 }),
             },
         },
@@ -247,7 +288,7 @@ const paths = {
                 }),
                 400: errorResponse({
                     message: 'Invalid Input',
-                    errors: 'Validation error messages',
+                    errors: { email: ['Invalid email address'] },
                 }),
             },
         },
@@ -271,11 +312,17 @@ const paths = {
             responses: {
                 200: successResponse({ message: 'Password successfully reset' }),
                 400: errorResponse({
-                    message: 'Invalid Input',
-                    errors: 'Validation error messsages',
+                    message: 'Invalid input',
+                    errors: {
+                        password: [
+                            'Password must contain uppercase, lowercase, number, and symbol, and no invalid characters',
+                        ],
+                        code: ['Too small: expected string to have >=6 characters'],
+                    },
                 }),
                 401: errorResponse({
-                    message: 'Invalid or expired password reset code.',
+                    message: 'Could not verify code',
+                    errors: { code: ['Invalid or expired login code'] },
                 }),
             },
         },

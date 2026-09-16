@@ -99,13 +99,18 @@ const paths = {
                     },
                 }),
                 400: errorResponse({
-                    message: 'Invalid Input',
+                    message: 'Invalid input',
+                    errors: {
+                        name: ['Playlist name must be between 1 and 50 characters'],
+                        description: ['Description must be 500 characters or fewer'],
+                    },
                 }),
                 401: errorResponse({
                     message: 'Unauthorized',
                 }),
                 409: errorResponse({
-                    message: 'You have another playlist with this name',
+                    message: 'Could not add playlist',
+                    errors: { name: ['You already have a playlist with this name'] },
                 }),
             },
         },
@@ -166,6 +171,7 @@ const paths = {
                 }),
                 400: errorResponse({
                     message: 'Invalid Input',
+                    errors: { id: ['Invalid UUID'] },
                 }),
                 401: errorResponse({
                     message: 'Unauthorized',
@@ -207,7 +213,11 @@ const paths = {
                     },
                 }),
                 400: errorResponse({
-                    message: 'Invalid Input',
+                    message: 'Invalid input',
+                    errors: {
+                        name: ['Playlist name must be between 1 and 50 characters'],
+                        description: ['Description must be 500 characters or fewer'],
+                    },
                 }),
                 401: errorResponse({
                     message: 'Unauthorized',
@@ -216,7 +226,8 @@ const paths = {
                     message: 'Playlist not found',
                 }),
                 409: errorResponse({
-                    message: 'You have another playlist with this name',
+                    message: 'Could not update playlist',
+                    errors: { name: ['You already have a playlist with this name'] },
                 }),
             },
         },
@@ -232,6 +243,7 @@ const paths = {
                 },
                 400: errorResponse({
                     message: 'Invalid Input',
+                    errors: { id: ['Invalid UUID'] },
                 }),
                 401: errorResponse({
                     message: 'Unauthorized',
@@ -278,15 +290,130 @@ const paths = {
                 }),
                 400: errorResponse({
                     message: 'Invalid input or unable to process video URL',
+                    examples: {
+                        invalidPlaylistId: {
+                            summary: 'Invalid playlist id',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Invalid input',
+                                errors: {
+                                    url: ['Invalid UUID'],
+                                },
+                            },
+                        },
+                        invalidUrl: {
+                            summary: 'Invalid URL',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Invalid input',
+                                errors: {
+                                    url: ['Invalid URL'],
+                                },
+                            },
+                        },
+                        unsupportedUrl: {
+                            summary: 'Unsupported video URL',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Unsupported video URL',
+                                errors: {
+                                    url: ['Unsupported video URL'],
+                                },
+                            },
+                        },
+                        tooManyRedirects: {
+                            summary: 'Too many redirects',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Too many redirects',
+                                errors: {
+                                    url: ['Too many redirects'],
+                                },
+                            },
+                        },
+                        unableToProcess: {
+                            summary: 'Unable to process video URL',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Unable to process video URL',
+                                errors: {
+                                    url: ['Unable to process video URL'],
+                                },
+                            },
+                        },
+                    },
                 }),
                 401: errorResponse({
                     message: 'Unauthorized',
                 }),
                 404: errorResponse({
-                    message: 'Playlist or Viideo not found',
+                    message: 'Invalid input or unable to process video URL',
+                    examples: {
+                        invalidPlaylistId: {
+                            summary: 'Invalid playlist id',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Invalid input',
+                                errors: {
+                                    url: ['Invalid UUID'],
+                                },
+                            },
+                        },
+                        invalidUrl: {
+                            summary: 'Invalid URL',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Invalid input',
+                                errors: {
+                                    url: ['Invalid URL'],
+                                },
+                            },
+                        },
+                        unsupportedUrl: {
+                            summary: 'Unsupported video URL',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Unsupported video URL',
+                                errors: {
+                                    url: ['Unsupported video URL'],
+                                },
+                            },
+                        },
+                        tooManyRedirects: {
+                            summary: 'Too many redirects',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Too many redirects',
+                                errors: {
+                                    url: ['Too many redirects'],
+                                },
+                            },
+                        },
+                        unableToProcess: {
+                            summary: 'Unable to process video URL',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Unable to process video URL',
+                                errors: {
+                                    url: ['Unable to process video URL'],
+                                },
+                            },
+                        },
+                    },
                 }),
                 409: errorResponse({
-                    message: 'You have already added this video to the playlist',
+                    message: 'Cannot add video',
+                    errors: { url: ['You have already added this video to the playlist'] },
                 }),
                 502: errorResponse({
                     message: 'Unable to fetch video metadata. Please try again later.',
@@ -331,13 +458,72 @@ const paths = {
                     },
                 }),
                 400: errorResponse({
-                    message: 'Invalid Input',
+                    message: 'Invalid input',
+                    examples: {
+                        invalidTitle: {
+                            summary: 'Invalid title',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Invalid input',
+                                errors: {
+                                    title: ['Title must be between 1 and 50 characters'],
+                                },
+                            },
+                        },
+                        invalidDescription: {
+                            summary: 'Invalid description',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Invalid input',
+                                errors: {
+                                    description: ['Description must be 500 characters or fewer'],
+                                },
+                            },
+                        },
+                        noFieldsProvided: {
+                            summary: 'No fields provided',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Invalid input',
+                                errors: {
+                                    title: ['Title or description field must be provided'],
+                                },
+                            },
+                        },
+                    },
                 }),
                 401: errorResponse({
                     message: 'Unauthorized',
                 }),
                 404: errorResponse({
-                    message: 'Playlist not found',
+                    message: 'Playlist or video not found',
+                    examples: {
+                        playilstNotFound: {
+                            summary: 'Playlist not found',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Playlist not found',
+                                errors: {
+                                    playlist: ['Playlist not found'],
+                                },
+                            },
+                        },
+                        videoNotFound: {
+                            summary: 'Video not found',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Video not found',
+                                errors: {
+                                    playlist: ['Video not found'],
+                                },
+                            },
+                        },
+                    },
                 }),
             },
         },
@@ -353,12 +539,37 @@ const paths = {
                 },
                 400: errorResponse({
                     message: 'Invalid Input',
+                    errors: { id: ['invalid UUID'], videoId: ['Invalid UUID'] },
                 }),
                 401: errorResponse({
                     message: 'Unauthorized',
                 }),
                 404: errorResponse({
-                    message: 'Playlist not found',
+                    message: 'Playlist or video not found',
+                    examples: {
+                        playilstNotFound: {
+                            summary: 'Playlist not found',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Playlist not found',
+                                errors: {
+                                    playlist: ['Playlist not found'],
+                                },
+                            },
+                        },
+                        videoNotFound: {
+                            summary: 'Video not found',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Video not found',
+                                errors: {
+                                    playlist: ['Video not found'],
+                                },
+                            },
+                        },
+                    },
                 }),
             },
         },

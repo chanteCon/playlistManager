@@ -23,24 +23,68 @@ export const createEmailService = () => {
         }
     };
 
+    const generateCodeEmail = ({
+        heading,
+        message,
+        code,
+    }: {
+        heading: string;
+        message: string;
+        code: string;
+    }) => `
+    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px; color: #302c38;">
+        <h2 style="margin: 0 0 16px; color: #a8326f;">
+            ${heading}
+        </h2>
+
+        <p style="margin: 0 0 24px; line-height: 1.6;">
+            ${message}
+        </p>
+
+        <div style="text-align: center; margin: 28px 0;">
+            <span style="font-size: 30px; font-weight: bold; letter-spacing: 6px; color: #a8326f;">
+                ${code}
+            </span>
+        </div>
+
+        <p style="margin: 0; text-align: center; font-size: 14px; font-weight: bold; color: #a8326f;">
+            This code expires in 5 minutes.
+        </p>
+    </div>
+`;
+
     const emailTemplates: Record<
         CodeType,
         { subject: string; generateHtml: (code: string) => string }
     > = {
         VERIFICATION: {
-            subject: 'App email verification',
+            subject: 'Verify your Playlists email',
             generateHtml: (code) =>
-                `<p>Please enter the below code to verify your email:<br>${code}</p>`,
+                generateCodeEmail({
+                    heading: 'Verify your email',
+                    message: 'Enter the code below to verify your email address.',
+                    code,
+                }),
         },
+
         PASSWORD_RESET: {
-            subject: 'App password reset',
+            subject: 'Reset your Playlists password',
             generateHtml: (code) =>
-                `<p>Please enter the below code to reset your password:<br>${code}</p>`,
+                generateCodeEmail({
+                    heading: 'Reset your password',
+                    message: 'Enter the code below to reset your Playlists password.',
+                    code,
+                }),
         },
+
         LOGIN: {
-            subject: 'App login code',
+            subject: 'Your Playlists login code',
             generateHtml: (code) =>
-                `<p>Please enter the below code to reset your password:<br>${code}</p>`,
+                generateCodeEmail({
+                    heading: 'Sign in to Playlists',
+                    message: 'Enter the code below to finish signing in.',
+                    code,
+                }),
         },
     };
 

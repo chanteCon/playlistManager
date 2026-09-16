@@ -41,7 +41,7 @@ export const expectMockCookie = ({
 }) => {
     expect(mockRes.cookie).toHaveBeenCalledWith(name, value, {
         httpOnly: true,
-        secure: true,
+        secure: false,
         sameSite: 'strict',
         path,
         maxAge: COOKIE_EXPIRY_MS,
@@ -59,7 +59,7 @@ export const expectMockCookieCleared = ({
 }) => {
     expect(mockRes.clearCookie).toHaveBeenCalledWith(name, {
         httpOnly: true,
-        secure: true,
+        secure: false,
         sameSite: 'strict',
         path,
     });

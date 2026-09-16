@@ -82,7 +82,7 @@ describe('e2e tests: Auth Routes - Update email', () => {
             .set('Authorization', `Bearer ${token}`)
             .send({ email: existingUser.email });
 
-        const error = new ConflictError('Email already in use');
+        const error = new ConflictError('Email must be unique');
         expectResError({ res, error, mockLogger });
     });
 

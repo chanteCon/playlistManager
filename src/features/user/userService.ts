@@ -73,7 +73,9 @@ export const createUserService = ({
         try {
             return await userRepo.updateUserPublic({ where: { id }, data });
         } catch (error) {
-            handleUniqueConstraintError(error);
+            handleUniqueConstraintError(error, 'Username must be unique', {
+                username: ['This username is already taken'],
+            });
             handleNotFoundError(error, 'User not found');
             throw error;
         }
@@ -111,7 +113,9 @@ export const createUserService = ({
                 await tokenService.revokeAllForUser(id, tx);
             });
         } catch (error) {
-            handleUniqueConstraintError(error);
+            handleUniqueConstraintError(error, 'Email must be unique', {
+                email: ['This email is already taken'],
+            });
             handleNotFoundError(error, 'User not found');
             throw error;
         }

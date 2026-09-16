@@ -111,7 +111,7 @@ describe('Unit tests: Code service', () => {
 
             await expect(
                 codeService.verifyCode({ code: codePlainStr, codeType: 'PASSWORD_RESET' }),
-            ).rejects.toThrow('Invalid or expired password reset code');
+            ).rejects.toThrow('Could not verify password reset code');
         });
     });
 });

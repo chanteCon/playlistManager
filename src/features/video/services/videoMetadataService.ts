@@ -89,7 +89,7 @@ export const createVideoMetadataService = () => {
                 continue;
             } else if (!response.ok) {
                 if (response.status === 404) {
-                    throw new NotFoundError('Video not found');
+                    throw new NotFoundError('Video not found', { video: ['Video not found'] });
                 }
 
                 throw new BadGatewayError(
@@ -106,18 +106,19 @@ export const createVideoMetadataService = () => {
                 platformId: platformId,
             };
         }
-
-        throw new BadInputError('Too many redirects');
+        throw new BadInputError('Invalid input', { url: ['Too many redirects'] });
     };
 
     const readResponse = async (response: Response): Promise<string> => {
         const contentLength = response.headers.get('content-length');
 
         if (contentLength && Number(contentLength) > MAX_HTML_SIZE) {
-            throw new BadInputError('Unable to process video URL');
+            throw new BadInputError('Invalid input', { url: ['Unable to process video URL'] });
         }
         if (!response.body) {
-            throw new BadInputError('Unable to process video URL');
+            throw new BadInputError('Invalid input', {
+                url: ['Unable to process video URL'],
+            });
         }
 
         const decoder = new TextDecoder();
@@ -128,7 +129,7 @@ export const createVideoMetadataService = () => {
             size += chunk.byteLength;
 
             if (size > MAX_HTML_SIZE) {
-                throw new BadInputError('Unable to process video URL');
+                throw new BadInputError('Invalid input', { url: ['Unable to process video URL'] });
             }
 
             chunks.push(decoder.decode(chunk, { stream: true }));
