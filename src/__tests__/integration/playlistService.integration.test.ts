@@ -66,7 +66,7 @@ describe('Playlist service integration tests', () => {
         test('Should throw conflict error if user already has playlist with that name', async () => {
             await testEnv.playlistService.create(user.id, playlistInput);
             await expect(testEnv.playlistService.create(user.id, playlistInput)).rejects.toThrow(
-                'You have another playlist with this name',
+                'Could not add playlist',
             );
             const playlists = await testEnv.db.playlist.findMany();
             expect(playlists).toHaveLength(1);
@@ -215,7 +215,7 @@ describe('Playlist service integration tests', () => {
                 testEnv.playlistService.update(user.id, playlist.id, {
                     name: playlistInput.name,
                 }),
-            ).rejects.toThrow('You have another playlist with this name');
+            ).rejects.toThrow('Could not update playlist');
         });
     });
     describe('Remove', () => {
@@ -333,7 +333,7 @@ describe('Playlist service integration tests', () => {
                     playlistId: playlist.id,
                     url: video.url,
                 }),
-            ).rejects.toThrow('You have already added this video to the playlist');
+            ).rejects.toThrow('Cannot add video');
 
             expect(
                 await testEnv.db.playlistVideo.findMany({

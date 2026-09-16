@@ -78,7 +78,7 @@ describe('e2e tests Playlist Routes', () => {
 
             expectResError({
                 res,
-                error: new ConflictError('You have another playlist with this name'),
+                error: new ConflictError('Could not add playlist'),
                 mockLogger,
             });
         });
@@ -369,7 +369,7 @@ describe('e2e tests Playlist Routes', () => {
 
             expectResError({
                 res,
-                error: new ConflictError('You have another playlist with this name'),
+                error: new ConflictError('Could not update playlist'),
                 mockLogger,
             });
         });

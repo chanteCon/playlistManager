@@ -48,7 +48,7 @@ describe('e2e tests: Auth - verify', () => {
         const failedVerifyRes = await request(app).patch(authPaths.verify).send({ code: oldCode });
         expectResError({
             res: failedVerifyRes,
-            error: new UnauthorisedError('Invalid or expired verification code'),
+            error: new UnauthorisedError('Could not verify verification code'),
             mockLogger,
         });
 
@@ -78,7 +78,7 @@ describe('e2e tests: Auth - verify', () => {
             .send({ code: extractCodeFromLastEmail(sendMailMock) });
         expectResError({
             res: failedVerifyRes,
-            error: new UnauthorisedError('Invalid or expired verification code'),
+            error: new UnauthorisedError('Could not verify verification code'),
             mockLogger,
         });
         expect(sendMailMock).toHaveBeenCalledTimes(1);
@@ -101,7 +101,7 @@ describe('e2e tests: Auth - verify', () => {
             .send({ code: extractCodeFromLastEmail(sendMailMock) });
         expectResError({
             res: failedVerifyRes,
-            error: new UnauthorisedError('Invalid or expired verification code'),
+            error: new UnauthorisedError('Could not verify verification code'),
             mockLogger,
         });
         expect(sendMailMock).toHaveBeenCalledTimes(1);

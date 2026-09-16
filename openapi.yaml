@@ -105,7 +105,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -134,7 +140,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -226,7 +238,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -255,7 +273,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -336,7 +360,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -365,36 +395,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
-                      - type: "null"
-                required:
-                  - success
-                  - message
-                  - data
-                additionalProperties: false
-        "403":
-          description: Email not verified
-          content:
-            application/json:
-              example:
-                success: false
-                data: null
-                message: Email not verified
-                errors: null
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    const: false
-                  message:
-                    default: Email not verified
-                    type: string
-                  data:
-                    type: "null"
-                  errors:
-                    anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -487,7 +494,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -516,7 +529,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -595,7 +614,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -657,7 +682,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -735,7 +766,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -814,7 +851,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -900,7 +943,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -929,7 +978,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1025,7 +1080,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1054,7 +1115,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1160,7 +1227,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1189,7 +1262,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1218,7 +1297,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1256,7 +1341,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1285,7 +1376,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1366,7 +1463,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1395,7 +1498,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1424,7 +1533,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1453,7 +1568,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1572,7 +1693,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1601,7 +1728,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1630,7 +1763,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1726,7 +1865,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1869,7 +2014,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1898,7 +2049,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -1927,7 +2084,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2046,7 +2209,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2075,7 +2244,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2104,7 +2279,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2133,7 +2314,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2173,7 +2360,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2202,7 +2395,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2231,7 +2430,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2335,13 +2540,13 @@ paths:
                   - data
                 additionalProperties: false
         "400":
-          description: Invalid input or nnable to process video URL
+          description: Invalid input or unable to process video URL
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Invalid input or nnable to process video URL
+                message: Invalid input or unable to process video URL
                 errors: null
               schema:
                 type: object
@@ -2350,13 +2555,19 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Invalid input or nnable to process video URL
+                    default: Invalid input or unable to process video URL
                     type: string
                   data:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2385,7 +2596,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2414,7 +2631,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2443,7 +2666,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2472,7 +2701,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2615,7 +2850,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2644,7 +2885,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2673,7 +2920,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2714,7 +2967,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2743,7 +3002,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2772,7 +3037,13 @@ paths:
                     type: "null"
                   errors:
                     anyOf:
-                      - {}
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
                       - type: "null"
                 required:
                   - success
@@ -2806,7 +3077,13 @@ components:
           type: "null"
         errors:
           anyOf:
-            - {}
+            - type: object
+              propertyNames:
+                type: string
+              additionalProperties:
+                type: array
+                items:
+                  type: string
             - type: "null"
       required:
         - success

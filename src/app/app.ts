@@ -65,7 +65,12 @@ const setUpRateLimiters = (app: Application, redis: RedisClientType) => {
 
 const setUpSecurityMiddleware = (app: Application) => {
     app.use(helmet());
-    app.use(cors());
+    app.use(
+        cors({
+            origin: process.env.FRONTEND_URL,
+            credentials: true,
+        }),
+    );
 };
 
 const setUpLogging = (app: Application) => {

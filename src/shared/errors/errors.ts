@@ -1,17 +1,19 @@
 export class AppError extends Error {
     status: number;
     cause?: unknown;
-    constructor(message: string, status = 500) {
+    errors?: Record<string, string[]>;
+
+    constructor(message: string, status = 500, errors?: Record<string, string[]>) {
         super(message);
         this.status = status;
-
+        this.errors = errors;
         Object.setPrototypeOf(this, new.target.prototype);
     }
 }
 
 export class NotFoundError extends AppError {
-    constructor(message = 'Not found') {
-        super(message, 404);
+    constructor(message = 'Not found', errors?: Record<string, string[]>) {
+        super(message, 404, errors);
     }
 }
 
@@ -22,7 +24,6 @@ export class BadInputError extends AppError {
 }
 
 export class ValidationError extends BadInputError {
-    errors: any;
     constructor(message = 'Invalid input', errors?: any) {
         super(message);
         this.errors = errors;
@@ -36,14 +37,15 @@ export class ForbiddenError extends AppError {
 }
 
 export class UnauthorisedError extends AppError {
-    constructor(message = 'Unauthorised') {
-        super(message, 401);
+    constructor(message = 'Unauthorised', errors?: any) {
+        super(message, 401, errors);
     }
 }
 
 export class ConflictError extends AppError {
-    constructor(message = 'Conflict') {
+    constructor(message = 'Conflict', errors?: any) {
         super(message, 409);
+        this.errors = errors;
     }
 }
 

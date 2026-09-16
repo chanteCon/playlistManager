@@ -174,13 +174,13 @@ describe('Integration tests: Auth service', () => {
         test('Should throw unauthorised if code is expired', async () => {
             testEnv.redis.expire(`user-code:${codeHash}`, 0);
             await expect(testEnv.authService.loginMfa({ code: codePlainStr })).rejects.toThrow(
-                'Invalid or expired login code',
+                'Could not verify login code',
             );
         });
         test('Should throw  unauthorised if code not found', async () => {
             await testEnv.redis.del(`user-code:${codeHash}`);
             await expect(testEnv.authService.loginMfa({ code: codePlainStr })).rejects.toThrow(
-                'Invalid or expired login code',
+                'Could not verify login code',
             );
         });
         test('Should throw  unauthorised if user not found', async () => {
@@ -195,7 +195,7 @@ describe('Integration tests: Auth service', () => {
                     code: codePlainStr,
                     existingDeviceId,
                 }),
-            ).rejects.toThrow('Invalid or expired verification code');
+            ).rejects.toThrow('Could not verify code');
         });
     });
     describe('logout', () => {
@@ -305,7 +305,7 @@ describe('Integration tests: Auth service', () => {
             const user = await seedUser(testEnv.db, { verified: false });
             const code = 'test-code';
             await expect(testEnv.authService.verifyUser(code)).rejects.toThrow(
-                new UnauthorisedError('Invalid or expired verification code'),
+                new UnauthorisedError('Could not verify verification code'),
             );
             const cachedCode = await testEnv.redis.get(`user-code:${user.id}:VERIFICATION`);
             expect(cachedCode).toBeNull();
@@ -374,7 +374,7 @@ describe('Integration tests: Auth service', () => {
                     code: 'nonexistentcode',
                     password: 'newPassword',
                 }),
-            ).rejects.toThrow('Invalid or expired password reset code');
+            ).rejects.toThrow('Could not verify password reset code');
         });
         test('Throws if user not found', async () => {
             const plainCode = randomBytes(32).toString('hex');
@@ -387,7 +387,7 @@ describe('Integration tests: Auth service', () => {
                     code: plainCode,
                     password: 'newPassword',
                 }),
-            ).rejects.toThrow('Invalid or expired password reset code');
+            ).rejects.toThrow('Could not verify password reset code');
         });
         test('Throws if code is expired', async () => {
             const code = await testEnv.codeService.issueCodeForUser({
@@ -402,7 +402,7 @@ describe('Integration tests: Auth service', () => {
                     code: code!,
                     password: 'newPassword',
                 }),
-            ).rejects.toThrow('Invalid or expired password reset code');
+            ).rejects.toThrow('Could not verify password reset code');
         });
     });
 });

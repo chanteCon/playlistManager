@@ -71,7 +71,9 @@ export const createCodeService = (deps: CodeServiceDeps) => {
             const cachedCode = await codeRepo.remove(codeHash);
             return cachedCode.userId;
         } catch (error) {
-            translateNotFoundToUnAuth(error, `Invalid or expired ${codeTypeStr} code`);
+            translateNotFoundToUnAuth(error, `Could not verify ${codeTypeStr} code`, {
+                code: [`Invalid or expired ${codeTypeStr} code`],
+            });
             throw error;
         }
     };

@@ -68,13 +68,13 @@ export const createAuthController = ({ services }: AuthControllerDeps) => {
         if (!oldToken) {
             throw new UnauthorisedError('Unauthorized');
         }
-        clearSessionCookie(res, 'refreshToken');
+        clearSessionCookie(res, 'refreshToken', '/api/auth');
         const { accessToken, refreshToken } = await tokenService.rotateTokens(oldToken);
         return sendAuthTokens(res, accessToken, refreshToken);
     };
 
     const logout = async (req: AuthRequest, res: Response) => {
-        clearSessionCookie(res, 'refreshToken');
+        clearSessionCookie(res, 'refreshToken', '/api/auth');
         await authService.logout(req.user!);
         res.locals.message = 'Successfully logged out.';
         return res.status(200).json({});
@@ -91,18 +91,18 @@ export const createAuthController = ({ services }: AuthControllerDeps) => {
 
     const resetPassword = async (req: Request<any, any, ResetPasswordInput>, res: Response) => {
         await authService.resetPassword(req.body);
-        clearSessionCookie(res, 'refreshToken');
+        clearSessionCookie(res, 'refreshToken', '/api/auth');
         res.locals.message = 'Password successfully reset';
         return res.status(200).json({});
     };
 
-    const clearSessionCookie = (res: Response, name: string, path = '/api/auth') => {
+    const clearSessionCookie = (res: Response, name: string, path = '/') => {
         if (canSendResponse(res)) {
             res.clearCookie(name, {
                 httpOnly: true,
-                secure: true,
                 sameSite: 'strict',
                 path,
+                secure: process.env.NODE_ENV === 'production',
             });
         }
     };
@@ -111,10 +111,10 @@ export const createAuthController = ({ services }: AuthControllerDeps) => {
         if (canSendResponse(res)) {
             res.cookie(name, value, {
                 httpOnly: true,
-                secure: true,
                 sameSite: 'strict',
                 path,
                 maxAge: COOKIE_EXPIRY_MS,
+                secure: process.env.NODE_ENV === 'production',
             });
         }
     };

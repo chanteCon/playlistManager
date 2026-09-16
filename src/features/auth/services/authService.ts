@@ -1,4 +1,4 @@
-import { ForbiddenError, NotFoundError, UnauthorisedError } from 'shared/errors/errors';
+import { NotFoundError, UnauthorisedError } from 'shared/errors/errors';
 import { logger } from 'shared/logger/logger';
 
 import { CreateAccountInput, AuthUser, LoginInput, Tokens, EmailCodeInput } from '../types';
@@ -59,7 +59,9 @@ export const createAuthService = ({ services, txRunner }: AuthServiceDeps) => {
             });
         } catch (error) {
             if (error instanceof NotFoundError) {
-                throw new ForbiddenError('Invalid or expired password reset code');
+                throw new UnauthorisedError('Could not verify password reset code', {
+                    code: 'Invalid or expired password reset code',
+                });
             }
             throw error;
         }
@@ -112,7 +114,9 @@ export const createAuthService = ({ services, txRunner }: AuthServiceDeps) => {
             return await _login(existingDeviceId, userId);
         } catch (error) {
             if (error instanceof NotFoundError) {
-                throw new UnauthorisedError('Invalid or expired verification code');
+                throw new UnauthorisedError('Could not verify code', {
+                    code: ['Invalid or expired login code'],
+                });
             }
             throw error;
         }
@@ -136,7 +140,9 @@ export const createAuthService = ({ services, txRunner }: AuthServiceDeps) => {
             return await _login(existingDeviceId, userId);
         } catch (error) {
             if (error instanceof NotFoundError) {
-                throw new UnauthorisedError('Invalid or expired verification code');
+                throw new UnauthorisedError('Could not verify verification code', {
+                    code: 'Invalid or expired verification code',
+                });
             }
             throw error;
         }

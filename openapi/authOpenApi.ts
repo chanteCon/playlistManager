@@ -118,7 +118,6 @@ const paths = {
                     errors: 'Validation error messages',
                 }),
                 401: errorResponse({ message: 'Incorrect email or password' }),
-                403: errorResponse({ message: 'Email not verified' }),
             },
         },
     },

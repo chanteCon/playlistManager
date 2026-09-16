@@ -10,7 +10,7 @@ export const ErrorResponse = z.object({
     success: z.literal(false),
     message: z.string(),
     data: z.null(),
-    errors: z.any().nullable().optional(),
+    errors: z.record(z.string(), z.array(z.string())).nullable().optional(),
 });
 
 type SuccessParams = {

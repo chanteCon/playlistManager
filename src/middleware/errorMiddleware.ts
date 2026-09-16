@@ -1,20 +1,15 @@
 import type { Request, Response, NextFunction } from 'express';
-import { AppError, ValidationError } from 'shared/errors/errors';
+import { AppError } from 'shared/errors/errors';
 import { logger } from 'shared/logger/logger';
 
 export const errorHandler = (error: unknown, req: Request, res: Response, _next: NextFunction) => {
     let status = 500;
     let message = 'Internal Server Error';
     let errors;
-    if (error instanceof ValidationError) {
-        status = 400;
-        message = error.message;
-        errors = error.errors;
-    } else if (error instanceof AppError) {
+    if (error instanceof AppError) {
         status = error.status;
-        if (status !== 500) {
-            message = error.message;
-        }
+        message = error.status !== 500 ? error.message : message;
+        errors = error.errors;
     } else if (
         typeof error === 'object' &&
         error !== null &&
