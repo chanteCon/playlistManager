@@ -48,9 +48,9 @@ export const createAuthController = ({ services }: AuthControllerDeps) => {
 
     const startLogin = async (req: Request<any, any, LoginInput>, res: Response) => {
         const { email, password } = req.body;
-        await authService.startLogin({ email, password });
+        const demoCode = await authService.startLogin({ email, password });
         res.locals.message = 'If email is valid you will receive a login code';
-        return res.status(200).json({});
+        return res.status(200).json({ code: demoCode ? demoCode : null });
     };
 
     const loginMfa = async (req: Request<any, any, { code: string }>, res: Response) => {

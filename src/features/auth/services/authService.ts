@@ -87,19 +87,23 @@ export const createAuthService = ({ services, txRunner }: AuthServiceDeps) => {
             data: { email, username, password: hashedPassword },
         });
         const data = {
-            user: { id: user.id, verified: user.verified, email: user.email },
+            user,
             codeType: 'VERIFICATION' as CodeType,
         };
         await codeService.issueCodeForUser({ data });
     };
 
-    const startLogin = async ({ email, password }: LoginInput): Promise<void> => {
+    const startLogin = async ({ email, password }: LoginInput): Promise<string | null> => {
         const user = await _getUserForLogin(email);
         const match = await comparePassword(password, user.password);
         if (!match) {
             throw new UnauthorisedError('Incorrect email or password');
         }
-        await codeService.issueCodeForUser({ data: { user, codeType: 'LOGIN' } });
+        const code = await codeService.issueCodeForUser({ data: { user, codeType: 'LOGIN' } });
+        if (user.isDemo) {
+            return code;
+        }
+        return null;
     };
 
     type LoginMfaInput = { code: string; existingDeviceId?: string };
@@ -109,7 +113,6 @@ export const createAuthService = ({ services, txRunner }: AuthServiceDeps) => {
     }: LoginMfaInput): Promise<Tokens & { deviceId: string }> => {
         try {
             const userId = await codeService.verifyCode({ code, codeType: 'LOGIN' });
-
             await userService.findAuthUserById(userId);
             return await _login(existingDeviceId, userId);
         } catch (error) {

@@ -7,6 +7,7 @@ import { translateNotFoundToUnAuth } from 'database/prisma/repoError';
 import { CodeRepo } from './codeRepo';
 import { EmailService } from 'shared/email/emailService';
 import { User } from 'features/user/types';
+import { ForbiddenError } from 'shared/errors/errors';
 
 const CODE_EXP_MS = 5 * 60 * 1000;
 
@@ -35,12 +36,17 @@ export const createCodeService = (deps: CodeServiceDeps) => {
     ////////////// Exported functions ////////////////
 
     type IssueUserCodeInput = {
-        data: { user: Pick<User, 'id' | 'verified' | 'email'>; codeType: CodeType };
+        data: { user: User; codeType: CodeType };
         tx?: PrismaClientTx;
     };
 
     const issueCodeForUser = async ({ data, tx }: IssueUserCodeInput): Promise<string | null> => {
         const { user, codeType } = data;
+        if (user.isDemo && codeType !== 'LOGIN') {
+            throw new ForbiddenError('Cannot issue code', {
+                user: ['Demo accounts do not have permission to perform this action'],
+            });
+        }
         if (codeType === 'VERIFICATION' && user.verified) {
             return null;
         }

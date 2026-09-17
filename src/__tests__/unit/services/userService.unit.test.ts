@@ -124,7 +124,7 @@ describe('Unit tests: User service', () => {
             expect(updatedUser).toEqual(privateUser);
             expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledTimes(1);
             expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledWith({
-                where: { id: user.id },
+                where: { id: user.id, isDemo: null },
                 data: { password },
             });
         });
@@ -138,7 +138,7 @@ describe('Unit tests: User service', () => {
                 }),
             ).rejects.toThrow('User not found');
             expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledWith({
-                where: { id: user.id },
+                where: { id: user.id, isDemo: null },
                 data: { password },
             });
         });
@@ -148,6 +148,7 @@ describe('Unit tests: User service', () => {
             const newEmail = 'new@email.com';
             const fullUser = buildUser({ ...user, email: newEmail });
             mockUserRepo.updateUserSensitive.mockResolvedValue(fullUser);
+            mockUserRepo.findUserInternalById.mockResolvedValueOnce(fullUser);
             await userService.updateEmail({ id: user.id, email: fullUser.email });
             expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledTimes(1);
             expect(mockUserRepo.updateUserSensitive).toHaveBeenCalledWith({
@@ -157,6 +158,10 @@ describe('Unit tests: User service', () => {
             });
         });
         test('Throws error if email is taken', async () => {
+            const newEmail = 'new@email.com';
+            const fullUser = buildUser({ ...user, email: newEmail });
+            mockUserRepo.updateUserSensitive.mockResolvedValue(fullUser);
+            mockUserRepo.findUserInternalById.mockResolvedValueOnce(fullUser);
             mockUserRepo.updateUserSensitive.mockRejectedValueOnce(prismaUniqueConstraintError);
             await expect(
                 userService.updateEmail({ id: user.id, email: privateUser.email }),
@@ -169,6 +174,10 @@ describe('Unit tests: User service', () => {
             });
         });
         test('Throws error if user not found', async () => {
+            const newEmail = 'new@email.com';
+            const fullUser = buildUser({ ...user, email: newEmail });
+            mockUserRepo.updateUserSensitive.mockResolvedValue(fullUser);
+            mockUserRepo.findUserInternalById.mockResolvedValueOnce(fullUser);
             mockUserRepo.updateUserSensitive.mockRejectedValueOnce(prismaNotFoundError);
             await expect(
                 userService.updateEmail({ id: user.id, email: privateUser.email }),
@@ -183,6 +192,9 @@ describe('Unit tests: User service', () => {
         const code = 'emailCode';
         test('Succesfully updates user email and issues new verification code', async () => {
             const email = 'new@email.com';
+            const fullUser = buildUser({ ...user, email: email });
+            mockUserRepo.findUserInternalById.mockResolvedValueOnce(fullUser);
+            mockUserRepo.updateUserSensitive.mockResolvedValue(fullUser);
             mockCodeService.issueCodeForUser.mockResolvedValueOnce(code);
             mockTokenService.revokeAllForUser.mockResolvedValueOnce();
 
@@ -192,6 +204,9 @@ describe('Unit tests: User service', () => {
         });
         test('Throws if user not found throws', async () => {
             const email = 'new@email.com';
+            mockUserRepo.findUserInternalById.mockResolvedValueOnce(
+                buildUser({ ...user, email: 'test@email.com' }),
+            );
             mockCodeService.issueCodeForUser.mockResolvedValueOnce(code);
             mockUserRepo.updateUserSensitive.mockRejectedValueOnce(
                 new ConflictError('Email already in use'),
@@ -205,6 +220,9 @@ describe('Unit tests: User service', () => {
     });
     describe('remove', () => {
         test('Removes user and returns their id', async () => {
+            const fullUser = buildUser({ ...user, email: 'test@email.com' });
+            mockUserRepo.updateUserSensitive.mockResolvedValue(fullUser);
+            mockUserRepo.findUserInternalById.mockResolvedValueOnce(fullUser);
             mockUserRepo.remove.mockResolvedValueOnce(user);
             mockCodeService.removeAllForUser.mockResolvedValueOnce();
             const deletedId = await userService.remove(user.id);
@@ -213,6 +231,9 @@ describe('Unit tests: User service', () => {
             expect(mockUserRepo.remove).toHaveBeenCalledWith(user.id);
         });
         test('Throws if user not found', async () => {
+            const fullUser = buildUser({ ...user, email: 'test@email.com' });
+            mockUserRepo.updateUserSensitive.mockResolvedValue(fullUser);
+            mockUserRepo.findUserInternalById.mockResolvedValueOnce(fullUser);
             mockUserRepo.remove.mockRejectedValueOnce(prismaNotFoundError);
             await expect(userService.remove(user.id)).rejects.toThrow('User not found');
             expect(mockUserRepo.remove).toHaveBeenCalledWith(user.id);
