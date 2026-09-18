@@ -2,7 +2,7 @@ import { mockLogger } from '__tests__/shared/mocks/mockLogger';
 import { sendMailMock } from '__tests__/shared/mocks/mockSendMail';
 
 import request from 'supertest';
-import { ForbiddenError, UnauthorisedError } from 'shared/errors/errors';
+import { BadInputError, ForbiddenError, UnauthorisedError } from 'shared/errors/errors';
 import { expectResError, expectWrappedResponse } from '__tests__/e2e/helpers/e2eAssertions';
 import { authPaths, playlistPaths, userPaths } from 'routes/path';
 import { User } from 'features/user/types';
@@ -83,6 +83,18 @@ describe('e2e tests: Demo User', () => {
         expectResError({
             res,
             error: new ForbiddenError('Cannot issue code'),
+            mockLogger,
+        });
+    });
+    test('User cannot update their demo status', async () => {
+        const { app } = testEnv;
+        const res = await setAuthHeader({
+            req: request(app).patch(userPaths.me),
+            accessToken,
+        }).send({ isDemo: null });
+        expectResError({
+            res,
+            error: new BadInputError('Invalid Input'),
             mockLogger,
         });
     });
