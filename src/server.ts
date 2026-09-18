@@ -6,7 +6,7 @@ import { logger } from 'shared/logger/logger';
 
 const envFile = process.env.NODE_ENV === 'production' ? '.env' : '.env.dev';
 
-config({ path: envFile });
+config({ path: envFile, override: true });
 const PORT = process.env.PORT || 4000;
 
 const start = async () => {
@@ -24,10 +24,7 @@ const start = async () => {
     };
 
     const app = createApp(appDeps);
-    const server = app.listen(PORT, () => {
-        logger.log(`Server listening on port ${PORT}`);
-        logger.log('http://localhost:4000');
-    });
+    const server = app.listen(PORT, () => {});
 
     const shutDown = async (signal: string) => {
         logger.log(signal + '. Shutting down...');
