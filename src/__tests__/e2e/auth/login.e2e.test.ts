@@ -2,7 +2,7 @@ import { mockLogger } from '__tests__/shared/mocks/mockLogger';
 import { sendMailMock } from '__tests__/shared/mocks/mockSendMail';
 import request from 'supertest';
 import * as jwt from 'jsonwebtoken';
-import { ForbiddenError, UnauthorisedError } from 'shared/errors/errors';
+import { UnauthorisedError } from 'shared/errors/errors';
 import {
     expectCookie,
     expectResError,

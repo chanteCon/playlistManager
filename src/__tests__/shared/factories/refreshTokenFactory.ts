@@ -1,9 +1,8 @@
 import { randomUUID, randomBytes, createHash } from 'crypto';
 import { RefreshToken } from '@prisma/client';
+import { CreateTokenInput } from 'features/auth/types';
 
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN;
-
-export type CreateTokenInput = Omit<RefreshToken, 'id' | 'revokedAt' | 'createdAt'>;
 
 export const buildRefreshTokenInput = (
     overrides: Partial<CreateTokenInput> = {},

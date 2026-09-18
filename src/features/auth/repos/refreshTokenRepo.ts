@@ -1,5 +1,4 @@
-import { AuthUser, ConsumedRefreshToken } from 'features/auth/types';
-import { CreateTokenInput } from '__tests__/shared/factories';
+import { AuthUser, ConsumedRefreshToken, CreateTokenInput } from 'features/auth/types';
 import { PrismaClient, RefreshToken } from '@prisma/client';
 import { RedisClientType } from 'redis';
 import { PrismaClientTx } from 'database/prisma/dbType';

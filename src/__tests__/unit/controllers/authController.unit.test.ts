@@ -65,7 +65,7 @@ describe('Unit tests: Auth controllers', () => {
             } as unknown as Request;
         });
         test('Returns 200 and accessToken and sets cookies on success', async () => {
-            mockAuthService.startLogin.mockResolvedValueOnce();
+            mockAuthService.startLogin.mockResolvedValueOnce(null);
             await authController.startLogin(mockReq, mockRes);
             expect(mockAuthService.startLogin).toHaveBeenCalledWith(mockReq.body);
             expectMockResponse({
