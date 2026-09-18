@@ -9,20 +9,56 @@ export const createEmailService = () => {
     const sendCodeEmail = async ({ code, email, codeType }: SendEmailCodeInput): Promise<void> => {
         const { subject, generateHtml } = emailTemplates[codeType];
         const html = generateHtml(code);
-        const mailOptions = {
-            from: process.env.EMAIL_FROM,
-            to: email,
-            subject,
-            html,
-        };
-
         try {
-            await emailTransporter.sendMail(mailOptions);
+            if (process.env.NODE_ENV === 'production') {
+                const apiKey = process.env.EMAIL_USER;
+                const secretKey = process.env.EMAIL_PASS;
+
+                const credentials = Buffer.from(`${apiKey}:${secretKey}`).toString('base64');
+
+                const response = await fetch('https://api.mailjet.com/v3.1/send', {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Basic ${credentials}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        Messages: [
+                            {
+                                From: {
+                                    Email: process.env.EMAIL_FROM,
+                                    Name: process.env.EMAIL_FROM_NAME,
+                                },
+                                To: [
+                                    {
+                                        Email: email,
+                                    },
+                                ],
+                                Subject: subject,
+                                HTMLPart: html,
+                            },
+                        ],
+                    }),
+                });
+
+                if (!response.ok) {
+                    const body = await response.text();
+
+                    throw new Error(`Mailjet API error (${response.status}): ${body}`);
+                }
+            } else {
+                await emailTransporter.sendMail({
+                    from: process.env.EMAIL_FROM,
+                    to: email,
+                    subject,
+                    html,
+                });
+            }
         } catch (err) {
             logger.error('Failed to send email:', err);
+            throw err;
         }
     };
-
     const generateCodeEmail = ({
         heading,
         message,

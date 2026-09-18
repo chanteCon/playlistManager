@@ -122,6 +122,6 @@ describe('e2e tests: Auth - verify', () => {
         const codeData = JSON.parse(storedCode!);
         expect(codeData).not.toBeNull();
         expect(codeData!.codeHash).not.toEqual(hashString(code));
-        expect(mockLogger.error).toHaveBeenCalledTimes(1);
+        expect(mockLogger.error).toHaveBeenCalledTimes(2);
     });
 });
