@@ -1,13 +1,34 @@
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
+
 import { AuthRequest } from 'features/auth/types';
+
 import RedisStore from 'rate-limit-redis';
+
 import { RedisClientType } from 'redis';
+import { Request } from 'express';
+
 type RateLimitOptions = {
     type: 'USER' | 'IP';
     max?: number;
     windowMs?: number;
     message?: string;
     keyPrefix?: string;
+};
+
+const getClientIp = (req: Request): string => {
+    if (process.env.NODE_ENV === 'production') {
+        const forwardedFor = req.get('X-Forwarded-For');
+
+        if (forwardedFor) {
+            return forwardedFor.split(',')[0].trim();
+        }
+    }
+
+    if (!req.ip) {
+        throw new Error('Unable to determine client IP');
+    }
+
+    return req.ip;
 };
 
 export const createRateLimiter = (
@@ -20,15 +41,21 @@ export const createRateLimiter = (
                 return redisClient.sendCommand([command, ...args]);
             },
         }),
+
         windowMs: windowMs ?? 10 * 60 * 1000,
         max,
+
         message: message ?? 'Too many requests, try again later',
+
         standardHeaders: 'draft-8',
         legacyHeaders: false,
+
         keyGenerator:
             type === 'IP'
                 ? (req) => {
-                      return `${keyPrefix ?? 'global'}:ip:${ipKeyGenerator(req.ip as string)}`;
+                      const ip = getClientIp(req);
+
+                      return `${keyPrefix ?? 'global'}:ip:${ipKeyGenerator(ip)}`;
                   }
                 : (req) => {
                       return `user:${(req as AuthRequest).user!.id}`;

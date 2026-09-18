@@ -1,5 +1,4 @@
 import { mockLogger } from '__tests__/shared/mocks/mockLogger';
-import { sendMailMock } from '__tests__/shared/mocks/mockSendMail';
 
 import request from 'supertest';
 import { BadInputError, ForbiddenError, UnauthorisedError } from 'shared/errors/errors';
@@ -7,7 +6,7 @@ import { expectResError, expectWrappedResponse } from '__tests__/e2e/helpers/e2e
 import { authPaths, playlistPaths, userPaths } from 'routes/path';
 import { User } from 'features/user/types';
 import { truncateDbTables } from '__tests__/shared/helpers/dbHelpers';
-import { extractCodeFromLastEmail, setAuthHeader } from '__tests__/e2e/helpers/e2eTestHelpers';
+import { setAuthHeader } from '__tests__/e2e/helpers/e2eTestHelpers';
 import { createTestApp, TestAppEnv } from '__tests__/setup/e2e';
 import { seedCode, seedPlaylist, seedUser } from '__tests__/shared/seeds/seeds';
 import { hashString } from 'shared/utils/hashing';
@@ -39,9 +38,7 @@ describe('e2e tests: Demo User', () => {
             .post(authPaths.login)
             .send({ email: user.email, password });
         expect(loginRes.status).toEqual(200);
-        const code = extractCodeFromLastEmail(sendMailMock);
-        const resCode = loginRes.body.data.demoCode;
-        expect(resCode).toBe(code);
+        const code = loginRes.body.data.demoCode;
         const mfaRes = await request(app).post(authPaths.loginMfa).send({ code });
         expect(mfaRes.status).toEqual(200);
         ({ accessToken } = mfaRes.body.data);

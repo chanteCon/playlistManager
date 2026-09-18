@@ -11,3 +11,5 @@ coverage/
 *.log
 *.code-workspace
 .env.test
+.env.prod
+.env.dev
