@@ -4,8 +4,9 @@ import { createRedisClient } from 'redisClient/redis';
 import { createApp } from 'app/app';
 import { logger } from 'shared/logger/logger';
 
-config();
+const envFile = process.env.NODE_ENV === 'production' ? '.env' : '.env.dev';
 
+config({ path: envFile });
 const PORT = process.env.PORT || 4000;
 
 const start = async () => {
