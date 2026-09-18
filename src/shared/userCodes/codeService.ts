@@ -56,9 +56,11 @@ export const createCodeService = (deps: CodeServiceDeps) => {
             codeType,
         };
         const code = await _generateUserCode({ data: codeData, tx });
-        await emailService
-            .sendCodeEmail({ email: user.email, code, codeType })
-            .catch((err) => logger.error('Failed to send email:', err));
+        if (!user.isDemo) {
+            await emailService
+                .sendCodeEmail({ email: user.email, code, codeType })
+                .catch((err) => logger.error('Failed to send email:', err));
+        }
 
         return code;
     };
