@@ -40,7 +40,7 @@ describe('e2e tests: Demo User', () => {
             .send({ email: user.email, password });
         expect(loginRes.status).toEqual(200);
         const code = extractCodeFromLastEmail(sendMailMock);
-        const resCode = loginRes.body.data.code;
+        const resCode = loginRes.body.data.demoCode;
         expect(resCode).toBe(code);
         const mfaRes = await request(app).post(authPaths.loginMfa).send({ code });
         expect(mfaRes.status).toEqual(200);
