@@ -6,7 +6,11 @@ import { logger } from 'shared/logger/logger';
 
 const envFile = process.env.NODE_ENV === 'production' ? '.env' : '.env.dev';
 
+<<<<<<< HEAD
 config({ path: envFile, override: true });
+=======
+config({ path: envFile });
+>>>>>>> 8f789f9 (chore(config): prepare production environment)
 const PORT = process.env.PORT || 4000;
 
 const start = async () => {
