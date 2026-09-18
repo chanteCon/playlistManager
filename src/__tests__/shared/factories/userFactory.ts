@@ -28,6 +28,7 @@ export const buildUser = (overrides: Partial<User> = {}): User => {
         createdAt: new Date(),
         updatedAt: new Date(),
         verified: true,
+        isDemo: null,
         ...userData,
         ...overrides,
     };

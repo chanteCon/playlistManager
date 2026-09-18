@@ -1,4 +1,4 @@
-import { NotFoundError } from 'shared/errors/errors';
+import { ForbiddenError, NotFoundError } from 'shared/errors/errors';
 import {
     CreateUserParams,
     PublicUser,
@@ -30,6 +30,17 @@ export const createUserService = ({
     tokenService,
     txRunner,
 }: UserServiceDeps) => {
+    const _assertNotDemo = async (id: string) => {
+        const user = await userRepo.findUserInternalById({ id });
+
+        if (!user) {
+            throw new NotFoundError('User not found');
+        }
+
+        if (user.isDemo) {
+            throw new ForbiddenError('Demo accounts do not have permission to perform this action');
+        }
+    };
     const create = async ({ data }: CreateUserParams): Promise<User> => {
         try {
             const user = await userRepo.create({ data });
@@ -88,7 +99,7 @@ export const createUserService = ({
     }: UpdatePasswordParams): Promise<PublicUser> => {
         try {
             return await userRepo.updateUserSensitive({
-                where: { id },
+                where: { id, isDemo: null },
                 data: { password: passwordHash },
                 tx,
             });
@@ -99,6 +110,7 @@ export const createUserService = ({
     };
 
     const updateEmail = async ({ id, email }: { id: string; email: string }): Promise<void> => {
+        await _assertNotDemo(id);
         try {
             await txRunner.run(async (tx: PrismaClientTx) => {
                 const user = await userRepo.updateUserSensitive({
@@ -122,6 +134,7 @@ export const createUserService = ({
     };
 
     const remove = async (id: string): Promise<string> => {
+        await _assertNotDemo(id);
         try {
             const user = await userRepo.remove(id);
             await codeService.removeAllForUser(id).catch(() => {
@@ -155,7 +168,6 @@ export const createUserService = ({
         }
         return user;
     };
-
     const findAll = async (options: UserSearchableParams = { verified: true }) => {
         return await userRepo.findAll(options);
     };

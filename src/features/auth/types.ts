@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { Request } from 'express';
 import { createAccountSchema, loginSchema, passwordResetSchema } from './schemas';
+import { RefreshToken } from '@prisma/client';
 
 export type CreateAccountInput = z.infer<typeof createAccountSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -36,3 +37,4 @@ export type UserCode = {
     codeType: 'VERIFICATION' | 'PASSWORD_RESET' | 'LOGIN';
     expiresAt: Date;
 };
+export type CreateTokenInput = Omit<RefreshToken, 'id' | 'revokedAt' | 'createdAt'>;

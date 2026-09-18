@@ -9,7 +9,10 @@ export type CreateUserParams = {
     data: z.infer<typeof createAccountSchema>;
     tx?: PrismaClientTx;
 };
-export type PublicUser = Omit<User, 'password' | 'createdAt' | 'updatedAt' | 'verified' | 'email'>;
+export type PublicUser = Omit<
+    User,
+    'password' | 'createdAt' | 'updatedAt' | 'verified' | 'email' | 'isDemo'
+>;
 export type UserUpdatableInput = z.infer<typeof updateUserSchema>;
 
 export type UpdateUserParams = {

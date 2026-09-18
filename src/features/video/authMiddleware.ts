@@ -25,6 +25,9 @@ export const authMiddleware: RequestHandler = (req, _res, next) => {
         throw new UnauthorisedError('Unauthorized');
     }
     const payload = verifyToken(accessToken);
-    (req as AuthRequest).user = { id: payload.id, deviceId: payload.deviceId };
+    (req as AuthRequest).user = {
+        id: payload.id,
+        deviceId: payload.deviceId,
+    };
     next();
 };

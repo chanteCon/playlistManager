@@ -31,8 +31,8 @@ export class ValidationError extends BadInputError {
 }
 
 export class ForbiddenError extends AppError {
-    constructor(message = 'Forbidden') {
-        super(message, 403);
+    constructor(message = 'Forbidden', errors?: Record<string, string[]>) {
+        super(message, 403, errors);
     }
 }
 
