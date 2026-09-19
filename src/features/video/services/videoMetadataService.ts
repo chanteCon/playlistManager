@@ -11,15 +11,26 @@ export type VideoMetadataService = ReturnType<typeof createVideoMetadataService>
 export const createVideoMetadataService = () => {
     const extractMetadata = (html: string): VideoMetadata => {
         const $ = load(html);
+
+        const metaTags = $('meta')
+            .map((_, element) => ({
+                property: $(element).attr('property'),
+                name: $(element).attr('name'),
+                content: $(element).attr('content'),
+            }))
+            .get();
+
+        logger.debug({ metaTags }, 'YouTube meta tags');
+
         const getMeta = (property: string): string | undefined => {
             return $(`meta[property="${property}"]`).attr('content') ?? undefined;
         };
+
         return {
             title: getMeta('og:title'),
             thumbnail: getMeta('og:image'),
             description: getMeta('og:description'),
         };
-        //TODO: tiktok
     };
 
     const getExternalData = async (
