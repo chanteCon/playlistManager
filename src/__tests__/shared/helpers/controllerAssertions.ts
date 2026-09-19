@@ -44,6 +44,7 @@ export const expectMockCookie = ({
         secure: false,
         path,
         maxAge: COOKIE_EXPIRY_MS,
+        sameSite: 'none',
     });
 };
 
@@ -60,5 +61,6 @@ export const expectMockCookieCleared = ({
         httpOnly: true,
         secure: false,
         path,
+        sameSite: 'none',
     });
 };
