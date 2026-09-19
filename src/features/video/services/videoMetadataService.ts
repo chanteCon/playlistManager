@@ -1,26 +1,24 @@
 import { logger } from 'shared/logger/logger';
+
 import { VideoMetadata } from '../types';
+
 import { load } from 'cheerio';
+
 import { ALLOWED_DOMAINS } from '../constants';
+
 import { getIdentityFromUrl } from '../utils/videoUrl';
-import { AppError, BadGatewayError, BadInputError, NotFoundError } from 'shared/errors/errors';
+
+import { BadGatewayError, BadInputError, NotFoundError } from 'shared/errors/errors';
 
 const MAX_HTML_SIZE = 2 * 1024 * 1024; // 2 MiB
 
 export type VideoMetadataService = ReturnType<typeof createVideoMetadataService>;
+
 export const createVideoMetadataService = () => {
     const extractMetadata = (html: string): VideoMetadata => {
         const $ = load(html);
 
-        const metaTags = $('meta')
-            .map((_, element) => ({
-                property: $(element).attr('property'),
-                name: $(element).attr('name'),
-                content: $(element).attr('content'),
-            }))
-            .get();
-
-        logger.debug({ metaTags }, 'YouTube meta tags');
+        logger.debug(html, 'YouTube HTML');
 
         const getMeta = (property: string): string | undefined => {
             return $(`meta[property="${property}"]`).attr('content') ?? undefined;
@@ -31,6 +29,7 @@ export const createVideoMetadataService = () => {
             thumbnail: getMeta('og:image'),
             description: getMeta('og:description'),
         };
+        // TODO: tiktok
     };
 
     const getExternalData = async (
@@ -38,44 +37,18 @@ export const createVideoMetadataService = () => {
     ): Promise<{ url: string; platformId?: string; metadata?: VideoMetadata } | undefined> => {
         const parsedUrl = new URL(url);
 
-        logger.debug({ url, hostname: parsedUrl.hostname }, 'Fetching external video data');
-
         if (!ALLOWED_DOMAINS.has(parsedUrl.hostname)) {
-            logger.warn({ hostname: parsedUrl.hostname }, 'Video URL rejected: domain not allowed');
-
             return undefined;
         }
 
         try {
             const result = await fetchHTML(url);
 
-            logger.debug(
-                {
-                    resolvedUrl: result.resolvedUrl,
-                    platformId: result.platformId,
-                    htmlLength: result.html.length,
-                },
-                'Video HTML fetched',
-            );
-
             if (!result.platformId) {
-                logger.warn(
-                    { url: result.resolvedUrl },
-                    'Video platform ID could not be determined',
-                );
-
                 return undefined;
             }
 
             const metadata = extractMetadata(result.html);
-
-            logger.debug(
-                {
-                    platformId: result.platformId,
-                    metadata,
-                },
-                'Video metadata extracted',
-            );
 
             return {
                 url: result.resolvedUrl,
@@ -84,11 +57,6 @@ export const createVideoMetadataService = () => {
             };
         } catch (error) {
             logger.error({ error, url }, 'Failed to fetch video metadata');
-
-            if (error instanceof AppError) {
-                throw error;
-            }
-
             throw error;
         }
     };
@@ -99,6 +67,7 @@ export const createVideoMetadataService = () => {
         if (!identity) {
             throw new Error('Redirect to disallowed host');
         }
+
         return identity;
     };
 
@@ -115,7 +84,11 @@ export const createVideoMetadataService = () => {
 
     const fetchHTML = async (
         url: string,
-    ): Promise<{ html: string; resolvedUrl: string; platformId: string | undefined }> => {
+    ): Promise<{
+        html: string;
+        resolvedUrl: string;
+        platformId: string | undefined;
+    }> => {
         let currentUrl = url;
         let platformId = undefined;
 
@@ -131,11 +104,15 @@ export const createVideoMetadataService = () => {
                 const redirectUrl = new URL(location, currentUrl);
 
                 currentUrl = redirectUrl.toString();
+
                 checkUrlAllowed(currentUrl);
+
                 continue;
             } else if (!response.ok) {
                 if (response.status === 404) {
-                    throw new NotFoundError('Video not found', { video: ['Video not found'] });
+                    throw new NotFoundError('Video not found', {
+                        video: ['Video not found'],
+                    });
                 }
 
                 throw new BadGatewayError(
@@ -146,31 +123,27 @@ export const createVideoMetadataService = () => {
             const identity = checkUrlAllowed(currentUrl);
             platformId = identity.platformId;
 
-            logger.debug(
-                {
-                    url: currentUrl,
-                    status: response.status,
-                    location: response.headers.get('location'),
-                    contentType: response.headers.get('content-type'),
-                },
-                'Video metadata HTTP response',
-            );
-
             return {
                 html: await readResponse(response),
                 resolvedUrl: getCanonicalUrl(currentUrl),
-                platformId: platformId,
+                platformId,
             };
         }
-        throw new BadInputError('Invalid input', { url: ['Too many redirects'] });
+
+        throw new BadInputError('Invalid input', {
+            url: ['Too many redirects'],
+        });
     };
 
     const readResponse = async (response: Response): Promise<string> => {
         const contentLength = response.headers.get('content-length');
 
         if (contentLength && Number(contentLength) > MAX_HTML_SIZE) {
-            throw new BadInputError('Invalid input', { url: ['Unable to process video URL'] });
+            throw new BadInputError('Invalid input', {
+                url: ['Unable to process video URL'],
+            });
         }
+
         if (!response.body) {
             throw new BadInputError('Invalid input', {
                 url: ['Unable to process video URL'],
@@ -185,7 +158,9 @@ export const createVideoMetadataService = () => {
             size += chunk.byteLength;
 
             if (size > MAX_HTML_SIZE) {
-                throw new BadInputError('Invalid input', { url: ['Unable to process video URL'] });
+                throw new BadInputError('Invalid input', {
+                    url: ['Unable to process video URL'],
+                });
             }
 
             chunks.push(decoder.decode(chunk, { stream: true }));
