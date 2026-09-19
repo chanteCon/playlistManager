@@ -30,11 +30,11 @@ export const createApp = (appDeps: AppDeps): Application => {
     app.use(timeout(20000));
     setUpRequestParsing(app);
     app.use(responseWrapper);
+    setUpLogging(app);
+
     setUpSecurityMiddleware(app);
 
     setUpRateLimiters(app, redis);
-
-    setUpLogging(app);
 
     if (process.env.NODE_ENV === 'development') {
         setUpDocs(app);
