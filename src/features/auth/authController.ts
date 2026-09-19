@@ -102,6 +102,7 @@ export const createAuthController = ({ services }: AuthControllerDeps) => {
                 httpOnly: true,
                 path,
                 secure: process.env.NODE_ENV === 'production',
+                sameSite: 'none',
             });
         }
     };
@@ -113,6 +114,7 @@ export const createAuthController = ({ services }: AuthControllerDeps) => {
                 path,
                 maxAge: COOKIE_EXPIRY_MS,
                 secure: process.env.NODE_ENV === 'production',
+                sameSite: 'none',
             });
         }
     };
