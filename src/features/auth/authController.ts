@@ -100,7 +100,6 @@ export const createAuthController = ({ services }: AuthControllerDeps) => {
         if (canSendResponse(res)) {
             res.clearCookie(name, {
                 httpOnly: true,
-                sameSite: 'strict',
                 path,
                 secure: process.env.NODE_ENV === 'production',
             });
@@ -111,7 +110,6 @@ export const createAuthController = ({ services }: AuthControllerDeps) => {
         if (canSendResponse(res)) {
             res.cookie(name, value, {
                 httpOnly: true,
-                sameSite: 'strict',
                 path,
                 maxAge: COOKIE_EXPIRY_MS,
                 secure: process.env.NODE_ENV === 'production',

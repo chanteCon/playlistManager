@@ -26,24 +26,59 @@ export const createVideoMetadataService = () => {
         url: string,
     ): Promise<{ url: string; platformId?: string; metadata?: VideoMetadata } | undefined> => {
         const parsedUrl = new URL(url);
+
+        logger.debug({ url, hostname: parsedUrl.hostname }, 'Fetching external video data');
+
         if (!ALLOWED_DOMAINS.has(parsedUrl.hostname)) {
+            logger.warn({ hostname: parsedUrl.hostname }, 'Video URL rejected: domain not allowed');
+
             return undefined;
         }
+
         try {
             const result = await fetchHTML(url);
+
+            logger.debug(
+                {
+                    resolvedUrl: result.resolvedUrl,
+                    platformId: result.platformId,
+                    htmlLength: result.html.length,
+                },
+                'Video HTML fetched',
+            );
+
             if (!result.platformId) {
+                logger.warn(
+                    { url: result.resolvedUrl },
+                    'Video platform ID could not be determined',
+                );
+
                 return undefined;
             }
+
+            const metadata = extractMetadata(result.html);
+
+            logger.debug(
+                {
+                    platformId: result.platformId,
+                    metadata,
+                },
+                'Video metadata extracted',
+            );
+
             return {
                 url: result.resolvedUrl,
                 platformId: result.platformId,
-                metadata: extractMetadata(result.html),
+                metadata,
             };
         } catch (error) {
-            logger.error({ error }, 'Failed to fetch video metadata');
+            logger.error({ error, url }, 'Failed to fetch video metadata');
+
             if (error instanceof AppError) {
                 throw error;
             }
+
+            throw error;
         }
     };
 
@@ -99,6 +134,16 @@ export const createVideoMetadataService = () => {
 
             const identity = checkUrlAllowed(currentUrl);
             platformId = identity.platformId;
+
+            logger.debug(
+                {
+                    url: currentUrl,
+                    status: response.status,
+                    location: response.headers.get('location'),
+                    contentType: response.headers.get('content-type'),
+                },
+                'Video metadata HTTP response',
+            );
 
             return {
                 html: await readResponse(response),
