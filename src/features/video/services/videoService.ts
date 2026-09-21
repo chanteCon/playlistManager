@@ -80,7 +80,10 @@ export const createVideoService = ({ videoRepo, videoMetadataService }: VideoSer
 
         if (normalisedURLData && !existingSource && platform) {
             // Otherwise need to fetch the canonical url and source data
-            const result = await videoMetadataService.getExternalData(normalisedURLData.url);
+            const result = await videoMetadataService.getExternalData(
+                normalisedURLData.url,
+                platformId ? { platform, platformId } : undefined,
+            );
             if (result) {
                 metadata = result.metadata;
                 canonicalUrl = result.url;

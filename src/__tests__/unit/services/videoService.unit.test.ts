@@ -52,7 +52,7 @@ describe('Video Service unit tests', () => {
                 name: 'valid tiktok mobile url',
                 url: 'https://vt.tiktok.com/ZS48Twksn/',
                 expectedPlatform: 'tiktok',
-                expectedPlatformId: 'ZS48Twksn',
+                expectedPlatformId: undefined,
                 expectedUrl: 'https://vt.tiktok.com/ZS48Twksn/',
             },
         ])(
@@ -60,6 +60,7 @@ describe('Video Service unit tests', () => {
             async ({ url, expectedPlatform, expectedPlatformId, expectedUrl }) => {
                 mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
                 mockVideoRepo.findByPlatformIdentity.mockResolvedValueOnce(null);
+
                 mockVideoMetadataService.getExternalData.mockResolvedValue({
                     url: expectedUrl,
                     metadata: { title: 'test title' },
@@ -68,14 +69,25 @@ describe('Video Service unit tests', () => {
 
                 await videoService.addFromUrl(url);
 
-                expect(mockVideoMetadataService.getExternalData).toHaveBeenCalledWith(expectedUrl);
+                expect(mockVideoMetadataService.getExternalData).toHaveBeenCalledWith(
+                    expectedUrl,
+                    expectedPlatformId
+                        ? {
+                              platform: expectedPlatform,
+                              platformId: expectedPlatformId,
+                          }
+                        : undefined,
+                );
+
                 const expectedVideo = {
                     url: expectedUrl,
                     canonicalUrl: expectedUrl,
-                    platformIdentity: {
-                        platform: expectedPlatform,
-                        platformId: expectedPlatformId,
-                    },
+                    platformIdentity: expectedPlatformId
+                        ? {
+                              platform: expectedPlatform,
+                              platformId: expectedPlatformId,
+                          }
+                        : undefined,
                     metadata: {
                         title: 'test title',
                     },
@@ -98,7 +110,10 @@ describe('Video Service unit tests', () => {
             mockVideoRepo.findByUrl.mockResolvedValueOnce(null);
             mockVideoMetadataService.getExternalData.mockResolvedValueOnce(undefined);
             await videoService.addFromUrl(testUrl);
-            expect(mockVideoMetadataService.getExternalData).toHaveBeenCalledWith(testUrl);
+            expect(mockVideoMetadataService.getExternalData).toHaveBeenCalledWith(testUrl, {
+                platform: 'tiktok',
+                platformId: '7234514172778777874',
+            });
             expect(mockVideoRepo.ensureExists).toHaveBeenCalledWith(
                 expect.objectContaining(expectedVideo),
             );
