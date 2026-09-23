@@ -5,6 +5,7 @@ import {
     seedPlaylistVideo,
     seedUsers,
     seedVideo,
+    seedVideoWithSource,
 } from '__tests__/shared/seeds/seeds';
 import { User } from 'features/user/types';
 import * as jwt from 'jsonwebtoken';
@@ -644,6 +645,188 @@ describe('e2e tests Playlist Routes', () => {
             });
 
             const res = await request(app).delete(playlistPaths.id(playlist.id)).send();
+
+            expectResError({
+                res,
+                error: new UnauthorisedError('Unauthorized'),
+                mockLogger,
+            });
+        });
+    });
+    describe('Search library', () => {
+        test('Should return matching playlists and videos', async () => {
+            const { app, db } = testEnv;
+
+            const matchingPlaylist = await seedPlaylist(db, {
+                userId: user.id,
+                name: 'Music Favourites',
+                description: 'My favourite songs',
+            });
+
+            await seedPlaylist(db, {
+                userId: user.id,
+                name: 'Cooking',
+                description: 'Recipes and tutorials',
+            });
+
+            const matchingVideo = await seedVideo(db);
+
+            const matchingPlaylistVideo = await seedPlaylistVideo(db, {
+                videoId: matchingVideo.id,
+                playlistId: matchingPlaylist.id,
+                customTitle: 'Best Music Videos',
+            });
+
+            const nonMatchingVideo = await seedVideo(db);
+
+            await seedPlaylistVideo(db, {
+                videoId: nonMatchingVideo.id,
+                playlistId: matchingPlaylist.id,
+                customTitle: 'Cooking Tutorial',
+            });
+
+            const res = await setAuthHeader({
+                req: request(app).get(playlistPaths.search).query({ search: 'music' }),
+                accessToken,
+            }).send();
+
+            expect(res.status).toBe(200);
+
+            expect(res.body.data).toMatchObject({
+                results: {
+                    playlists: [
+                        expect.objectContaining({
+                            id: matchingPlaylist.id,
+                            name: 'Music Favourites',
+                        }),
+                    ],
+                    videos: [
+                        expect.objectContaining({
+                            id: matchingPlaylistVideo.id,
+                            title: 'Best Music Videos',
+                        }),
+                    ],
+                },
+            });
+
+            expect(res.body.data.results.playlists).toHaveLength(1);
+            expect(res.body.data.results.videos).toHaveLength(1);
+        });
+
+        test('Should search videos by source title', async () => {
+            const { app, db } = testEnv;
+
+            const playlist = await seedPlaylist(db, {
+                userId: user.id,
+            });
+
+            const video = await seedVideoWithSource({
+                db,
+                sourceOverrides: {
+                    title: 'Music Video',
+                },
+            });
+
+            const playlistVideo = await seedPlaylistVideo(db, {
+                videoId: video.id,
+                playlistId: playlist.id,
+            });
+
+            const res = await setAuthHeader({
+                req: request(app).get(playlistPaths.search).query({ search: 'music' }),
+                accessToken,
+            }).send();
+
+            expect(res.status).toBe(200);
+
+            expect(res.body.data.results.videos).toMatchObject([
+                expect.objectContaining({
+                    id: playlistVideo.id,
+                    title: 'Music Video',
+                }),
+            ]);
+        });
+
+        test('Should not return results belonging to another user', async () => {
+            const { app, db } = testEnv;
+
+            const otherPlaylist = await seedPlaylist(db, {
+                userId: users[1].id,
+                name: 'Music Favourites',
+            });
+
+            const otherVideo = await seedVideo(db);
+
+            await seedPlaylistVideo(db, {
+                videoId: otherVideo.id,
+                playlistId: otherPlaylist.id,
+                customTitle: 'Music Video',
+            });
+
+            const res = await setAuthHeader({
+                req: request(app).get(playlistPaths.search).query({ search: 'music' }),
+                accessToken,
+            }).send();
+
+            expect(res.status).toBe(200);
+
+            expect(res.body.data.results).toMatchObject({
+                playlists: [],
+                videos: [],
+            });
+        });
+
+        test('Should return empty results if search has no matches', async () => {
+            const { app, db } = testEnv;
+
+            await seedPlaylist(db, {
+                userId: user.id,
+                name: 'Music Favourites',
+            });
+
+            const res = await setAuthHeader({
+                req: request(app).get(playlistPaths.search).query({ search: 'travel' }),
+                accessToken,
+            }).send();
+
+            expect(res.status).toBe(200);
+
+            expect(res.body.data.results).toMatchObject({
+                playlists: [],
+                videos: [],
+            });
+        });
+
+        test('Should be case insensitive and ignore whitespace', async () => {
+            const { app, db } = testEnv;
+
+            const playlist = await seedPlaylist(db, {
+                userId: user.id,
+                name: 'Music Favourites',
+            });
+
+            const res = await setAuthHeader({
+                req: request(app).get(playlistPaths.search).query({ search: '  MUSIC  ' }),
+                accessToken,
+            }).send();
+
+            expect(res.status).toBe(200);
+
+            expect(res.body.data.results.playlists).toMatchObject([
+                expect.objectContaining({
+                    id: playlist.id,
+                    name: 'Music Favourites',
+                }),
+            ]);
+        });
+
+        test('Should return unauthorised error (401) if user is not authenticated', async () => {
+            const { app } = testEnv;
+
+            const res = await request(app)
+                .get(playlistPaths.search)
+                .query({ search: 'music' })
+                .send();
 
             expectResError({
                 res,

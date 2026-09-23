@@ -37,6 +37,12 @@ export const createPlaylistRoutes = ({
     );
 
     router.get(
+        '/search',
+        validate(playlistSearchSchema, 'query'),
+        playlistController.searchLibrary,
+    );
+
+    router.get(
         '/:id',
         validate(playlistSearchSchema, 'query'),
         validate(playlistIdSchema, 'params'),

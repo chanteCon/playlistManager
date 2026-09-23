@@ -34,6 +34,18 @@ export const createPlaylistController = (playlistService: PlaylistService) => {
         return res.status(200).json({ playlist });
     };
 
+    const searchLibrary = async (
+        req: AuthRequest<any, any, any, { search: string }>,
+        res: Response,
+    ) => {
+        const userId = req.user!.id;
+        const { search } = req.query;
+
+        const results = await playlistService.searchUserLibrary(userId, search);
+
+        return res.status(200).json({ results });
+    };
+
     const updatePlaylist = async (
         req: AuthRequest<PlaylistIdParams, any, PlaylistUpdateInput>,
         res: Response,
@@ -53,5 +65,12 @@ export const createPlaylistController = (playlistService: PlaylistService) => {
         }
     };
 
-    return { createPlaylist, getPlaylist, getAllUserPlaylists, updatePlaylist, deletePlaylist };
+    return {
+        createPlaylist,
+        searchLibrary,
+        getPlaylist,
+        getAllUserPlaylists,
+        updatePlaylist,
+        deletePlaylist,
+    };
 };

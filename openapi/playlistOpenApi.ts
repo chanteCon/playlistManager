@@ -18,6 +18,14 @@ const components: ZodOpenApiComponentsObject = {
     securitySchemes: authHeader,
 };
 
+export const playlistSearchField = {
+    name: 'search',
+    in: 'query',
+    required: false,
+    schema: {
+        type: 'string',
+    },
+};
 /*
  * DTOs
  */
@@ -119,6 +127,7 @@ const paths = {
             summary: 'Get all user playlists',
             tags: ['Playlist'],
             security: [{ BearerAuth: [] }],
+            parameters: [playlistSearchField],
             responses: {
                 200: successResponse({
                     dataSchema: playlistsResponseSchema,
@@ -145,7 +154,7 @@ const paths = {
             summary: 'Get playlist',
             tags: ['Playlist'],
             security: [{ BearerAuth: [] }],
-            parameters: [playlistSchemas.playlistIdField],
+            parameters: [playlistSchemas.playlistIdField, playlistSearchField],
             responses: {
                 200: successResponse({
                     dataSchema: playlistWithVideosResponseSchema,

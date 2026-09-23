@@ -92,6 +92,15 @@ export const createPlaylistService = ({
         };
     };
 
+    const searchUserLibrary = async (userId: string, search: string) => {
+        const { playlists, playlistVideos } = await playlistRepo.search(userId, search);
+
+        return {
+            playlists,
+            videos: playlistVideos.map(_toPlaylistVideoDto),
+        };
+    };
+
     const update = async (
         userId: string,
         playlistId: string,
@@ -192,5 +201,6 @@ export const createPlaylistService = ({
         removeVideo,
         addVideo,
         updateVideo,
+        searchUserLibrary,
     };
 };

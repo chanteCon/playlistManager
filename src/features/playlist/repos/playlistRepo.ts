@@ -149,5 +149,104 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
         });
     };
 
-    return { create, existsForUser, findUserPlaylists, findById, update, deleteById };
+    const search = async (userId: string, search: string) => {
+        const normalizedSearch = search.trim().toLowerCase();
+
+        const platform: Platform | undefined =
+            normalizedSearch === 'youtube'
+                ? Platform.youtube
+                : normalizedSearch === 'tiktok'
+                  ? Platform.tiktok
+                  : undefined;
+
+        const [playlists, playlistVideos] = await Promise.all([
+            db.playlist.findMany({
+                where: {
+                    userId,
+                    OR: [
+                        {
+                            name: {
+                                contains: normalizedSearch,
+                                mode: 'insensitive',
+                            },
+                        },
+                        {
+                            description: {
+                                contains: normalizedSearch,
+                                mode: 'insensitive',
+                            },
+                        },
+                    ],
+                },
+            }),
+
+            db.playlistVideo.findMany({
+                where: {
+                    playlist: {
+                        userId,
+                    },
+                    OR: [
+                        {
+                            customTitle: {
+                                contains: normalizedSearch,
+                                mode: 'insensitive',
+                            },
+                        },
+                        {
+                            AND: [
+                                { customTitle: null },
+                                {
+                                    video: {
+                                        source: {
+                                            title: {
+                                                contains: normalizedSearch,
+                                                mode: 'insensitive',
+                                            },
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                        {
+                            customDescription: {
+                                contains: normalizedSearch,
+                                mode: 'insensitive',
+                            },
+                        },
+                        {
+                            AND: [
+                                { customDescription: null },
+                                {
+                                    video: {
+                                        source: {
+                                            description: {
+                                                contains: normalizedSearch,
+                                                mode: 'insensitive',
+                                            },
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                        ...(platform
+                            ? [
+                                  {
+                                      video: {
+                                          source: {
+                                              platform,
+                                          },
+                                      },
+                                  },
+                              ]
+                            : []),
+                    ],
+                },
+                include: playlistVideoInclude,
+            }),
+        ]);
+
+        return { playlists, playlistVideos };
+    };
+
+    return { create, search, existsForUser, findUserPlaylists, findById, update, deleteById };
 };
