@@ -2068,6 +2068,170 @@ paths:
                   - message
                   - data
                 additionalProperties: false
+  /api/playlists/search:
+    get:
+      summary: Search user library
+      tags:
+        - Playlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - *a1
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  results:
+                    playlists:
+                      - id: 00000000-0000-0000-0000-000000000000
+                        userId: 00000000-0000-0000-0000-000000000000
+                        name: Music Favourites
+                        description: My favourite songs
+                    videos:
+                      - id: 00000000-0000-0000-0000-000000000000
+                        playlistId: 00000000-0000-0000-0000-000000000000
+                        title: Best Music Videos
+                        description: My favourite music
+                        thumbnail: https://example.com/thumbnail.jpg
+                        url: https://www.youtube.com/watch?v=zzzzzzzzzzz
+                        platform: youtube
+                        platformId: zzzzzzzzzzz
+                        render: true
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      results:
+                        type: object
+                        properties:
+                          playlists:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                userId:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                name:
+                                  type: string
+                                description:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                              required:
+                                - id
+                                - userId
+                                - name
+                                - description
+                              additionalProperties: false
+                          videos:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                playlistId:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                title:
+                                  type: string
+                                description:
+                                  type: string
+                                thumbnail:
+                                  type: string
+                                url:
+                                  type: string
+                                platform:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                platformId:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                render:
+                                  type: boolean
+                              required:
+                                - id
+                                - playlistId
+                                - title
+                                - url
+                                - render
+                              additionalProperties: false
+                        required:
+                          - playlists
+                          - videos
+                        additionalProperties: false
+                    required:
+                      - results
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
   /api/playlists/{id}:
     get:
       summary: Get playlist
@@ -2146,6 +2310,10 @@ paths:
                                   type: string
                                   format: uuid
                                   pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                playlistId:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
                                 title:
                                   type: string
                                 description:
@@ -2166,6 +2334,7 @@ paths:
                                   type: boolean
                               required:
                                 - id
+                                - playlistId
                                 - title
                                 - url
                                 - render
@@ -2738,6 +2907,10 @@ paths:
                             type: string
                             format: uuid
                             pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          playlistId:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
                           title:
                             type: string
                           description:
@@ -2758,6 +2931,7 @@ paths:
                             type: boolean
                         required:
                           - id
+                          - playlistId
                           - title
                           - url
                           - render
@@ -3126,6 +3300,10 @@ paths:
                             type: string
                             format: uuid
                             pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          playlistId:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
                           title:
                             type: string
                           description:
@@ -3146,6 +3324,7 @@ paths:
                             type: boolean
                         required:
                           - id
+                          - playlistId
                           - title
                           - url
                           - render

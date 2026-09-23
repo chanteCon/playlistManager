@@ -26,12 +26,14 @@ export const playlistSearchField = {
         type: 'string',
     },
 };
+
 /*
  * DTOs
  */
 
 const playlistVideoDTOSchema = z.object({
     id: z.uuid(),
+    playlistId: z.uuid(),
     title: z.string(),
     description: z.string().optional(),
     thumbnail: z.string().optional(),
@@ -66,6 +68,20 @@ const playlistsResponseSchema = z.object({
             description: z.string().nullable(),
         }),
     ),
+});
+
+const searchResponseSchema = z.object({
+    results: z.object({
+        playlists: z.array(
+            z.object({
+                id: z.uuid(),
+                userId: z.uuid(),
+                name: z.string(),
+                description: z.string().nullable(),
+            }),
+        ),
+        videos: z.array(playlistVideoDTOSchema),
+    }),
 });
 
 const playlistWithVideosResponseSchema = z.object({
@@ -140,6 +156,48 @@ const paths = {
                                 description: null,
                             },
                         ],
+                    },
+                }),
+                401: errorResponse({
+                    message: 'Unauthorized',
+                }),
+            },
+        },
+    },
+
+    '/api/playlists/search': {
+        get: {
+            summary: 'Search user library',
+            tags: ['Playlist'],
+            security: [{ BearerAuth: [] }],
+            parameters: [playlistSearchField],
+            responses: {
+                200: successResponse({
+                    dataSchema: searchResponseSchema,
+                    data: {
+                        results: {
+                            playlists: [
+                                {
+                                    id,
+                                    userId: id,
+                                    name: 'Music Favourites',
+                                    description: 'My favourite songs',
+                                },
+                            ],
+                            videos: [
+                                {
+                                    id,
+                                    playlistId: id,
+                                    title: 'Best Music Videos',
+                                    description: 'My favourite music',
+                                    thumbnail: 'https://example.com/thumbnail.jpg',
+                                    url: 'https://www.youtube.com/watch?v=zzzzzzzzzzz',
+                                    platform: 'youtube',
+                                    platformId: 'zzzzzzzzzzz',
+                                    render: true,
+                                },
+                            ],
+                        },
                     },
                 }),
                 401: errorResponse({

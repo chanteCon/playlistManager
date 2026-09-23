@@ -46,6 +46,7 @@ export const createPlaylistService = ({
 
         return {
             id: playlistVideo.id,
+            playlistId: playlistVideo.playlistId,
             title: playlistVideo.customTitle ?? source?.title ?? '',
             description: playlistVideo.customDescription ?? source?.description ?? '',
             thumbnail: source?.thumbnail ?? '',
