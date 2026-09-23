@@ -4,6 +4,8 @@
 
 Backend API for managing video playlists. Users can create playlists and add videos from supported external platforms using URLs.
 
+**Live:** [api.playlist.chantellecs.com](https://playlist.api.chantellecs.com/api/docs)
+
 ## Features
 
 - Manage users, playlists, and playlist videos
