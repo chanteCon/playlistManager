@@ -36,7 +36,7 @@ export const createApp = (appDeps: AppDeps): Application => {
 
     setUpRateLimiters(app, redis);
 
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'test') {
         setUpDocs(app);
     }
 
