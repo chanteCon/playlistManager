@@ -138,7 +138,12 @@ export const seedPlaylists = async (
     );
 };
 
-type PlaylistVideoInput = { playlistId: string; videoId: string };
+type PlaylistVideoInput = {
+    playlistId: string;
+    videoId: string;
+    customTitle?: string;
+    customDescription?: string;
+};
 export const seedPlaylistVideo = async (
     db: PrismaClient,
     ids: PlaylistVideoInput,

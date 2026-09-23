@@ -2,6 +2,7 @@ import { buildPlaylistInput } from '__tests__/shared/factories';
 import {
     playlistCreateSchema,
     playlistIdSchema,
+    playlistSearchSchema,
     playlistUpdateSchema,
     playlistVideoRefSchema,
     updateVideoSchema,
@@ -137,5 +138,28 @@ describe('Unit tests: Playlist Schemas', () => {
         };
 
         testZodSchema(config);
+    });
+    describe('Playlist Search Schema', () => {
+        const config = {
+            schema: playlistSearchSchema,
+            validInput: { search: 'music' },
+            fields: [{ field: 'search', badValue: 2 }],
+            required: [],
+            extraFieldKey: 'userId',
+        };
+
+        testZodSchema(config);
+
+        test('Accepts search omitted', () => {
+            const res = playlistSearchSchema.safeParse({});
+            expect(res.success).toBe(true);
+        });
+
+        test('Accepts empty search', () => {
+            const res = playlistSearchSchema.safeParse({
+                search: '',
+            });
+            expect(res.success).toBe(true);
+        });
     });
 });

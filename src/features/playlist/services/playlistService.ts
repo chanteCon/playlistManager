@@ -46,6 +46,7 @@ export const createPlaylistService = ({
 
         return {
             id: playlistVideo.id,
+            playlistId: playlistVideo.playlistId,
             title: playlistVideo.customTitle ?? source?.title ?? '',
             description: playlistVideo.customDescription ?? source?.description ?? '',
             thumbnail: source?.thumbnail ?? '',
@@ -71,12 +72,16 @@ export const createPlaylistService = ({
         }
     };
 
-    const getUserPlaylists = async (userId: string): Promise<Playlist[]> => {
-        return await playlistRepo.findUserPlaylists(userId);
+    const getUserPlaylists = async (userId: string, search?: string): Promise<Playlist[]> => {
+        return await playlistRepo.findUserPlaylists(userId, search);
     };
 
-    const getPlaylistById = async (userId: string, playlistId: string): Promise<PlaylistDTO> => {
-        const playlist = await playlistRepo.findById(playlistId, userId);
+    const getPlaylistById = async (
+        userId: string,
+        playlistId: string,
+        search?: string,
+    ): Promise<PlaylistDTO> => {
+        const playlist = await playlistRepo.findById(playlistId, userId, search);
         if (!playlist) {
             throw new NotFoundError('Playlist not found');
         }
@@ -85,6 +90,15 @@ export const createPlaylistService = ({
             name: playlist.name,
             description: playlist.description,
             videos: playlist.playlistVideos.map(_toPlaylistVideoDto),
+        };
+    };
+
+    const searchUserLibrary = async (userId: string, search: string) => {
+        const { playlists, playlistVideos } = await playlistRepo.search(userId, search);
+
+        return {
+            playlists,
+            videos: playlistVideos.map(_toPlaylistVideoDto),
         };
     };
 
@@ -188,5 +202,6 @@ export const createPlaylistService = ({
         removeVideo,
         addVideo,
         updateVideo,
+        searchUserLibrary,
     };
 };

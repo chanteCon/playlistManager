@@ -61,6 +61,7 @@ export type PlaylistWithVideos = Prisma.PlaylistGetPayload<{
 // DTOs
 export type PlaylistVideoDTO = {
     id: string;
+    playlistId: string;
     title: string;
     description?: string;
     thumbnail?: string;

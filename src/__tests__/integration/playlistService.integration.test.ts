@@ -1,3 +1,4 @@
+import { Platform } from '@prisma/client';
 import { createTestInfrastructure, InfraStructure } from '__tests__/setup/infrastructure';
 import { createPlaylistServiceFixture } from '__tests__/setup/integration';
 import { buildPlaylistInput } from '__tests__/shared/factories';
@@ -6,6 +7,7 @@ import { mockVideoMetadataService } from '__tests__/shared/mocks/services';
 import {
     seedPlaylist,
     seedPlaylists,
+    seedPlaylistVideo,
     seedPlaylistWithVideos,
     seedUser,
     seedVideo,
@@ -106,6 +108,168 @@ describe('Playlist service integration tests', () => {
                 name: playlistInput.name,
             });
         });
+        describe('Search', () => {
+            test('Should return all if empty', async () => {
+                const dbPlaylists = await seedPlaylists(testEnv.db, 2, [
+                    { userId: user.id },
+                    { userId: user.id },
+                ]);
+
+                const playlists = await testEnv.playlistService.getUserPlaylists(user.id, '');
+
+                expect(playlists).toHaveLength(2);
+                expect(playlists).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({
+                            id: dbPlaylists[0].id,
+                            userId: user.id,
+                        }),
+                        expect.objectContaining({
+                            id: dbPlaylists[1].id,
+                            userId: user.id,
+                        }),
+                    ]),
+                );
+            });
+
+            test('Should find matching name', async () => {
+                const matchingPlaylist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                    name: 'Music Videos',
+                });
+
+                await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                    name: 'Cooking Videos',
+                });
+
+                const playlists = await testEnv.playlistService.getUserPlaylists(user.id, 'music');
+
+                expect(playlists).toHaveLength(1);
+                expect(playlists[0]).toMatchObject({
+                    id: matchingPlaylist.id,
+                    userId: user.id,
+                    name: 'Music Videos',
+                });
+            });
+
+            test('Should find matching description', async () => {
+                const matchingPlaylist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                    name: 'My Videos',
+                    description: 'Videos about rock music',
+                });
+
+                await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                    name: 'Cooking',
+                    description: 'Recipes and cooking tutorials',
+                });
+
+                const playlists = await testEnv.playlistService.getUserPlaylists(user.id, 'rock');
+
+                expect(playlists).toHaveLength(1);
+                expect(playlists[0]).toMatchObject({
+                    id: matchingPlaylist.id,
+                    userId: user.id,
+                    description: 'Videos about rock music',
+                });
+            });
+
+            test('Should find matching name and description', async () => {
+                const nameMatch = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                    name: 'Music Videos',
+                    description: 'My favourite videos',
+                });
+
+                const descriptionMatch = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                    name: 'My Favourites',
+                    description: 'Music Videos I love',
+                });
+
+                await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                    name: 'Cooking Videos',
+                    description: 'Recipes and cooking tutorials',
+                });
+
+                const playlists = await testEnv.playlistService.getUserPlaylists(user.id, 'music');
+
+                expect(playlists).toHaveLength(2);
+                expect(playlists).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({
+                            id: nameMatch.id,
+                            name: 'Music Videos',
+                        }),
+                        expect.objectContaining({
+                            id: descriptionMatch.id,
+                            description: 'Music Videos I love',
+                        }),
+                    ]),
+                );
+            });
+
+            test('Should find nothing if neither match', async () => {
+                await seedPlaylists(testEnv.db, 2, [
+                    {
+                        userId: user.id,
+                        name: 'Music Videos',
+                        description: 'My favourite videos',
+                    },
+                    {
+                        userId: user.id,
+                        name: 'Cooking Videos',
+                        description: 'Recipes and cooking tutorials',
+                    },
+                ]);
+
+                const playlists = await testEnv.playlistService.getUserPlaylists(user.id, 'travel');
+
+                expect(playlists).toHaveLength(0);
+            });
+
+            test('Should not return matching playlist not owned by user', async () => {
+                const user2 = await seedUser(testEnv.db);
+
+                await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                    name: 'Cooking Videos',
+                });
+
+                const otherUserPlaylist = await seedPlaylist(testEnv.db, {
+                    userId: user2.id,
+                    name: 'Music Videos',
+                });
+
+                const playlists = await testEnv.playlistService.getUserPlaylists(user.id, 'rock');
+
+                expect(playlists).toHaveLength(0);
+                expect(playlists.some((playlist) => playlist.id === otherUserPlaylist.id)).toBe(
+                    false,
+                );
+            });
+
+            test('Should be case insensitive and ignore whitespace', async () => {
+                const matchingPlaylist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                    name: 'Music Videos',
+                });
+
+                const playlists = await testEnv.playlistService.getUserPlaylists(
+                    user.id,
+                    '  MUSIC  ',
+                );
+
+                expect(playlists).toHaveLength(1);
+                expect(playlists[0]).toMatchObject({
+                    id: matchingPlaylist.id,
+                    name: 'Music Videos',
+                });
+            });
+        });
     });
     describe('Get playlist by id', () => {
         test('Should get playlist with videos', async () => {
@@ -174,6 +338,339 @@ describe('Playlist service integration tests', () => {
             await expect(
                 testEnv.playlistService.getPlaylistById(user.id, randomUUID()),
             ).rejects.toThrow('Playlist not found');
+        });
+
+        describe('Search', () => {
+            test('Should return all videos if search is not provided', async () => {
+                const playlist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                });
+
+                const video1 = await seedVideoWithSource({
+                    db: testEnv.db,
+                    sourceOverrides: {
+                        title: 'Music Video',
+                        description: 'A Music Video',
+                    },
+                });
+
+                const video2 = await seedVideoWithSource({
+                    db: testEnv.db,
+                    sourceOverrides: {
+                        title: 'Cooking Video',
+                        description: 'A cooking video',
+                    },
+                });
+
+                await seedPlaylistVideo(testEnv.db, {
+                    playlistId: playlist.id,
+                    videoId: video1.id,
+                });
+
+                await seedPlaylistVideo(testEnv.db, {
+                    playlistId: playlist.id,
+                    videoId: video2.id,
+                });
+
+                const result = await testEnv.playlistService.getPlaylistById(user.id, playlist.id);
+
+                expect(result.videos).toHaveLength(2);
+            });
+
+            test('Should find video by custom title', async () => {
+                const playlist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                });
+
+                const video = await seedVideoWithSource({
+                    db: testEnv.db,
+                    sourceOverrides: {
+                        title: 'Original Title',
+                    },
+                });
+
+                await seedPlaylistVideo(testEnv.db, {
+                    playlistId: playlist.id,
+                    videoId: video.id,
+                    customTitle: 'My Music Video',
+                });
+
+                const result = await testEnv.playlistService.getPlaylistById(
+                    user.id,
+                    playlist.id,
+                    'music',
+                );
+
+                expect(result.videos).toHaveLength(1);
+            });
+
+            test('Should find video by source title if custom title is not set', async () => {
+                const playlist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                });
+
+                const video = await seedVideoWithSource({
+                    db: testEnv.db,
+                    sourceOverrides: {
+                        title: 'Music Video',
+                    },
+                });
+
+                await seedPlaylistVideo(testEnv.db, {
+                    playlistId: playlist.id,
+                    videoId: video.id,
+                });
+
+                const result = await testEnv.playlistService.getPlaylistById(
+                    user.id,
+                    playlist.id,
+                    'music',
+                );
+
+                expect(result.videos).toHaveLength(1);
+            });
+
+            test('Should not find source title if custom title is set', async () => {
+                const playlist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                });
+
+                const video = await seedVideoWithSource({
+                    db: testEnv.db,
+                    sourceOverrides: {
+                        title: 'Music Video',
+                    },
+                });
+
+                await seedPlaylistVideo(testEnv.db, {
+                    playlistId: playlist.id,
+                    videoId: video.id,
+                    customTitle: 'Cooking Video',
+                });
+
+                const result = await testEnv.playlistService.getPlaylistById(
+                    user.id,
+                    playlist.id,
+                    'rock',
+                );
+
+                expect(result.videos).toHaveLength(0);
+            });
+
+            test('Should find video by custom description', async () => {
+                const playlist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                });
+
+                const video = await seedVideoWithSource({
+                    db: testEnv.db,
+                    sourceOverrides: {
+                        description: 'Original description',
+                    },
+                });
+
+                await seedPlaylistVideo(testEnv.db, {
+                    playlistId: playlist.id,
+                    videoId: video.id,
+                    customDescription: 'My favourite Music Video',
+                });
+
+                const result = await testEnv.playlistService.getPlaylistById(
+                    user.id,
+                    playlist.id,
+                    'music',
+                );
+
+                expect(result.videos).toHaveLength(1);
+            });
+
+            test('Should find video by source description if custom description is not set', async () => {
+                const playlist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                });
+
+                const video = await seedVideoWithSource({
+                    db: testEnv.db,
+                    sourceOverrides: {
+                        description: 'A Music Video',
+                    },
+                });
+
+                await seedPlaylistVideo(testEnv.db, {
+                    playlistId: playlist.id,
+                    videoId: video.id,
+                });
+
+                const result = await testEnv.playlistService.getPlaylistById(
+                    user.id,
+                    playlist.id,
+                    'music',
+                );
+
+                expect(result.videos).toHaveLength(1);
+            });
+
+            test('Should not find source description if custom description is set', async () => {
+                const playlist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                });
+
+                const video = await seedVideoWithSource({
+                    db: testEnv.db,
+                    sourceOverrides: {
+                        description: 'A Music Video',
+                    },
+                });
+
+                await seedPlaylistVideo(testEnv.db, {
+                    playlistId: playlist.id,
+                    videoId: video.id,
+                    customDescription: 'A cooking video',
+                });
+
+                const result = await testEnv.playlistService.getPlaylistById(
+                    user.id,
+                    playlist.id,
+                    'rock',
+                );
+
+                expect(result.videos).toHaveLength(0);
+            });
+
+            test('Should find video by platform', async () => {
+                const playlist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                });
+
+                const video = await seedVideoWithSource({
+                    db: testEnv.db,
+                    sourceOverrides: {
+                        platform: Platform.youtube,
+                    },
+                });
+
+                await seedPlaylistVideo(testEnv.db, {
+                    playlistId: playlist.id,
+                    videoId: video.id,
+                });
+
+                const result = await testEnv.playlistService.getPlaylistById(
+                    user.id,
+                    playlist.id,
+                    'youtube',
+                );
+
+                expect(result.videos).toHaveLength(1);
+            });
+
+            test('Should not return videos from another playlist', async () => {
+                const playlist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                });
+
+                const otherPlaylist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                });
+
+                const video = await seedVideoWithSource({
+                    db: testEnv.db,
+                    sourceOverrides: {
+                        title: 'Music Video',
+                    },
+                });
+
+                await seedPlaylistVideo(testEnv.db, {
+                    playlistId: otherPlaylist.id,
+                    videoId: video.id,
+                });
+
+                const result = await testEnv.playlistService.getPlaylistById(
+                    user.id,
+                    playlist.id,
+                    'rock',
+                );
+
+                expect(result.videos).toHaveLength(0);
+            });
+
+            test('Should return no videos if search does not match', async () => {
+                const playlist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                });
+
+                const video = await seedVideoWithSource({
+                    db: testEnv.db,
+                    sourceOverrides: {
+                        title: 'Music Video',
+                    },
+                });
+
+                await seedPlaylistVideo(testEnv.db, {
+                    playlistId: playlist.id,
+                    videoId: video.id,
+                });
+
+                const result = await testEnv.playlistService.getPlaylistById(
+                    user.id,
+                    playlist.id,
+                    'travel',
+                );
+
+                expect(result.videos).toHaveLength(0);
+            });
+
+            test('Should be case insensitive and ignore whitespace', async () => {
+                const playlist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                });
+
+                const video = await seedVideoWithSource({
+                    db: testEnv.db,
+                    sourceOverrides: {
+                        title: 'Music Video',
+                    },
+                });
+
+                await seedPlaylistVideo(testEnv.db, {
+                    playlistId: playlist.id,
+                    videoId: video.id,
+                });
+
+                const result = await testEnv.playlistService.getPlaylistById(
+                    user.id,
+                    playlist.id,
+                    '  MUSIC  ',
+                );
+
+                expect(result.videos).toHaveLength(1);
+            });
+
+            test('Should return all videos if search is empty', async () => {
+                const playlist = await seedPlaylist(testEnv.db, {
+                    userId: user.id,
+                });
+
+                const video1 = await seedVideoWithSource({ db: testEnv.db });
+                const video2 = await seedVideoWithSource({ db: testEnv.db });
+
+                await seedPlaylistVideo(testEnv.db, {
+                    playlistId: playlist.id,
+                    videoId: video1.id,
+                });
+
+                await seedPlaylistVideo(testEnv.db, {
+                    playlistId: playlist.id,
+                    videoId: video2.id,
+                });
+
+                const result = await testEnv.playlistService.getPlaylistById(
+                    user.id,
+                    playlist.id,
+                    '',
+                );
+
+                expect(result.videos).toHaveLength(2);
+            });
         });
     });
     describe('Update', () => {
@@ -544,6 +1041,211 @@ describe('Playlist service integration tests', () => {
                     playlistVideoId: randomUUID(),
                 }),
             ).rejects.toThrow('Playlist or video not found');
+        });
+    });
+    describe('Search user library', () => {
+        test('Should return matching playlists and videos', async () => {
+            const matchingPlaylist = await seedPlaylist(testEnv.db, {
+                userId: user.id,
+                name: 'Music Favourites',
+                description: 'My favourite songs',
+            });
+
+            await seedPlaylist(testEnv.db, {
+                userId: user.id,
+                name: 'Cooking',
+                description: 'Recipes and tutorials',
+            });
+
+            const matchingVideo = await seedVideoWithSource({
+                db: testEnv.db,
+                sourceOverrides: {
+                    title: 'Best Music Videos',
+                    description: 'My favourite music',
+                },
+            });
+
+            const nonMatchingVideo = await seedVideoWithSource({
+                db: testEnv.db,
+                sourceOverrides: {
+                    title: 'Cooking Tutorial',
+                },
+            });
+
+            const matchingPlaylistVideo = await seedPlaylistVideo(testEnv.db, {
+                playlistId: matchingPlaylist.id,
+                videoId: matchingVideo.id,
+            });
+
+            await seedPlaylistVideo(testEnv.db, {
+                playlistId: matchingPlaylist.id,
+                videoId: nonMatchingVideo.id,
+            });
+
+            const result = await testEnv.playlistService.searchUserLibrary(user.id, 'music');
+
+            expect(result.playlists).toHaveLength(1);
+            expect(result.playlists[0]).toMatchObject({
+                id: matchingPlaylist.id,
+                name: 'Music Favourites',
+            });
+
+            expect(result.videos).toHaveLength(1);
+            expect(result.videos[0]).toMatchObject({
+                id: matchingPlaylistVideo.id,
+                title: 'Best Music Videos',
+            });
+        });
+
+        test('Should search videos by custom title', async () => {
+            const playlist = await seedPlaylist(testEnv.db, {
+                userId: user.id,
+            });
+
+            const video = await seedVideoWithSource({
+                db: testEnv.db,
+                sourceOverrides: {
+                    title: 'Original Title',
+                },
+            });
+
+            const playlistVideo = await seedPlaylistVideo(testEnv.db, {
+                playlistId: playlist.id,
+                videoId: video.id,
+                customTitle: 'My Music Video',
+            });
+
+            const result = await testEnv.playlistService.searchUserLibrary(user.id, 'music');
+
+            expect(result.videos).toHaveLength(1);
+            expect(result.videos[0]).toMatchObject({
+                id: playlistVideo.id,
+                title: 'My Music Video',
+            });
+        });
+
+        test('Should search videos by source title when custom title is not set', async () => {
+            const playlist = await seedPlaylist(testEnv.db, {
+                userId: user.id,
+            });
+
+            const video = await seedVideoWithSource({
+                db: testEnv.db,
+                sourceOverrides: {
+                    title: 'Music Video',
+                },
+            });
+
+            const playlistVideo = await seedPlaylistVideo(testEnv.db, {
+                playlistId: playlist.id,
+                videoId: video.id,
+            });
+
+            const result = await testEnv.playlistService.searchUserLibrary(user.id, 'music');
+
+            expect(result.videos).toHaveLength(1);
+            expect(result.videos[0]).toMatchObject({
+                id: playlistVideo.id,
+                title: 'Music Video',
+            });
+        });
+
+        test('Should not return matching resources belonging to another user', async () => {
+            const otherUser = await seedUser(testEnv.db);
+
+            const otherPlaylist = await seedPlaylist(testEnv.db, {
+                userId: otherUser.id,
+                name: 'Music Favourites',
+            });
+
+            const otherVideo = await seedVideoWithSource({
+                db: testEnv.db,
+                sourceOverrides: {
+                    title: 'Music Video',
+                },
+            });
+
+            await seedPlaylistVideo(testEnv.db, {
+                playlistId: otherPlaylist.id,
+                videoId: otherVideo.id,
+            });
+
+            const result = await testEnv.playlistService.searchUserLibrary(user.id, 'music');
+
+            expect(result.playlists).toHaveLength(0);
+            expect(result.videos).toHaveLength(0);
+        });
+
+        test('Should not return matching videos from playlists belonging to another user', async () => {
+            const userPlaylist = await seedPlaylist(testEnv.db, {
+                userId: user.id,
+            });
+
+            const otherUser = await seedUser(testEnv.db);
+
+            const otherPlaylist = await seedPlaylist(testEnv.db, {
+                userId: otherUser.id,
+            });
+
+            const video = await seedVideoWithSource({
+                db: testEnv.db,
+                sourceOverrides: {
+                    title: 'Music Video',
+                },
+            });
+
+            await seedPlaylistVideo(testEnv.db, {
+                playlistId: otherPlaylist.id,
+                videoId: video.id,
+            });
+
+            await seedPlaylistVideo(testEnv.db, {
+                playlistId: userPlaylist.id,
+                videoId: await seedVideo(testEnv.db).then((video) => video.id),
+            });
+
+            const result = await testEnv.playlistService.searchUserLibrary(user.id, 'music');
+
+            expect(result.videos).toHaveLength(0);
+        });
+
+        test('Should return no results when search does not match', async () => {
+            const playlist = await seedPlaylist(testEnv.db, {
+                userId: user.id,
+                name: 'Music',
+            });
+
+            const video = await seedVideoWithSource({
+                db: testEnv.db,
+                sourceOverrides: {
+                    title: 'Music Video',
+                },
+            });
+
+            await seedPlaylistVideo(testEnv.db, {
+                playlistId: playlist.id,
+                videoId: video.id,
+            });
+
+            const result = await testEnv.playlistService.searchUserLibrary(user.id, 'travel');
+
+            expect(result.playlists).toHaveLength(0);
+            expect(result.videos).toHaveLength(0);
+        });
+
+        test('Should be case insensitive and ignore whitespace', async () => {
+            const playlist = await seedPlaylist(testEnv.db, {
+                userId: user.id,
+                name: 'Music Favourites',
+            });
+
+            const result = await testEnv.playlistService.searchUserLibrary(user.id, '  MUSIC  ');
+
+            expect(result.playlists).toHaveLength(1);
+            expect(result.playlists[0]).toMatchObject({
+                id: playlist.id,
+                name: 'Music Favourites',
+            });
         });
     });
 });

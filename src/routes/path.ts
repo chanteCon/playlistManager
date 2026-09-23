@@ -26,8 +26,13 @@ const PLAYLIST_PATH = `${API_PREFIX}/playlists`;
 
 export const playlistPaths = {
     base: PLAYLIST_PATH,
+
+    search: `${PLAYLIST_PATH}/search`,
+
     id: (id: string) => `${PLAYLIST_PATH}/${id}`,
+
     videoBase: (playlistId: string) => `${PLAYLIST_PATH}/${playlistId}/videos`,
+
     videoId: (playlistId: string, playlistVideoId: string) =>
         `${PLAYLIST_PATH}/${playlistId}/videos/${playlistVideoId}`,
 };

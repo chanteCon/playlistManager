@@ -51,7 +51,10 @@ describe('Unit tests: playlist service', () => {
         test('Returns all user playlists', async () => {
             mockPlaylistRepo.findUserPlaylists.mockResolvedValueOnce([playlist]);
             const result = await playlistService.getUserPlaylists(playlist.userId);
-            expect(mockPlaylistRepo.findUserPlaylists).toHaveBeenCalledWith(playlist.userId);
+            expect(mockPlaylistRepo.findUserPlaylists).toHaveBeenCalledWith(
+                playlist.userId,
+                undefined,
+            );
             expect(result).toEqual([playlist]);
         });
     });
@@ -66,6 +69,7 @@ describe('Unit tests: playlist service', () => {
             expect(mockPlaylistRepo.findById).toHaveBeenCalledWith(
                 savedPlaylist.id,
                 savedPlaylist.userId,
+                undefined,
             );
             expectPlaylistDTO(result, savedPlaylist);
             expect(result.videos).toEqual([]);

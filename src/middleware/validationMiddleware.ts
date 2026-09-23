@@ -11,7 +11,12 @@ export const validate = <T extends z.ZodType>(
         if (!result.success) {
             throw new ValidationError('Invalid Input', formatZodError(result.error));
         }
-        req[property] = result.data as z.infer<T>;
+        if (property === 'query') {
+            Object.assign(req.query, result.data);
+        } else {
+            req[property] = result.data as z.infer<T>;
+        }
+
         next();
     };
 };

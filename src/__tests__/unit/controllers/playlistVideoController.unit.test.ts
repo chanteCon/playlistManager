@@ -10,6 +10,7 @@ const userId = randomUUID();
 const url = 'testUrl.com';
 const playlistId = randomUUID();
 const videoDTO = {
+    playlistId: randomUUID(),
     id: randomUUID(),
     title: 'Test video',
     url,
