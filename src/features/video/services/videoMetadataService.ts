@@ -5,6 +5,12 @@ import { BadGatewayError, NotFoundError } from 'shared/errors/errors';
 
 export type VideoMetadataService = ReturnType<typeof createVideoMetadataService>;
 
+const MAX_TITLE_LENGTH = 50;
+const MAX_DESCRIPTION_LENGTH = 500;
+
+const truncate = (value: string | undefined, maxLength: number) =>
+    value?.trim().slice(0, maxLength) || undefined;
+
 export const createVideoMetadataService = () => {
     const getTikTokMetadata = async (
         url: string,
@@ -32,7 +38,7 @@ export const createVideoMetadataService = () => {
             const data = await response.json();
 
             return {
-                title: data.title,
+                title: truncate(data.title, MAX_TITLE_LENGTH),
                 thumbnail: data.thumbnail_url,
                 description: undefined,
                 platformId: data.embed_product_id,
@@ -88,8 +94,8 @@ export const createVideoMetadataService = () => {
             const snippet = video.snippet;
 
             return {
-                title: snippet.title,
-                description: snippet.description,
+                title: truncate(snippet.title, MAX_TITLE_LENGTH),
+                description: truncate(snippet.description, MAX_DESCRIPTION_LENGTH),
                 thumbnail:
                     snippet.thumbnails.maxres?.url ??
                     snippet.thumbnails.high?.url ??
