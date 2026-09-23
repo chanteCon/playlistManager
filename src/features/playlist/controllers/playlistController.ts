@@ -6,8 +6,11 @@ import { canSendResponse } from 'shared/helper';
 
 export type PlaylistController = ReturnType<typeof createPlaylistController>;
 export const createPlaylistController = (playlistService: PlaylistService) => {
-    const getAllUserPlaylists = async (req: AuthRequest, res: Response) => {
-        const playlists = await playlistService.getUserPlaylists(req.user!.id);
+    const getAllUserPlaylists = async (
+        req: AuthRequest<any, any, any, { search?: string }>,
+        res: Response,
+    ) => {
+        const playlists = await playlistService.getUserPlaylists(req.user!.id, req.query.search);
         return res.status(200).json({ playlists });
     };
 
@@ -20,10 +23,14 @@ export const createPlaylistController = (playlistService: PlaylistService) => {
         return res.status(201).json({ playlist });
     };
 
-    const getPlaylist = async (req: AuthRequest<PlaylistIdParams>, res: Response) => {
+    const getPlaylist = async (
+        req: AuthRequest<PlaylistIdParams, any, any, { search: string }>,
+        res: Response,
+    ) => {
         const { id } = req.params;
         const userId = req.user!.id;
-        const playlist = await playlistService.getPlaylistById(userId, id);
+        const { search } = req.query;
+        const playlist = await playlistService.getPlaylistById(userId, id, search);
         return res.status(200).json({ playlist });
     };
 

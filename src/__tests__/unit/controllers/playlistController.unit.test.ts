@@ -18,7 +18,10 @@ describe('Unit tests: playlist controller', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         ({ mockRes } = buildExpressMocks());
-        mockReq = { user: { id: userId } } as unknown as AuthRequest;
+        mockReq = {
+            user: { id: userId },
+            query: {},
+        } as unknown as AuthRequest;
     });
 
     describe('Get all user playlists', () => {
@@ -26,14 +29,32 @@ describe('Unit tests: playlist controller', () => {
             mockPlaylistService.getUserPlaylists.mockResolvedValueOnce(playlists);
             await playlistController.getAllUserPlaylists(mockReq, mockRes);
             expectMockResponse({ mockRes, status: 200, json: true, data: { playlists } });
-            expect(mockPlaylistService.getUserPlaylists).toHaveBeenCalledWith(userId);
+            expect(mockPlaylistService.getUserPlaylists).toHaveBeenCalledWith(userId, undefined);
+        });
+        test('Returns 200 and matching user playlists', async () => {
+            const search = 'videos';
+
+            mockReq.query = { search };
+
+            mockPlaylistService.getUserPlaylists.mockResolvedValueOnce(playlists);
+
+            await playlistController.getAllUserPlaylists(mockReq, mockRes);
+
+            expectMockResponse({
+                mockRes,
+                status: 200,
+                json: true,
+                data: { playlists },
+            });
+
+            expect(mockPlaylistService.getUserPlaylists).toHaveBeenCalledWith(userId, search);
         });
         test('Throws service layer error', async () => {
             mockPlaylistService.getUserPlaylists.mockRejectedValueOnce(error);
             await expect(playlistController.getAllUserPlaylists(mockReq, mockRes)).rejects.toThrow(
                 error,
             );
-            expect(mockPlaylistService.getUserPlaylists).toHaveBeenCalledWith(userId);
+            expect(mockPlaylistService.getUserPlaylists).toHaveBeenCalledWith(userId, undefined);
         });
     });
     describe('Create playlist', () => {
@@ -79,12 +100,29 @@ describe('Unit tests: playlist controller', () => {
                 json: true,
                 data: { playlist: playlistDTO },
             });
-            expect(mockPlaylistService.getPlaylistById).toHaveBeenCalledWith(userId, id);
+            expect(mockPlaylistService.getPlaylistById).toHaveBeenCalledWith(userId, id, undefined);
+        });
+        test('Returns 200 and matching playlist videos', async () => {
+            const search = 'videos';
+            mockReq.query = { search };
+
+            mockPlaylistService.getPlaylistById.mockResolvedValueOnce(playlistDTO);
+
+            await playlistController.getPlaylist(mockReq, mockRes);
+
+            expectMockResponse({
+                mockRes,
+                status: 200,
+                json: true,
+                data: { playlist: playlistDTO },
+            });
+
+            expect(mockPlaylistService.getPlaylistById).toHaveBeenCalledWith(userId, id, search);
         });
         test('Throws service layer error', async () => {
             mockPlaylistService.getPlaylistById.mockRejectedValueOnce(error);
             await expect(playlistController.getPlaylist(mockReq, mockRes)).rejects.toThrow(error);
-            expect(mockPlaylistService.getPlaylistById).toHaveBeenCalledWith(userId, id);
+            expect(mockPlaylistService.getPlaylistById).toHaveBeenCalledWith(userId, id, undefined);
         });
     });
     describe('Update playlist', () => {

@@ -42,6 +42,13 @@ export const playlistCreateSchema = z
     })
     .strip();
 export const playlistIdSchema = z.object({ id: playlistIdField }).strip();
+
+export const playlistSearchSchema = z
+    .object({
+        search: z.string().optional(),
+    })
+    .strip();
+
 export const playlistUpdateSchema = z
     .object({
         name: playlistNameField.optional(),

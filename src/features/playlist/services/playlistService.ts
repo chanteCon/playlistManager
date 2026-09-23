@@ -71,12 +71,16 @@ export const createPlaylistService = ({
         }
     };
 
-    const getUserPlaylists = async (userId: string): Promise<Playlist[]> => {
-        return await playlistRepo.findUserPlaylists(userId);
+    const getUserPlaylists = async (userId: string, search?: string): Promise<Playlist[]> => {
+        return await playlistRepo.findUserPlaylists(userId, search);
     };
 
-    const getPlaylistById = async (userId: string, playlistId: string): Promise<PlaylistDTO> => {
-        const playlist = await playlistRepo.findById(playlistId, userId);
+    const getPlaylistById = async (
+        userId: string,
+        playlistId: string,
+        search?: string,
+    ): Promise<PlaylistDTO> => {
+        const playlist = await playlistRepo.findById(playlistId, userId, search);
         if (!playlist) {
             throw new NotFoundError('Playlist not found');
         }
