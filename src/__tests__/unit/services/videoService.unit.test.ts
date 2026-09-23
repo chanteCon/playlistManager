@@ -76,7 +76,7 @@ describe('Video Service unit tests', () => {
                               platform: expectedPlatform,
                               platformId: expectedPlatformId,
                           }
-                        : undefined,
+                        : { platform: 'tiktok', platformId: undefined },
                 );
 
                 const expectedVideo = {
