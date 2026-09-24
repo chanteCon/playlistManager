@@ -1,11 +1,5 @@
 import { Platform, PrismaClient } from '@prisma/client';
-import {
-    Playlist,
-    PlaylistCreateInput,
-    PlaylistUpdateInput,
-    playlistVideoInclude,
-    PlaylistWithVideos,
-} from '../types';
+import { Playlist, PlaylistCreateInput, playlistVideoInclude, PlaylistWithVideos } from '../types';
 
 type PlaylistRepoDeps = { db: PrismaClient };
 export type PlaylistRepo = ReturnType<typeof createPlaylistRepo>;
@@ -14,7 +8,13 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
     const create = async (data: PlaylistCreateInput): Promise<Playlist> => {
         return await db.playlist.create({ data });
     };
-    const findUserPlaylists = async (userId: string, search?: string): Promise<Playlist[]> => {
+
+    type PlaylistWithCount = Playlist & { _count: { playlistVideos: number } };
+
+    const findUserPlaylists = async (
+        userId: string,
+        search?: string,
+    ): Promise<PlaylistWithCount[]> => {
         const normalizedSearch = search?.trim().toLowerCase();
 
         return await db.playlist.findMany({
@@ -36,6 +36,13 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
                         },
                     ],
                 }),
+            },
+            include: {
+                _count: {
+                    select: {
+                        playlistVideos: true,
+                    },
+                },
             },
         });
     };
@@ -66,6 +73,11 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
                 userId,
             },
             include: {
+                _count: {
+                    select: {
+                        playlistVideos: true,
+                    },
+                },
                 playlistVideos: {
                     where: normalizedSearch
                         ? {
@@ -132,10 +144,15 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
         });
     };
 
+    type PlaylistUpdateParams = {
+        name?: string | undefined;
+        description?: string | undefined;
+        coverUrl?: string | null | undefined;
+    };
     const update = async (
         playlistId: string,
         userId: string,
-        data: PlaylistUpdateInput,
+        data: PlaylistUpdateParams,
     ): Promise<Playlist> => {
         return await db.playlist.update({
             where: { id: playlistId, userId },

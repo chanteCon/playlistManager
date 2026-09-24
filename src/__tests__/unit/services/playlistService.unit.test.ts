@@ -16,7 +16,7 @@ const playlistService = createPlaylistService({
     playlistVideoRepo: mockPlaylistVideoRepo,
     videoService: mockVideoService,
 });
-let playlist: Playlist;
+let playlist: Playlist & { _count: { playlistVideos: number } };
 const expectPlaylistDTO = (result: PlaylistDTO, expected: Playlist) => {
     expect(result.id).toEqual(expected.id);
     expect(result.name).toEqual(expected.name);
@@ -55,7 +55,12 @@ describe('Unit tests: playlist service', () => {
                 playlist.userId,
                 undefined,
             );
-            expect(result).toEqual([playlist]);
+            expect(result).toEqual([
+                {
+                    ...playlist,
+                    numVideos: 10,
+                },
+            ]);
         });
     });
     describe('getPlaylistById', () => {
@@ -135,7 +140,12 @@ describe('Unit tests: playlist service', () => {
 
         test('should return playlist DTO with defaults when video has no source', async () => {
             const videoOverrides = [{ source: null, sourceId: null }];
-            const savedPlaylist = buildPlaylistWithVideos({ videoOverrides }, 1);
+            const savedPlaylist = buildPlaylistWithVideos(
+                {
+                    videoOverrides,
+                },
+                1,
+            );
             mockPlaylistRepo.findById.mockResolvedValueOnce(savedPlaylist);
             const result = await playlistService.getPlaylistById(
                 savedPlaylist.userId,

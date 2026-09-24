@@ -47,7 +47,9 @@ const playlistDTOSchema = z.object({
     id: z.uuid(),
     name: z.string(),
     description: z.string().nullable().optional(),
+    coverUrl: z.string().nullable().optional(),
     videos: z.array(playlistVideoDTOSchema),
+    numVideos: z.number(),
 });
 
 const playlistResponseSchema = z.object({
@@ -56,6 +58,8 @@ const playlistResponseSchema = z.object({
         userId: z.uuid(),
         name: z.string(),
         description: z.string().nullable(),
+        coverUrl: z.string().nullable(),
+        numVideos: z.number(),
     }),
 });
 
@@ -66,6 +70,8 @@ const playlistsResponseSchema = z.object({
             userId: z.uuid(),
             name: z.string(),
             description: z.string().nullable(),
+            coverUrl: z.string().nullable(),
+            numVideos: z.number(),
         }),
     ),
 });
@@ -78,6 +84,7 @@ const searchResponseSchema = z.object({
                 userId: z.uuid(),
                 name: z.string(),
                 description: z.string().nullable(),
+                coverUrl: z.string().nullable(),
             }),
         ),
         videos: z.array(playlistVideoDTOSchema),
@@ -119,6 +126,8 @@ const paths = {
                             userId: id,
                             name: 'My Playlist',
                             description: null,
+                            coverUrl: null,
+                            numVideos: 10,
                         },
                     },
                 }),
@@ -154,6 +163,8 @@ const paths = {
                                 userId: id,
                                 name: 'Playlist 1',
                                 description: null,
+                                coverUrl: null,
+                                numVideos: 10,
                             },
                         ],
                     },
@@ -182,6 +193,7 @@ const paths = {
                                     userId: id,
                                     name: 'Music Favourites',
                                     description: 'My favourite songs',
+                                    coverUrl: null,
                                 },
                             ],
                             videos: [
@@ -221,6 +233,8 @@ const paths = {
                             id,
                             name: 'My Playlist',
                             description: 'My playlist description',
+                            coverUrl: null,
+                            numVideos: 10,
                             videos: [
                                 {
                                     id,
@@ -263,6 +277,7 @@ const paths = {
                         example: {
                             name: 'Updated Playlist',
                             description: 'Updated description',
+                            cover: id,
                         },
                     },
                 },
@@ -276,6 +291,8 @@ const paths = {
                             userId: id,
                             name: 'Updated Playlist',
                             description: 'Updated description',
+                            coverUrl: 'example.image.com',
+                            numVideos: 10,
                         },
                     },
                 }),
@@ -290,7 +307,27 @@ const paths = {
                     message: 'Unauthorized',
                 }),
                 404: errorResponse({
-                    message: 'Playlist not found',
+                    message: 'Not found',
+                    examples: {
+                        playlistNotFound: {
+                            summary: 'Playist not found',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Playlist not found',
+                                errors: {},
+                            },
+                        },
+                        coverVideoNotFound: {
+                            summary: 'Cannot set video as playlist cover image',
+                            value: {
+                                success: false,
+                                data: null,
+                                message: 'Cannot set video as playlist cover image',
+                                errors: { cover: 'Video not found' },
+                            },
+                        },
+                    },
                 }),
                 409: errorResponse({
                     message: 'Could not update playlist',

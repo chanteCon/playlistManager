@@ -13,6 +13,7 @@ import { setAuthHeader } from '../helpers/e2eTestHelpers';
 import { expectResError } from '../helpers/e2eAssertions';
 import request from 'supertest';
 import {
+    BadInputError,
     ConflictError,
     NotFoundError,
     UnauthorisedError,
@@ -576,6 +577,108 @@ describe('e2e tests Playlist Routes', () => {
             expectResError({
                 res,
                 error: new UnauthorisedError('Unauthorized'),
+                mockLogger,
+            });
+        });
+
+        test('Should update playlist cover image from video thumbnail', async () => {
+            const { app, db } = testEnv;
+            const playlist = await seedPlaylist(db, { userId: user.id });
+            const video = await seedVideoWithSource({
+                db,
+                sourceOverrides: { thumbnail: 'https://example.com/thumbnail.jpg' },
+            });
+            const playlistVideo = await seedPlaylistVideo(db, {
+                videoId: video.id,
+                playlistId: playlist.id,
+            });
+            const res = await setAuthHeader({
+                req: request(app).patch(playlistPaths.id(playlist.id)),
+                accessToken,
+            }).send({ cover: playlistVideo.id });
+            expect(res.status).toBe(200);
+            expect(res.body.data).toMatchObject({
+                playlist: { id: playlist.id, coverUrl: 'https://example.com/thumbnail.jpg' },
+            });
+        });
+        test('Should remove playlist cover image when cover video is null', async () => {
+            const { app, db } = testEnv;
+            const playlist = await seedPlaylist(db, {
+                userId: user.id,
+                coverUrl: 'https://example.com/existing-thumbnail.jpg',
+            });
+            const res = await setAuthHeader({
+                req: request(app).patch(playlistPaths.id(playlist.id)),
+                accessToken,
+            }).send({ cover: null });
+            expect(res.status).toBe(200);
+            expect(res.body.data).toMatchObject({ playlist: { id: playlist.id, coverUrl: null } });
+        });
+        test('Should return not found (404) if cover video does not belong to playlist', async () => {
+            const { app, db } = testEnv;
+            const playlist = await seedPlaylist(db, { userId: user.id });
+            const otherPlaylist = await seedPlaylist(db, { userId: user.id });
+            const video = await seedVideoWithSource({
+                db,
+                sourceOverrides: { thumbnail: 'https://example.com/thumbnail.jpg' },
+            });
+            const playlistVideo = await seedPlaylistVideo(db, {
+                videoId: video.id,
+                playlistId: otherPlaylist.id,
+            });
+            const res = await setAuthHeader({
+                req: request(app).patch(playlistPaths.id(playlist.id)),
+                accessToken,
+            }).send({ cover: playlistVideo.id });
+            expectResError({
+                res,
+                error: new NotFoundError('Cannot set video as playlist cover image'),
+                mockLogger,
+            });
+        });
+        test('Should return not found (404) if cover video does not exist', async () => {
+            const { app, db } = testEnv;
+            const playlist = await seedPlaylist(db, { userId: user.id });
+            const res = await setAuthHeader({
+                req: request(app).patch(playlistPaths.id(playlist.id)),
+                accessToken,
+            }).send({ cover: crypto.randomUUID() });
+            expectResError({
+                res,
+                error: new NotFoundError('Cannot set video as playlist cover image'),
+                mockLogger,
+            });
+        });
+        test('Should return bad request (400) if cover video does not have a thumbnail', async () => {
+            const { app, db } = testEnv;
+            const playlist = await seedPlaylist(db, { userId: user.id });
+            const video = await seedVideoWithSource({ db, sourceOverrides: { thumbnail: null } });
+            const playlistVideo = await seedPlaylistVideo(db, {
+                videoId: video.id,
+                playlistId: playlist.id,
+            });
+            const res = await setAuthHeader({
+                req: request(app).patch(playlistPaths.id(playlist.id)),
+                accessToken,
+            }).send({ cover: playlistVideo.id });
+            expectResError({
+                res,
+                error: new BadInputError('Cannot set playlistVideo as playlist cover'),
+                errors: [],
+                mockLogger,
+            });
+        });
+        test('Should return bad request (400) if cover video id is invalid format', async () => {
+            const { app, db } = testEnv;
+            const playlist = await seedPlaylist(db, { userId: user.id });
+            const res = await setAuthHeader({
+                req: request(app).patch(playlistPaths.id(playlist.id)),
+                accessToken,
+            }).send({ cover: 'invalid-id' });
+            expectResError({
+                res,
+                error: new BadInputError('Invalid Input'),
+                errors: [],
                 mockLogger,
             });
         });

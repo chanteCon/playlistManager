@@ -53,12 +53,19 @@ export const playlistUpdateSchema = z
     .object({
         name: playlistNameField.optional(),
         description: desriptionField,
+        cover: z.uuid().nullable().optional().meta({
+            description: 'The id of the playlist video whose thumbnail should be used as the cover',
+        }),
     })
     .strip()
-    .refine((data) => data.name !== undefined || data.description !== undefined, {
-        message: 'Name or description field must be provided',
-        path: ['name'],
-    });
+    .refine(
+        (data) =>
+            data.name !== undefined || data.description !== undefined || data.cover !== undefined,
+        {
+            message: 'Name, cover video or description field must be provided',
+            path: ['name'],
+        },
+    );
 
 export const videoUrlSchema = z
     .object({

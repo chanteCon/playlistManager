@@ -9,7 +9,7 @@ import {
     PlaylistVideoDTO,
     PlaylistVideoWithInclude,
 } from '../types';
-import { NotFoundError } from 'shared/errors/errors';
+import { BadInputError, NotFoundError } from 'shared/errors/errors';
 import {
     handleNotFoundError,
     handleUniqueConstraintError,
@@ -72,8 +72,16 @@ export const createPlaylistService = ({
         }
     };
 
-    const getUserPlaylists = async (userId: string, search?: string): Promise<Playlist[]> => {
-        return await playlistRepo.findUserPlaylists(userId, search);
+    const getUserPlaylists = async (
+        userId: string,
+        search?: string,
+    ): Promise<(Playlist & { numVideos: number })[]> => {
+        const playlists = await playlistRepo.findUserPlaylists(userId, search);
+
+        return playlists.map((playlist) => ({
+            ...playlist,
+            numVideos: playlist._count.playlistVideos,
+        }));
     };
 
     const getPlaylistById = async (
@@ -85,11 +93,14 @@ export const createPlaylistService = ({
         if (!playlist) {
             throw new NotFoundError('Playlist not found');
         }
+        const numVideos = playlist._count.playlistVideos;
         return {
             id: playlist.id,
             name: playlist.name,
             description: playlist.description,
+            coverUrl: playlist.coverUrl,
             videos: playlist.playlistVideos.map(_toPlaylistVideoDto),
+            numVideos: numVideos,
         };
     };
 
@@ -108,7 +119,28 @@ export const createPlaylistService = ({
         data: PlaylistUpdateInput,
     ): Promise<Playlist> => {
         try {
-            return await playlistRepo.update(playlistId, userId, data);
+            const { cover, ...playlistData } = data;
+            let coverUrl: string | null | undefined;
+            if (cover !== undefined) {
+                if (cover === null) {
+                    coverUrl = null;
+                } else {
+                    await _ensurePlaylistExistsForUser(playlistId, userId);
+                    const playlistVideo = await playlistVideoRepo.findSource(cover, playlistId);
+                    if (!playlistVideo) {
+                        throw new NotFoundError('Cannot set video as playlist cover image', {
+                            cover: ['Video not found'],
+                        });
+                    }
+                    if (!playlistVideo.video.source || !playlistVideo.video.source.thumbnail) {
+                        throw new BadInputError('Cannot set playlistVideo as playlist cover', {
+                            cover: ['This video does not have a thumbnail'],
+                        });
+                    }
+                    coverUrl = playlistVideo.video.source.thumbnail;
+                }
+            }
+            return await playlistRepo.update(playlistId, userId, { ...playlistData, coverUrl });
         } catch (error) {
             handleUniqueConstraintError(error, 'Could not update playlist', {
                 name: ['You already have a playlist with this name'],

@@ -36,9 +36,17 @@ export const createPlaylistVideoRepo = ({ db }: PlaylistVideoRepoDeps) => {
         });
     };
 
+    const findSource = async (id: string, playlistId: string) => {
+        return await db.playlistVideo.findFirst({
+            where: { id, playlistId },
+            include: playlistVideoInclude,
+        });
+    };
+
     return {
         create,
         update,
         deleteFromPlaylist,
+        findSource,
     };
 };

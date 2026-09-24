@@ -1790,6 +1790,8 @@ paths:
                     userId: 00000000-0000-0000-0000-000000000000
                     name: My Playlist
                     description: null
+                    coverUrl: null
+                    numVideos: 10
                 message: null
               schema:
                 type: object
@@ -1822,11 +1824,19 @@ paths:
                             anyOf:
                               - type: string
                               - type: "null"
+                          coverUrl:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          numVideos:
+                            type: number
                         required:
                           - id
                           - userId
                           - name
                           - description
+                          - coverUrl
+                          - numVideos
                         additionalProperties: false
                     required:
                       - playlist
@@ -1982,6 +1992,8 @@ paths:
                       userId: 00000000-0000-0000-0000-000000000000
                       name: Playlist 1
                       description: null
+                      coverUrl: null
+                      numVideos: 10
                 message: null
               schema:
                 type: object
@@ -2016,11 +2028,19 @@ paths:
                               anyOf:
                                 - type: string
                                 - type: "null"
+                            coverUrl:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            numVideos:
+                              type: number
                           required:
                             - id
                             - userId
                             - name
                             - description
+                            - coverUrl
+                            - numVideos
                           additionalProperties: false
                     required:
                       - playlists
@@ -2091,6 +2111,7 @@ paths:
                         userId: 00000000-0000-0000-0000-000000000000
                         name: Music Favourites
                         description: My favourite songs
+                        coverUrl: null
                     videos:
                       - id: 00000000-0000-0000-0000-000000000000
                         playlistId: 00000000-0000-0000-0000-000000000000
@@ -2138,11 +2159,16 @@ paths:
                                   anyOf:
                                     - type: string
                                     - type: "null"
+                                coverUrl:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
                               required:
                                 - id
                                 - userId
                                 - name
                                 - description
+                                - coverUrl
                               additionalProperties: false
                           videos:
                             type: array
@@ -2264,6 +2290,8 @@ paths:
                     id: 00000000-0000-0000-0000-000000000000
                     name: My Playlist
                     description: My playlist description
+                    coverUrl: null
+                    numVideos: 10
                     videos:
                       - id: 00000000-0000-0000-0000-000000000000
                         title: Test Video
@@ -2298,6 +2326,10 @@ paths:
                           name:
                             type: string
                           description:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          coverUrl:
                             anyOf:
                               - type: string
                               - type: "null"
@@ -2339,10 +2371,13 @@ paths:
                                 - url
                                 - render
                               additionalProperties: false
+                          numVideos:
+                            type: number
                         required:
                           - id
                           - name
                           - videos
+                          - numVideos
                         additionalProperties: false
                     required:
                       - playlist
@@ -2484,6 +2519,7 @@ paths:
             example:
               name: Updated Playlist
               description: Updated description
+              cover: 00000000-0000-0000-0000-000000000000
             schema:
               type: object
               properties:
@@ -2499,6 +2535,14 @@ paths:
                   example: This is a description example.
                   type: string
                   maxLength: 500
+                cover:
+                  description: The id of the playlist video whose thumbnail should be used as the
+                    cover
+                  anyOf:
+                    - type: string
+                      format: uuid
+                      pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                    - type: "null"
       responses:
         "200":
           description: Successful response
@@ -2512,6 +2556,8 @@ paths:
                     userId: 00000000-0000-0000-0000-000000000000
                     name: Updated Playlist
                     description: Updated description
+                    coverUrl: example.image.com
+                    numVideos: 10
                 message: null
               schema:
                 type: object
@@ -2544,11 +2590,19 @@ paths:
                             anyOf:
                               - type: string
                               - type: "null"
+                          coverUrl:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          numVideos:
+                            type: number
                         required:
                           - id
                           - userId
                           - name
                           - description
+                          - coverUrl
+                          - numVideos
                         additionalProperties: false
                     required:
                       - playlist
@@ -2639,14 +2693,9 @@ paths:
                   - data
                 additionalProperties: false
         "404":
-          description: Playlist not found
+          description: Not found
           content:
             application/json:
-              example:
-                success: false
-                data: null
-                message: Playlist not found
-                errors: null
               schema:
                 type: object
                 properties:
@@ -2654,7 +2703,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Playlist not found
+                    default: Not found
                     type: string
                   data:
                     type: "null"
@@ -2676,6 +2725,22 @@ paths:
                   - message
                   - data
                 additionalProperties: false
+              examples:
+                playlistNotFound:
+                  summary: Playist not found
+                  value:
+                    success: false
+                    data: null
+                    message: Playlist not found
+                    errors: {}
+                coverVideoNotFound:
+                  summary: Cannot set video as playlist cover image
+                  value:
+                    success: false
+                    data: null
+                    message: Cannot set video as playlist cover image
+                    errors:
+                      cover: Video not found
         "409":
           description: Could not update playlist
           content:
