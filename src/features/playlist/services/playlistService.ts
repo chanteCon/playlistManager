@@ -60,9 +60,17 @@ export const createPlaylistService = ({
     //// External ////////////////////////////////////
 
     /// Playlist /////////////////////////////////////
-    const create = async (userId: string, data: PlaylistCreateData): Promise<Playlist> => {
+    const create = async (
+        userId: string,
+        data: PlaylistCreateData,
+    ): Promise<Playlist & { numVideos: number }> => {
         try {
-            return await playlistRepo.create({ userId, ...data });
+            const playlist = await playlistRepo.create({ userId, ...data });
+
+            return {
+                ...playlist,
+                numVideos: 0,
+            };
         } catch (error) {
             translateForeignKeyError(error, NotFoundError, 'User not found');
             handleUniqueConstraintError(error, 'Could not add playlist', {

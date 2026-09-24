@@ -44,7 +44,10 @@ describe('Unit tests: playlist service', () => {
             };
             const response = await playlistService.create(userId, data);
             expect(mockPlaylistRepo.create).toHaveBeenCalledWith({ userId, ...data });
-            expect(response).toEqual(playlist);
+            expect(response).toEqual({
+                ...playlist,
+                numVideos: 0,
+            });
         });
     });
     describe('getUserPlaylists', () => {

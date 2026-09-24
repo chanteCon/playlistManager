@@ -153,10 +153,17 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
         playlistId: string,
         userId: string,
         data: PlaylistUpdateParams,
-    ): Promise<Playlist> => {
+    ): Promise<Playlist & { _count: { playlistVideos: number } }> => {
         return await db.playlist.update({
             where: { id: playlistId, userId },
             data,
+            include: {
+                _count: {
+                    select: {
+                        playlistVideos: true,
+                    },
+                },
+            },
         });
     };
 
