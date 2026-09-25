@@ -1,6 +1,11 @@
 import { AuthRequest } from 'features/auth/types';
 import { PlaylistService } from '../services/playlistService';
-import { PlaylistCreateData, PlaylistIdParams, PlaylistUpdateInput } from '../types';
+import {
+    PlaylistCreateData,
+    PlaylistIdParams,
+    PlaylistUpdateInput,
+    UpdatePlaylistPositionsInput,
+} from '../types';
 import { Response } from 'express';
 import { canSendResponse } from 'shared/helper';
 
@@ -65,6 +70,18 @@ export const createPlaylistController = (playlistService: PlaylistService) => {
         }
     };
 
+    const updatePlaylistPositions = async (
+        req: AuthRequest<PlaylistIdParams, any, UpdatePlaylistPositionsInput>,
+        res: Response,
+    ) => {
+        const { id } = req.params;
+        const userId = req.user!.id;
+
+        const videos = await playlistService.updatePositions(userId, id, req.body.positions);
+
+        return res.status(200).json({ videos });
+    };
+
     return {
         createPlaylist,
         searchLibrary,
@@ -72,5 +89,6 @@ export const createPlaylistController = (playlistService: PlaylistService) => {
         getAllUserPlaylists,
         updatePlaylist,
         deletePlaylist,
+        updatePlaylistPositions,
     };
 };

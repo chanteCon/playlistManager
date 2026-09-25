@@ -938,4 +938,236 @@ describe('e2e tests Playlist Routes', () => {
             });
         });
     });
+    describe('Update video positions', () => {
+        test('Should update video positions', async () => {
+            const { app, db } = testEnv;
+
+            const playlist = await seedPlaylist(db, {
+                userId: user.id,
+            });
+
+            const video1 = await seedVideo(db);
+            const video2 = await seedVideo(db);
+            const video3 = await seedVideo(db);
+
+            const playlistVideo1 = await seedPlaylistVideo(
+                db,
+                {
+                    videoId: video1.id,
+                    playlistId: playlist.id,
+                },
+                0,
+            );
+
+            const playlistVideo2 = await seedPlaylistVideo(
+                db,
+                {
+                    videoId: video2.id,
+                    playlistId: playlist.id,
+                },
+                1,
+            );
+
+            const playlistVideo3 = await seedPlaylistVideo(
+                db,
+                {
+                    videoId: video3.id,
+                    playlistId: playlist.id,
+                },
+                2,
+            );
+
+            const res = await setAuthHeader({
+                req: request(app).patch(`${playlistPaths.id(playlist.id)}/videos/positions`),
+                accessToken,
+            }).send({
+                positions: [
+                    { id: playlistVideo1.id, position: 2 },
+                    { id: playlistVideo2.id, position: 0 },
+                    { id: playlistVideo3.id, position: 1 },
+                ],
+            });
+
+            expect(res.status).toBe(200);
+
+            const updatedPlaylistVideos = await db.playlistVideo.findMany({
+                where: {
+                    playlistId: playlist.id,
+                },
+                orderBy: {
+                    position: 'asc',
+                },
+            });
+
+            expect(
+                updatedPlaylistVideos.map(({ id, position }) => ({
+                    id,
+                    position,
+                })),
+            ).toEqual([
+                { id: playlistVideo2.id, position: 0 },
+                { id: playlistVideo3.id, position: 1 },
+                { id: playlistVideo1.id, position: 2 },
+            ]);
+        });
+
+        test('Should return not found (404) if playlist does not belong to user', async () => {
+            const { app, db } = testEnv;
+
+            const otherPlaylist = await seedPlaylist(db, {
+                userId: users[1].id,
+            });
+
+            const video = await seedVideo(db);
+
+            const playlistVideo = await seedPlaylistVideo(
+                db,
+                {
+                    videoId: video.id,
+                    playlistId: otherPlaylist.id,
+                },
+                0,
+            );
+
+            const res = await setAuthHeader({
+                req: request(app).patch(`${playlistPaths.id(otherPlaylist.id)}/videos/positions`),
+                accessToken,
+            }).send({
+                positions: [
+                    {
+                        id: playlistVideo.id,
+                        position: 2,
+                    },
+                ],
+            });
+
+            expectResError({
+                res,
+                error: new NotFoundError('Playlist not found'),
+                mockLogger,
+            });
+
+            const unchanged = await db.playlistVideo.findUnique({
+                where: {
+                    id: playlistVideo.id,
+                },
+            });
+
+            expect(unchanged?.position).toBe(0);
+        });
+
+        test('Should return not found (404) if playlist video does not belong to playlist', async () => {
+            const { app, db } = testEnv;
+
+            const playlist = await seedPlaylist(db, {
+                userId: user.id,
+            });
+
+            const otherPlaylist = await seedPlaylist(db, {
+                userId: user.id,
+            });
+
+            const video = await seedVideo(db);
+
+            const playlistVideo = await seedPlaylistVideo(
+                db,
+                {
+                    videoId: video.id,
+                    playlistId: otherPlaylist.id,
+                },
+                0,
+            );
+
+            const res = await setAuthHeader({
+                req: request(app).patch(`${playlistPaths.id(playlist.id)}/videos/positions`),
+                accessToken,
+            }).send({
+                positions: [
+                    {
+                        id: playlistVideo.id,
+                        position: 2,
+                    },
+                ],
+            });
+
+            expectResError({
+                res,
+                error: new NotFoundError('Playlist not found'),
+                mockLogger,
+            });
+
+            const unchanged = await db.playlistVideo.findUnique({
+                where: {
+                    id: playlistVideo.id,
+                },
+            });
+
+            expect(unchanged?.position).toBe(0);
+        });
+
+        test('Should return bad request (400) if playlist id is invalid format', async () => {
+            const { app } = testEnv;
+
+            const res = await setAuthHeader({
+                req: request(app).patch(`${playlistPaths.id('invalid-id')}/videos/positions`),
+                accessToken,
+            }).send({
+                positions: [],
+            });
+
+            expectResError({
+                res,
+                error: new ValidationError('Invalid Input'),
+                errors: [],
+                mockLogger,
+            });
+        });
+
+        test('Should return bad request (400) if positions are invalid', async () => {
+            const { app, db } = testEnv;
+
+            const playlist = await seedPlaylist(db, {
+                userId: user.id,
+            });
+
+            const res = await setAuthHeader({
+                req: request(app).patch(`${playlistPaths.id(playlist.id)}/videos/positions`),
+                accessToken,
+            }).send({
+                positions: [
+                    {
+                        id: 'invalid-id',
+                        position: -1,
+                    },
+                ],
+            });
+
+            expectResError({
+                res,
+                error: new ValidationError('Invalid Input'),
+                errors: [],
+                mockLogger,
+            });
+        });
+
+        test('Should return unauthorised error (401) if user is not authenticated', async () => {
+            const { app, db } = testEnv;
+
+            const playlist = await seedPlaylist(db, {
+                userId: user.id,
+            });
+
+            const res = await request(app)
+                .patch(`${playlistPaths.id(playlist.id)}/videos/positions`)
+                .send({
+                    positions: [],
+                });
+
+            expectResError({
+                res,
+                error: new UnauthorisedError('Unauthorized'),
+                mockLogger,
+            });
+        });
+    });
 });

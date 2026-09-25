@@ -54,6 +54,7 @@ export const createPlaylistService = ({
             platform: source?.platform ?? null,
             platformId: source?.platformId ?? null,
             render: RENDERABLE_PLATFORMS.has(source?.platform ?? ''),
+            position: playlistVideo.position,
         };
     };
 
@@ -158,6 +159,24 @@ export const createPlaylistService = ({
         }
     };
 
+    const updatePositions = async (
+        userId: string,
+        playlistId: string,
+        positions: { id: string; position: number }[],
+    ) => {
+        try {
+            await _ensurePlaylistExistsForUser(playlistId, userId);
+
+            return await playlistVideoRepo.updatePositions({
+                playlistId,
+                positions,
+            });
+        } catch (error) {
+            handleNotFoundError(error, 'Playlist not found');
+            throw error;
+        }
+    };
+
     const remove = async (userId: string, playlistId: string): Promise<Playlist> => {
         try {
             return await playlistRepo.deleteById(playlistId, userId);
@@ -243,5 +262,6 @@ export const createPlaylistService = ({
         addVideo,
         updateVideo,
         searchUserLibrary,
+        updatePositions,
     };
 };

@@ -138,6 +138,9 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
                               ],
                           }
                         : undefined,
+                    orderBy: {
+                        position: 'asc',
+                    },
                     include: playlistVideoInclude,
                 },
             },
@@ -272,5 +275,13 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
         return { playlists, playlistVideos };
     };
 
-    return { create, search, existsForUser, findUserPlaylists, findById, update, deleteById };
+    return {
+        create,
+        search,
+        existsForUser,
+        findUserPlaylists,
+        findById,
+        update,
+        deleteById,
+    };
 };

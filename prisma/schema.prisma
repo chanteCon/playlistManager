@@ -97,6 +97,7 @@ model PlaylistVideo {
 
   customTitle       String?
   customDescription String? 
+  position          Int
 
   playlist          Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
   video             Video @relation(fields: [videoId], references: [id], onDelete: Restrict)

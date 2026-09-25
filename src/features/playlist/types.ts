@@ -74,6 +74,7 @@ export type PlaylistVideoDTO = {
     platform?: string | null;
     platformId?: string | null;
     render: boolean;
+    position: number;
 };
 
 export type PlaylistDTO = {
@@ -83,4 +84,9 @@ export type PlaylistDTO = {
     videos: PlaylistVideoDTO[];
     coverUrl: string | null;
     numVideos: number;
+};
+
+export type UpdatePlaylistPositionsInput = {
+    userId: string;
+    positions: { id: string; position: number }[];
 };

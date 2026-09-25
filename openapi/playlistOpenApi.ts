@@ -41,6 +41,7 @@ const playlistVideoDTOSchema = z.object({
     platform: z.string().nullable().optional(),
     platformId: z.string().nullable().optional(),
     render: z.boolean(),
+    position: z.number(),
 });
 
 const playlistDTOSchema = z.object({
@@ -245,6 +246,7 @@ const paths = {
                                     platform: 'youtube',
                                     platformId: 'zzzzzzzzzzz',
                                     render: false,
+                                    position: 1,
                                 },
                             ],
                         },
@@ -389,6 +391,7 @@ const paths = {
                             platform: 'youtube',
                             platformId: 'zzzzzzzzzzz',
                             render: false,
+                            positoin: 1,
                         },
                     },
                 }),
@@ -526,6 +529,57 @@ const paths = {
         },
     },
 
+    '/api/playlists/{id}/videos/positions': {
+        patch: {
+            summary: 'Update video positions',
+            tags: ['Playlist'],
+            security: [{ BearerAuth: [] }],
+            parameters: [playlistSchemas.playlistIdField],
+            requestBody: {
+                required: true,
+                content: {
+                    'application/json': {
+                        schema: playlistSchemas.playlistVideoPositionsSchema,
+                    },
+                },
+            },
+            responses: {
+                200: successResponse({
+                    dataSchema: z.object({
+                        videos: z.array(playlistVideoDTOSchema),
+                    }),
+                    data: {
+                        videos: [
+                            {
+                                id,
+                                playlistId: id,
+                                title: 'Test Video',
+                                description: 'Test description',
+                                thumbnail: 'https://example.com/thumbnail.jpg',
+                                url: 'https://www.youtube.com/watch?v=zzzzzzzzzzz',
+                                platform: 'youtube',
+                                platformId: 'zzzzzzzzzzz',
+                                render: false,
+                                position: 0,
+                            },
+                        ],
+                    },
+                }),
+                400: errorResponse({
+                    message: 'Invalid Input',
+                    errors: {
+                        id: ['Invalid UUID'],
+                    },
+                }),
+                401: errorResponse({
+                    message: 'Unauthorized',
+                }),
+                404: errorResponse({
+                    message: 'Playlist not found',
+                }),
+            },
+        },
+    },
     '/api/playlists/{id}/videos/{playlistVideoId}': {
         patch: {
             summary: 'Update playlist video',
@@ -558,6 +612,7 @@ const paths = {
                             platform: 'youtube',
                             platformId: 'zzzzzzzzzzz',
                             render: false,
+                            position: 1,
                         },
                     },
                 }),

@@ -104,3 +104,14 @@ export const updateVideoSchema = z
 export const playlistVideoRefSchema = z
     .object({ id: playlistIdField, playlistVideoId: videoIdField })
     .strip();
+
+export const playlistVideoPositionsSchema = z.object({
+    positions: z
+        .array(
+            z.object({
+                id: z.uuid(),
+                position: z.number().int().nonnegative(),
+            }),
+        )
+        .min(1),
+});

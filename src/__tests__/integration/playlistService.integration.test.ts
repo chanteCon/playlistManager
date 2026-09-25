@@ -280,7 +280,7 @@ describe('Playlist service integration tests', () => {
             );
             const sourcedVideo = await seedVideoWithSource({ db: testEnv.db });
             const sourcedPlaylistVideo = await testEnv.db.playlistVideo.create({
-                data: { videoId: sourcedVideo.id, playlistId: playlist.id },
+                data: { videoId: sourcedVideo.id, playlistId: playlist.id, position: 1 },
             });
             const updatedPlaylistvideo = await testEnv.db.playlistVideo.update({
                 where: { id: playlistVideos[0].id },
@@ -872,6 +872,7 @@ describe('Playlist service integration tests', () => {
                 data: {
                     videoId: video.id,
                     playlistId: playlist2.id,
+                    position: 1,
                 },
             });
 
@@ -968,6 +969,7 @@ describe('Playlist service integration tests', () => {
                 data: {
                     playlistId: playlist.id,
                     videoId: video.id,
+                    position: 1,
                 },
             });
 
@@ -1052,6 +1054,7 @@ describe('Playlist service integration tests', () => {
                 data: {
                     playlistId: playlist1.id,
                     videoId: video.id,
+                    position: 1,
                 },
             });
 
@@ -1133,6 +1136,7 @@ describe('Playlist service integration tests', () => {
                 data: {
                     playlistId: playlist1.id,
                     videoId: video.id,
+                    position: 1,
                 },
             });
 
@@ -1392,6 +1396,73 @@ describe('Playlist service integration tests', () => {
                 id: playlist.id,
                 name: 'Music Favourites',
             });
+        });
+    });
+    describe('Update video positions', () => {
+        test('Should update video positions', async () => {
+            const { playlist, playlistVideos } = await seedPlaylistWithVideos(testEnv.db, user.id);
+            const positions = [
+                { id: playlistVideos[0].id, position: 2 },
+                { id: playlistVideos[1].id, position: 0 },
+                { id: playlistVideos[2].id, position: 1 },
+            ];
+            await testEnv.playlistService.updatePositions(user.id, playlist.id, positions);
+            const updatedPlaylistVideos = await testEnv.db.playlistVideo.findMany({
+                where: { playlistId: playlist.id },
+                orderBy: { position: 'asc' },
+            });
+            expect(updatedPlaylistVideos).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({ id: playlistVideos[0].id, position: 2 }),
+                    expect.objectContaining({ id: playlistVideos[1].id, position: 0 }),
+                    expect.objectContaining({ id: playlistVideos[2].id, position: 1 }),
+                ]),
+            );
+        });
+        test('Should not update video belonging to another playlist', async () => {
+            const playlist1 = await seedPlaylist(testEnv.db, { userId: user.id });
+            const playlist2 = await seedPlaylist(testEnv.db, { userId: user.id });
+            const video = await seedVideo(testEnv.db);
+            const playlistVideo = await seedPlaylistVideo(
+                testEnv.db,
+                {
+                    playlistId: playlist1.id,
+                    videoId: video.id,
+                },
+                0,
+            );
+            await expect(
+                testEnv.playlistService.updatePositions(user.id, playlist2.id, [
+                    { id: playlistVideo.id, position: 1 },
+                ]),
+            ).rejects.toThrow('Playlist not found');
+            const unchanged = await testEnv.db.playlistVideo.findUnique({
+                where: { id: playlistVideo.id },
+            });
+            expect(unchanged?.position).toBe(0);
+        });
+        test('Should throw not found error if playlist belongs to another user', async () => {
+            const otherUser = await seedUser(testEnv.db);
+            const { playlist, playlistVideos } = await seedPlaylistWithVideos(
+                testEnv.db,
+                otherUser.id,
+            );
+            await expect(
+                testEnv.playlistService.updatePositions(user.id, playlist.id, [
+                    { id: playlistVideos[0].id, position: 1 },
+                ]),
+            ).rejects.toThrow('Playlist not found');
+            const unchanged = await testEnv.db.playlistVideo.findUnique({
+                where: { id: playlistVideos[0].id },
+            });
+            expect(unchanged?.position).toBe(0);
+        });
+        test('Should throw not found error if playlist does not exist', async () => {
+            await expect(
+                testEnv.playlistService.updatePositions(user.id, randomUUID(), [
+                    { id: randomUUID(), position: 0 },
+                ]),
+            ).rejects.toThrow('Playlist not found');
         });
     });
 });

@@ -249,6 +249,7 @@ describe('e2e tests Playlist Routes', () => {
                 data: {
                     playlistId: playlist.id,
                     videoId: video.id,
+                    position: 1,
                 },
             });
 
@@ -284,6 +285,7 @@ describe('e2e tests Playlist Routes', () => {
                 data: {
                     playlistId: otherUserPlaylist.id,
                     videoId: video.id,
+                    position: 1,
                 },
             });
 
@@ -320,6 +322,7 @@ describe('e2e tests Playlist Routes', () => {
                 data: {
                     playlistId: otherUserPlaylist.id,
                     videoId: video.id,
+                    position: 1,
                 },
             });
 
@@ -390,6 +393,7 @@ describe('e2e tests Playlist Routes', () => {
                 data: {
                     playlistId: playlist.id,
                     videoId: video.id,
+                    position: 1,
                 },
             });
 
@@ -421,6 +425,7 @@ describe('e2e tests Playlist Routes', () => {
                 data: {
                     playlistId: playlist.id,
                     videoId: video.id,
+                    position: 1,
                 },
             });
 
@@ -451,6 +456,7 @@ describe('e2e tests Playlist Routes', () => {
                 data: {
                     playlistId: playlist.id,
                     videoId: video.id,
+                    position: 1,
                 },
             });
 
@@ -481,6 +487,7 @@ describe('e2e tests Playlist Routes', () => {
                 data: {
                     playlistId: otherUserPlaylist.id,
                     videoId: video.id,
+                    position: 1,
                 },
             });
 
@@ -515,6 +522,7 @@ describe('e2e tests Playlist Routes', () => {
                 data: {
                     playlistId: otherUserPlaylist.id,
                     videoId: video.id,
+                    position: 1,
                 },
             });
 
@@ -579,6 +587,7 @@ describe('e2e tests Playlist Routes', () => {
                 data: {
                     playlistId: playlist.id,
                     videoId: video.id,
+                    position: 1,
                 },
             });
 
