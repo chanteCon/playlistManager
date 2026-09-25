@@ -5,4 +5,21 @@
 
 */
 -- AlterTable
-ALTER TABLE "PlaylistVideo" ADD COLUMN     "position" INTEGER NOT NULL;
+ALTER TABLE "PlaylistVideo"
+ADD COLUMN "position" INTEGER;
+
+UPDATE "PlaylistVideo" pv
+SET "position" = positions.position
+FROM (
+    SELECT
+        id,
+        ROW_NUMBER() OVER (
+            PARTITION BY "playlistId"
+            ORDER BY "createdAt", id
+        ) - 1 AS position
+    FROM "PlaylistVideo"
+) positions
+WHERE pv.id = positions.id;
+
+ALTER TABLE "PlaylistVideo"
+ALTER COLUMN "position" SET NOT NULL;
