@@ -7,6 +7,7 @@ import {
     playlistIdSchema,
     playlistSearchSchema,
     playlistUpdateSchema,
+    playlistVideoPositionsSchema,
     playlistVideoRefSchema,
     updateVideoSchema,
     videoUrlSchema,
@@ -54,6 +55,13 @@ export const createPlaylistRoutes = ({
         validate(playlistIdSchema, 'params'),
         validate(playlistUpdateSchema),
         playlistController.updatePlaylist,
+    );
+
+    router.patch(
+        '/:id/videos/positions',
+        validate(playlistIdSchema, 'params'),
+        validate(playlistVideoPositionsSchema),
+        playlistController.updatePlaylistPositions,
     );
 
     router.delete('/:id', validate(playlistIdSchema, 'params'), playlistController.deletePlaylist);

@@ -49,6 +49,11 @@ export type PlaylistVideoWithInclude = Prisma.PlaylistVideoGetPayload<{
 }>;
 
 export const playlistWithVideosInclude = {
+    _count: {
+        select: {
+            playlistVideos: true,
+        },
+    },
     playlistVideos: {
         include: playlistVideoInclude,
     },
@@ -69,6 +74,7 @@ export type PlaylistVideoDTO = {
     platform?: string | null;
     platformId?: string | null;
     render: boolean;
+    position: number;
 };
 
 export type PlaylistDTO = {
@@ -76,4 +82,11 @@ export type PlaylistDTO = {
     name: string;
     description?: string | null;
     videos: PlaylistVideoDTO[];
+    coverUrl: string | null;
+    numVideos: number;
+};
+
+export type UpdatePlaylistPositionsInput = {
+    userId: string;
+    positions: { id: string; position: number }[];
 };

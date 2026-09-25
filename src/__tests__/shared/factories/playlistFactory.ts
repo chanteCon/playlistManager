@@ -21,7 +21,9 @@ export const buildPlaylistInput = (
     };
 };
 
-export const buildPlaylist = (overrides: Partial<Playlist> = {}): Playlist => {
+export const buildPlaylist = (
+    overrides: Partial<Playlist & { _count: { playlistVideos: number } }> = {},
+): Playlist & { _count: { playlistVideos: number } } => {
     return {
         id: randomUUID(),
         userId: randomUUID(),
@@ -29,6 +31,8 @@ export const buildPlaylist = (overrides: Partial<Playlist> = {}): Playlist => {
         description: null,
         createdAt: new Date(),
         updatedAt: new Date(),
+        coverUrl: 'test',
+        _count: { playlistVideos: 10 },
         ...overrides,
     };
 };
@@ -40,7 +44,7 @@ export const buildPlaylistWithVideos = (
         videoOverrides = [],
         sourceOverrides = [],
     }: {
-        playlistOverrides?: Partial<Playlist>;
+        playlistOverrides?: Partial<Playlist & { _count?: { playlistVideos: number } }>;
         playlistVideoOverrides?: Partial<PlaylistVideo>[];
         videoOverrides?: Partial<VideoWithSource>[];
         sourceOverrides?: Partial<VideoSource>[];
@@ -72,5 +76,6 @@ export const buildPlaylistWithVideos = (
     return {
         ...playlist,
         playlistVideos,
+        _count: { playlistVideos: 10 },
     };
 };

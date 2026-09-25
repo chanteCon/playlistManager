@@ -1790,6 +1790,8 @@ paths:
                     userId: 00000000-0000-0000-0000-000000000000
                     name: My Playlist
                     description: null
+                    coverUrl: null
+                    numVideos: 10
                 message: null
               schema:
                 type: object
@@ -1822,11 +1824,19 @@ paths:
                             anyOf:
                               - type: string
                               - type: "null"
+                          coverUrl:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          numVideos:
+                            type: number
                         required:
                           - id
                           - userId
                           - name
                           - description
+                          - coverUrl
+                          - numVideos
                         additionalProperties: false
                     required:
                       - playlist
@@ -1982,6 +1992,8 @@ paths:
                       userId: 00000000-0000-0000-0000-000000000000
                       name: Playlist 1
                       description: null
+                      coverUrl: null
+                      numVideos: 10
                 message: null
               schema:
                 type: object
@@ -2016,11 +2028,19 @@ paths:
                               anyOf:
                                 - type: string
                                 - type: "null"
+                            coverUrl:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            numVideos:
+                              type: number
                           required:
                             - id
                             - userId
                             - name
                             - description
+                            - coverUrl
+                            - numVideos
                           additionalProperties: false
                     required:
                       - playlists
@@ -2091,6 +2111,7 @@ paths:
                         userId: 00000000-0000-0000-0000-000000000000
                         name: Music Favourites
                         description: My favourite songs
+                        coverUrl: null
                     videos:
                       - id: 00000000-0000-0000-0000-000000000000
                         playlistId: 00000000-0000-0000-0000-000000000000
@@ -2138,11 +2159,16 @@ paths:
                                   anyOf:
                                     - type: string
                                     - type: "null"
+                                coverUrl:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
                               required:
                                 - id
                                 - userId
                                 - name
                                 - description
+                                - coverUrl
                               additionalProperties: false
                           videos:
                             type: array
@@ -2175,12 +2201,15 @@ paths:
                                     - type: "null"
                                 render:
                                   type: boolean
+                                position:
+                                  type: number
                               required:
                                 - id
                                 - playlistId
                                 - title
                                 - url
                                 - render
+                                - position
                               additionalProperties: false
                         required:
                           - playlists
@@ -2264,6 +2293,8 @@ paths:
                     id: 00000000-0000-0000-0000-000000000000
                     name: My Playlist
                     description: My playlist description
+                    coverUrl: null
+                    numVideos: 10
                     videos:
                       - id: 00000000-0000-0000-0000-000000000000
                         title: Test Video
@@ -2273,6 +2304,7 @@ paths:
                         platform: youtube
                         platformId: zzzzzzzzzzz
                         render: false
+                        position: 1
                 message: null
               schema:
                 type: object
@@ -2298,6 +2330,10 @@ paths:
                           name:
                             type: string
                           description:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          coverUrl:
                             anyOf:
                               - type: string
                               - type: "null"
@@ -2332,17 +2368,23 @@ paths:
                                     - type: "null"
                                 render:
                                   type: boolean
+                                position:
+                                  type: number
                               required:
                                 - id
                                 - playlistId
                                 - title
                                 - url
                                 - render
+                                - position
                               additionalProperties: false
+                          numVideos:
+                            type: number
                         required:
                           - id
                           - name
                           - videos
+                          - numVideos
                         additionalProperties: false
                     required:
                       - playlist
@@ -2484,6 +2526,7 @@ paths:
             example:
               name: Updated Playlist
               description: Updated description
+              cover: 00000000-0000-0000-0000-000000000000
             schema:
               type: object
               properties:
@@ -2499,6 +2542,14 @@ paths:
                   example: This is a description example.
                   type: string
                   maxLength: 500
+                cover:
+                  description: The id of the playlist video whose thumbnail should be used as the
+                    cover
+                  anyOf:
+                    - type: string
+                      format: uuid
+                      pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                    - type: "null"
       responses:
         "200":
           description: Successful response
@@ -2512,6 +2563,8 @@ paths:
                     userId: 00000000-0000-0000-0000-000000000000
                     name: Updated Playlist
                     description: Updated description
+                    coverUrl: example.image.com
+                    numVideos: 10
                 message: null
               schema:
                 type: object
@@ -2544,11 +2597,19 @@ paths:
                             anyOf:
                               - type: string
                               - type: "null"
+                          coverUrl:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          numVideos:
+                            type: number
                         required:
                           - id
                           - userId
                           - name
                           - description
+                          - coverUrl
+                          - numVideos
                         additionalProperties: false
                     required:
                       - playlist
@@ -2639,14 +2700,9 @@ paths:
                   - data
                 additionalProperties: false
         "404":
-          description: Playlist not found
+          description: Not found
           content:
             application/json:
-              example:
-                success: false
-                data: null
-                message: Playlist not found
-                errors: null
               schema:
                 type: object
                 properties:
@@ -2654,7 +2710,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Playlist not found
+                    default: Not found
                     type: string
                   data:
                     type: "null"
@@ -2676,6 +2732,22 @@ paths:
                   - message
                   - data
                 additionalProperties: false
+              examples:
+                playlistNotFound:
+                  summary: Playist not found
+                  value:
+                    success: false
+                    data: null
+                    message: Playlist not found
+                    errors: {}
+                coverVideoNotFound:
+                  summary: Cannot set video as playlist cover image
+                  value:
+                    success: false
+                    data: null
+                    message: Cannot set video as playlist cover image
+                    errors:
+                      cover: Video not found
         "409":
           description: Could not update playlist
           content:
@@ -2885,6 +2957,7 @@ paths:
                     platform: youtube
                     platformId: zzzzzzzzzzz
                     render: false
+                    positoin: 1
                 message: null
               schema:
                 type: object
@@ -2929,12 +3002,15 @@ paths:
                               - type: "null"
                           render:
                             type: boolean
+                          position:
+                            type: number
                         required:
                           - id
                           - playlistId
                           - title
                           - url
                           - render
+                          - position
                         additionalProperties: false
                     required:
                       - video
@@ -3218,6 +3294,240 @@ paths:
                   - message
                   - data
                 additionalProperties: false
+  /api/playlists/{id}/videos/positions:
+    patch:
+      summary: Update video positions
+      tags:
+        - Playlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - *a2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                positions:
+                  minItems: 1
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                      position:
+                        type: integer
+                        minimum: 0
+                        maximum: 9007199254740991
+                    required:
+                      - id
+                      - position
+              required:
+                - positions
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  videos:
+                    - id: 00000000-0000-0000-0000-000000000000
+                      playlistId: 00000000-0000-0000-0000-000000000000
+                      title: Test Video
+                      description: Test description
+                      thumbnail: https://example.com/thumbnail.jpg
+                      url: https://www.youtube.com/watch?v=zzzzzzzzzzz
+                      platform: youtube
+                      platformId: zzzzzzzzzzz
+                      render: false
+                      position: 0
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      videos:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            playlistId:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            title:
+                              type: string
+                            description:
+                              type: string
+                            thumbnail:
+                              type: string
+                            url:
+                              type: string
+                            platform:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            platformId:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            render:
+                              type: boolean
+                            position:
+                              type: number
+                          required:
+                            - id
+                            - playlistId
+                            - title
+                            - url
+                            - render
+                            - position
+                          additionalProperties: false
+                    required:
+                      - videos
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors:
+                  id:
+                    - Invalid UUID
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: Playlist not found
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Playlist not found
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Playlist not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
   /api/playlists/{id}/videos/{playlistVideoId}:
     patch:
       summary: Update playlist video
@@ -3278,6 +3588,7 @@ paths:
                     platform: youtube
                     platformId: zzzzzzzzzzz
                     render: false
+                    position: 1
                 message: null
               schema:
                 type: object
@@ -3322,12 +3633,15 @@ paths:
                               - type: "null"
                           render:
                             type: boolean
+                          position:
+                            type: number
                         required:
                           - id
                           - playlistId
                           - title
                           - url
                           - render
+                          - position
                         additionalProperties: false
                     required:
                       - video

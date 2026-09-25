@@ -81,6 +81,7 @@ model Playlist {
   description       String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  coverUrl          String?
 
   user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
   playlistVideos    PlaylistVideo[]
@@ -96,6 +97,7 @@ model PlaylistVideo {
 
   customTitle       String?
   customDescription String? 
+  position          Int
 
   playlist          Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
   video             Video @relation(fields: [videoId], references: [id], onDelete: Restrict)

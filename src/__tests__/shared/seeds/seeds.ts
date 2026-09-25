@@ -147,8 +147,9 @@ type PlaylistVideoInput = {
 export const seedPlaylistVideo = async (
     db: PrismaClient,
     ids: PlaylistVideoInput,
+    position?: number,
 ): Promise<PlaylistVideo> => {
-    return db.playlistVideo.create({ data: ids });
+    return db.playlistVideo.create({ data: { position: position ?? 0, ...ids } });
 };
 export const seedPlaylistVideos = async (
     db: PrismaClient,
