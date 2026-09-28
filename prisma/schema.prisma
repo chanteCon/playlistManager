@@ -22,6 +22,7 @@ model User {
 
   refreshTokens     RefreshToken[]
   playlists         Playlist[]
+  collections       Collection[]
 }
 
 model RefreshToken {
@@ -85,6 +86,7 @@ model Playlist {
 
   user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
   playlistVideos    PlaylistVideo[]
+  collections       CollectionPlaylist[]
 
   @@unique([userId, name])
 }
@@ -103,5 +105,26 @@ model PlaylistVideo {
   video             Video @relation(fields: [videoId], references: [id], onDelete: Restrict)
 
   @@unique([playlistId, videoId])
-  @@index([playlistId])
+}
+
+model Collection {
+  id        String             @id @default(uuid())
+  name      String
+  userId    String
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  playlists CollectionPlaylist[]
+  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
+@@unique([userId, name])
+}
+
+model CollectionPlaylist {
+  collectionId String
+  playlistId   String
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  playlist   Playlist   @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, playlistId])
 }

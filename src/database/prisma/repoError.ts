@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { ConflictError, NotFoundError, UnauthorisedError } from 'shared/errors/errors';
+import { AppError, ConflictError, NotFoundError, UnauthorisedError } from 'shared/errors/errors';
 
 export const PRISMA_NOT_FOUND_ERROR = 'P2025';
 export const PRISMA_UNIQUE_CONTSTRAINT_ERROR = 'P2002';
@@ -42,16 +42,12 @@ export const isUniqueConstraintError = (error: any) => {
     );
 };
 
-export const translateForeignKeyError = (
-    error: unknown,
-    ErrorType: new (message: string) => Error,
-    message: string,
-) => {
+export const translateForeignKeyError = (error: unknown, appError: AppError) => {
     if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === PRISMA_FOREIGN_KEY_ERROR
     ) {
-        throw new ErrorType(message);
+        throw appError;
     }
 };
 export const handleUniqueConstraintError = (

@@ -123,7 +123,7 @@ const paths = {
 
 export const userApiPaths = {
     openapi: '3.1.0',
-    info: { title: 'Auth API', version: '1.0.0' },
+    info: { title: 'User API', version: '1.0.0' },
     components,
     paths,
 };

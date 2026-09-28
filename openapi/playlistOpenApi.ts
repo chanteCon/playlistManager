@@ -25,7 +25,7 @@ export const playlistSearchField = {
     schema: {
         type: 'string',
     },
-};
+} as const;
 
 /*
  * DTOs

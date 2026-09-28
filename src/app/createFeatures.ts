@@ -13,6 +13,7 @@ import { createVerificationMiddleware } from 'middleware/verificationMiddleware'
 import { createTokenRepo } from 'features/auth/repos/refreshTokenRepo';
 import { createTokenService } from 'features/auth/services/tokenService';
 import { createRateLimiter } from 'middleware/rateLimitMiddleware';
+import { createCollectionsFeature } from 'features/collections';
 
 type FeatureDeps = {
     db: PrismaClient;
@@ -45,8 +46,13 @@ export const createFeatures = ({ db, redis }: FeatureDeps) => {
         txRunner,
     });
     const playlistFeature = createPlaylistFeature({ db, authUserLimiter });
+    const collectionFeature = createCollectionsFeature({
+        db,
+        playlistService: playlistFeature.services.playlistService,
+        authUserLimiter,
+    });
 
-    return { userFeature, authFeature, playlistFeature };
+    return { userFeature, authFeature, playlistFeature, collectionFeature };
 };
 
 export const createCodeModule = (redis: RedisClientType) => {

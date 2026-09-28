@@ -15,7 +15,9 @@ import { createVideoService } from 'features/video/services/videoService';
 import { VideoMetadataService } from 'features/video/services/videoMetadataService';
 import { createPlaylistRepo } from 'features/playlist/repos/playlistRepo';
 import { createPlaylistVideoRepo } from 'features/playlist/repos/playlistVideoRepo';
-import { createPlaylistService } from 'features/playlist/services/playlistService';
+import { createPlaylistService, PlaylistService } from 'features/playlist/services/playlistService';
+import { createCollectionsRepo } from 'features/collections/collectionsRepo';
+import { createCollectionService } from 'features/collectionsService';
 
 const createCodeServiceFixture = (redis: RedisClientType, emailService: EmailService) => {
     const codeRepo = createCodeRepo({ redis });
@@ -56,6 +58,24 @@ export const createAuthServiceFixture = ({ db, redis, emailService }: AuthUserFi
         txRunner,
     });
     return { authService, codeService, tokenService };
+};
+
+export type CollectionServiceFixtureDeps = {
+    db: PrismaClient;
+    playlistService: PlaylistService;
+};
+export const createCollectionServiceFixture = ({
+    db,
+    playlistService,
+}: CollectionServiceFixtureDeps) => {
+    const collectionsRepo = createCollectionsRepo({ db });
+
+    const collectionService = createCollectionService({
+        collectionsRepo,
+        playlistService,
+    });
+
+    return { collectionService };
 };
 
 export const createVideoServiceFixture = ({

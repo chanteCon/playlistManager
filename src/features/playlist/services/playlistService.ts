@@ -30,7 +30,7 @@ export const createPlaylistService = ({
     videoService,
 }: PlaylistServiceDeps) => {
     //// Internal ////////////////////////////////////
-    const _ensurePlaylistExistsForUser = async (
+    const ensurePlaylistExistsForUser = async (
         playlistId: string,
         userId: string,
     ): Promise<void> => {
@@ -73,7 +73,7 @@ export const createPlaylistService = ({
                 numVideos: 0,
             };
         } catch (error) {
-            translateForeignKeyError(error, NotFoundError, 'User not found');
+            translateForeignKeyError(error, new NotFoundError('User not found'));
             handleUniqueConstraintError(error, 'Could not add playlist', {
                 name: ['You already have a playlist with this name'],
             });
@@ -134,7 +134,7 @@ export const createPlaylistService = ({
                 if (cover === null) {
                     coverUrl = null;
                 } else {
-                    await _ensurePlaylistExistsForUser(playlistId, userId);
+                    await ensurePlaylistExistsForUser(playlistId, userId);
                     const playlistVideo = await playlistVideoRepo.findSource(cover, playlistId);
                     if (!playlistVideo) {
                         throw new NotFoundError('Cannot set video as playlist cover image', {
@@ -165,7 +165,7 @@ export const createPlaylistService = ({
         positions: { id: string; position: number }[],
     ) => {
         try {
-            await _ensurePlaylistExistsForUser(playlistId, userId);
+            await ensurePlaylistExistsForUser(playlistId, userId);
 
             return await playlistVideoRepo.updatePositions({
                 playlistId,
@@ -195,7 +195,7 @@ export const createPlaylistService = ({
         userId: string,
         { playlistId, url }: AddVideoData,
     ): Promise<PlaylistVideoDTO> => {
-        await _ensurePlaylistExistsForUser(playlistId, userId);
+        await ensurePlaylistExistsForUser(playlistId, userId);
         const video = await videoService.addFromUrl(url);
         try {
             const playlistVideo = await playlistVideoRepo.create(playlistId, video.id);
@@ -204,7 +204,7 @@ export const createPlaylistService = ({
             handleUniqueConstraintError(error, 'Cannot add video', {
                 url: ['You have already added this video to the playlist'],
             });
-            translateForeignKeyError(error, NotFoundError, 'Playlist or video not found');
+            translateForeignKeyError(error, new NotFoundError('Playlist or video not found'));
             throw error;
         }
     };
@@ -218,7 +218,7 @@ export const createPlaylistService = ({
         userId: string,
         { playlistId, playlistVideoId, data }: UpdatePlaylistVideoData,
     ): Promise<PlaylistVideoDTO> => {
-        await _ensurePlaylistExistsForUser(playlistId, userId);
+        await ensurePlaylistExistsForUser(playlistId, userId);
         try {
             const playlistVideo = await playlistVideoRepo.update(playlistVideoId, playlistId, {
                 customTitle: data?.title,
@@ -241,7 +241,7 @@ export const createPlaylistService = ({
         userId: string,
         { playlistId, playlistVideoId }: RemovePlaylistVideoData,
     ): Promise<void> => {
-        await _ensurePlaylistExistsForUser(playlistId, userId);
+        await ensurePlaylistExistsForUser(playlistId, userId);
         try {
             await playlistVideoRepo.deleteFromPlaylist(playlistId, playlistVideoId);
         } catch (error) {
@@ -263,5 +263,6 @@ export const createPlaylistService = ({
         updateVideo,
         searchUserLibrary,
         updatePositions,
+        ensurePlaylistExistsForUser,
     };
 };
