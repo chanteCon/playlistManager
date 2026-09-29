@@ -83,9 +83,8 @@ export const createPlaylistService = ({
 
     const getUserPlaylists = async (
         userId: string,
-        search?: string,
     ): Promise<(Playlist & { numVideos: number })[]> => {
-        const playlists = await playlistRepo.findUserPlaylists(userId, search);
+        const playlists = await playlistRepo.findUserPlaylists(userId);
 
         return playlists.map((playlist) => ({
             ...playlist,
@@ -93,12 +92,8 @@ export const createPlaylistService = ({
         }));
     };
 
-    const getPlaylistById = async (
-        userId: string,
-        playlistId: string,
-        search?: string,
-    ): Promise<PlaylistDTO> => {
-        const playlist = await playlistRepo.findById(playlistId, userId, search);
+    const getPlaylistById = async (userId: string, playlistId: string): Promise<PlaylistDTO> => {
+        const playlist = await playlistRepo.findById(playlistId, userId);
         if (!playlist) {
             throw new NotFoundError('Playlist not found');
         }
@@ -110,6 +105,7 @@ export const createPlaylistService = ({
             coverUrl: playlist.coverUrl,
             videos: playlist.playlistVideos.map(_toPlaylistVideoDto),
             numVideos: numVideos,
+            updatedAt: playlist.updatedAt,
         };
     };
 
@@ -142,7 +138,7 @@ export const createPlaylistService = ({
                         });
                     }
                     if (!playlistVideo.video.source || !playlistVideo.video.source.thumbnail) {
-                        throw new BadInputError('Cannot set playlistVideo as playlist cover', {
+                        throw new BadInputError('Cannot set video as playlist cover', {
                             cover: ['This video does not have a thumbnail'],
                         });
                     }

@@ -14,6 +14,7 @@ export const buildPlaylistVideo = (overrides: Partial<PlaylistVideo> = {}): Play
         id: randomUUID(),
         createdAt: new Date(),
         ...buildPlaylistVideoInput(),
+        position: 0,
         ...overrides,
         customDescription: overrides.customDescription ?? null,
         customTitle: overrides.customTitle ?? null,

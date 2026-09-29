@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PlaylistService } from 'features/playlist/services/playlistService';
 import { createCollectionsRepo } from './collectionsRepo';
-import { createCollectionService } from 'features/collectionsService';
+import { createCollectionService } from 'features/collections/collectionsService';
 import { createCollectionController } from './collectionsController';
 import { createCollectionRoutes } from './collectionsRoutes';
 import { RequestHandler } from 'express';

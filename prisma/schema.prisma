@@ -113,6 +113,7 @@ model Collection {
   userId    String
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
+  coverUrl    String?
 
   playlists CollectionPlaylist[]
   user              User @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -9,4 +9,7 @@ export const mockPlaylistService: jest.Mocked<PlaylistService> = {
     removeVideo: jest.fn(),
     updateVideo: jest.fn(),
     addVideo: jest.fn(),
+    searchUserLibrary: jest.fn(),
+    ensurePlaylistExistsForUser: jest.fn(),
+    updatePositions: jest.fn(),
 };

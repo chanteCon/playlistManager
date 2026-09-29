@@ -7,4 +7,5 @@ export const mockPlaylistRepo: jest.Mocked<PlaylistRepo> = {
     findById: jest.fn(),
     update: jest.fn(),
     deleteById: jest.fn(),
+    search: jest.fn(),
 };

@@ -3,7 +3,9 @@ import { RequestHandler, Router } from 'express';
 import { validate } from 'middleware/validationMiddleware';
 
 import { authMiddleware } from 'features/video/authMiddleware';
+
 import { CollectionController } from './collectionsController';
+
 import {
     collectionIdParamsSchema,
     collectionPlaylistParamsSchema,
@@ -23,10 +25,17 @@ export const createCollectionRoutes = ({
     const router = Router();
 
     router.use(authMiddleware);
-
     router.use(authUserLimiter);
 
+    router.get('/', collectionController.getCollections);
+
     router.post('/', validate(createCollectionSchema), collectionController.createCollection);
+
+    router.get(
+        '/:id',
+        validate(collectionIdParamsSchema, 'params'),
+        collectionController.getCollection,
+    );
 
     router.patch(
         '/:id',

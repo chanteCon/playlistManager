@@ -9,7 +9,9 @@ info:
         Requests are rate limited .
 servers:
   - url: http://localhost:4000
-    description: Main API server
+    description: Local development server
+  - url: https://playlist.api.chantellecs.com
+    description: Deployed server
 paths:
   /api/auth/register:
     post:
@@ -3946,7 +3948,124 @@ paths:
                     errors:
                       playlist:
                         - Video not found
-  /api/collections:
+  /api/collections/:
+    get:
+      summary: Get user collections
+      tags:
+        - Collection
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  collections:
+                    - id: 00000000-0000-0000-0000-000000000000
+                      userId: 00000000-0000-0000-0000-000000000000
+                      name: Music
+                      createdAt: 2026-01-01T00:00:00.000Z
+                      updatedAt: 2026-01-01T00:00:00.000Z
+                      numPlaylists: 3
+                      coverUrl: https://example.com/cover.jpg
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      collections:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            userId:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            name:
+                              type: string
+                            createdAt:
+                              type: string
+                            updatedAt:
+                              type: string
+                            numPlaylists:
+                              type: number
+                            coverUrl:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                          required:
+                            - id
+                            - userId
+                            - name
+                            - createdAt
+                            - updatedAt
+                            - numPlaylists
+                            - coverUrl
+                          additionalProperties: false
+                    required:
+                      - collections
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
     post:
       summary: Create collection
       tags:
@@ -3982,6 +4101,9 @@ paths:
                     name: Music
                     createdAt: 2026-01-01T00:00:00.000Z
                     updatedAt: 2026-01-01T00:00:00.000Z
+                    numPlaylists: 0
+                    coverUrl: null
+                    playlists: []
                 message: null
               schema:
                 type: object
@@ -4014,12 +4136,70 @@ paths:
                             type: string
                           updatedAt:
                             type: string
+                          numPlaylists:
+                            type: number
+                          coverUrl:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          playlists:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                userId:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                title:
+                                  type: string
+                                description:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                platform:
+                                  type: string
+                                platformId:
+                                  type: string
+                                thumbnailUrl:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                position:
+                                  type: number
+                                customTitle:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                customDescription:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                              required:
+                                - id
+                                - userId
+                                - title
+                                - description
+                                - platform
+                                - platformId
+                                - thumbnailUrl
+                                - position
+                                - customTitle
+                                - customDescription
+                              additionalProperties: false
                         required:
                           - id
                           - userId
                           - name
                           - createdAt
                           - updatedAt
+                          - numPlaylists
+                          - coverUrl
+                          - playlists
                         additionalProperties: false
                     required:
                       - collection
@@ -4039,7 +4219,7 @@ paths:
                 message: Invalid input
                 errors:
                   name:
-                    - Collection name must be between 1 and 50 characters
+                    - Collection name must be 100 characters or less
               schema:
                 type: object
                 properties:
@@ -4148,8 +4328,8 @@ paths:
                   - data
                 additionalProperties: false
   /api/collections/{id}:
-    patch:
-      summary: Update collection
+    get:
+      summary: Get collection
       tags:
         - Collection
       security:
@@ -4163,21 +4343,6 @@ paths:
             format: uuid
             pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
           required: true
-      requestBody:
-        required: true
-        content:
-          application/json:
-            example:
-              name: Updated Collection
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  minLength: 1
-                  maxLength: 100
-              required:
-                - name
       responses:
         "200":
           description: Successful response
@@ -4189,9 +4354,22 @@ paths:
                   collection:
                     id: 00000000-0000-0000-0000-000000000000
                     userId: 00000000-0000-0000-0000-000000000000
-                    name: Updated Collection
+                    name: Music
                     createdAt: 2026-01-01T00:00:00.000Z
                     updatedAt: 2026-01-01T00:00:00.000Z
+                    numPlaylists: 2
+                    coverUrl: https://example.com/cover.jpg
+                    playlists:
+                      - id: 00000000-0000-0000-0000-000000000000
+                        userId: 00000000-0000-0000-0000-000000000000
+                        title: My Playlist
+                        description: null
+                        platform: youtube
+                        platformId: abc123
+                        thumbnailUrl: https://example.com/thumbnail.jpg
+                        position: 0
+                        customTitle: null
+                        customDescription: null
                 message: null
               schema:
                 type: object
@@ -4224,12 +4402,70 @@ paths:
                             type: string
                           updatedAt:
                             type: string
+                          numPlaylists:
+                            type: number
+                          coverUrl:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          playlists:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                userId:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                title:
+                                  type: string
+                                description:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                platform:
+                                  type: string
+                                platformId:
+                                  type: string
+                                thumbnailUrl:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                position:
+                                  type: number
+                                customTitle:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                customDescription:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                              required:
+                                - id
+                                - userId
+                                - title
+                                - description
+                                - platform
+                                - platformId
+                                - thumbnailUrl
+                                - position
+                                - customTitle
+                                - customDescription
+                              additionalProperties: false
                         required:
                           - id
                           - userId
                           - name
                           - createdAt
                           - updatedAt
+                          - numPlaylists
+                          - coverUrl
+                          - playlists
                         additionalProperties: false
                     required:
                       - collection
@@ -4240,16 +4476,14 @@ paths:
                   - data
                 additionalProperties: false
         "400":
-          description: Invalid input
+          description: Invalid Input
           content:
             application/json:
               example:
                 success: false
                 data: null
-                message: Invalid input
+                message: Invalid Input
                 errors:
-                  name:
-                    - Collection name must be between 1 and 50 characters
                   id:
                     - Invalid UUID
               schema:
@@ -4259,7 +4493,7 @@ paths:
                     type: boolean
                     const: false
                   message:
-                    default: Invalid input
+                    default: Invalid Input
                     type: string
                   data:
                     type: "null"
@@ -4357,6 +4591,336 @@ paths:
                   - message
                   - data
                 additionalProperties: false
+    patch:
+      summary: Update collection
+      description: Updates a collection name and/or cover. To set the cover, provide
+        the ID of a playlist already in the collection. The selected playlist
+        must have a cover image. Provide null to remove the current cover. If
+        cover is omitted, the existing cover is preserved.
+      tags:
+        - Collection
+      security:
+        - BearerAuth: []
+      parameters:
+        - *a4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                cover:
+                  anyOf:
+                    - type: string
+                      format: uuid
+                      pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                    - type: "null"
+            examples:
+              updateName:
+                summary: Update collection name
+                value:
+                  name: Updated Collection
+              updateCover:
+                summary: Set cover from a playlist
+                description: The playlist must already belong to the collection and must have a
+                  cover image.
+                value:
+                  cover: 00000000-0000-0000-0000-000000000000
+              removeCover:
+                summary: Remove collection cover
+                value:
+                  cover: null
+              updateNameAndCover:
+                summary: Update name and cover
+                value:
+                  name: Updated Collection
+                  cover: 00000000-0000-0000-0000-000000000000
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  collection:
+                    id: 00000000-0000-0000-0000-000000000000
+                    userId: 00000000-0000-0000-0000-000000000000
+                    name: Updated Collection
+                    createdAt: 2026-01-01T00:00:00.000Z
+                    updatedAt: 2026-01-01T00:00:00.000Z
+                    numPlaylists: 2
+                    coverUrl: https://example.com/cover.jpg
+                    playlists: []
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      collection:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          userId:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          name:
+                            type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          numPlaylists:
+                            type: number
+                          coverUrl:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          playlists:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                userId:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                title:
+                                  type: string
+                                description:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                platform:
+                                  type: string
+                                platformId:
+                                  type: string
+                                thumbnailUrl:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                position:
+                                  type: number
+                                customTitle:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                customDescription:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                              required:
+                                - id
+                                - userId
+                                - title
+                                - description
+                                - platform
+                                - platformId
+                                - thumbnailUrl
+                                - position
+                                - customTitle
+                                - customDescription
+                              additionalProperties: false
+                        required:
+                          - id
+                          - userId
+                          - name
+                          - createdAt
+                          - updatedAt
+                          - numPlaylists
+                          - coverUrl
+                          - playlists
+                        additionalProperties: false
+                    required:
+                      - collection
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+              examples:
+                invalidName:
+                  summary: Invalid collection name
+                  value:
+                    success: false
+                    data: null
+                    message: Invalid input
+                    errors:
+                      name:
+                        - Collection name must be 100 characters or less
+                invalidCover:
+                  summary: Invalid cover playlist ID
+                  value:
+                    success: false
+                    data: null
+                    message: Invalid input
+                    errors:
+                      cover:
+                        - Invalid UUID
+                playlistHasNoCover:
+                  summary: Selected playlist has no cover
+                  value:
+                    success: false
+                    data: null
+                    message: Cannot set playlist as cover
+                    errors:
+                      cover:
+                        - This playlist does not have a cover
+                noFieldsProvided:
+                  summary: No fields provided
+                  value:
+                    success: false
+                    data: null
+                    message: Invalid input
+                    errors: {}
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: Collection not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Collection not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+              examples:
+                collectionNotFound:
+                  summary: Collection not found
+                  value:
+                    success: false
+                    data: null
+                    message: Collection not found
+                    errors:
+                      collection:
+                        - Collection not found
+                playlistNotFound:
+                  summary: Selected playlist is not in the collection
+                  value:
+                    success: false
+                    data: null
+                    message: Collection or playlist not found
+                    errors:
+                      cover:
+                        - Could not find playlist selected for the cover image
+                          in this collection.
         "409":
           description: Cannot update collection
           content:
@@ -4542,8 +5106,94 @@ paths:
             pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
           required: true
       responses:
-        "204":
-          description: Playlist added to collection successfully
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  playlist:
+                    id: 00000000-0000-0000-0000-000000000000
+                    userId: 00000000-0000-0000-0000-000000000000
+                    title: My Playlist
+                    description: null
+                    platform: youtube
+                    platformId: abc123
+                    thumbnailUrl: https://example.com/thumbnail.jpg
+                    position: 0
+                    customTitle: null
+                    customDescription: null
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      playlist:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          userId:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          title:
+                            type: string
+                          description:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          platform:
+                            type: string
+                          platformId:
+                            type: string
+                          thumbnailUrl:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          position:
+                            type: number
+                          customTitle:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          customDescription:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                        required:
+                          - id
+                          - userId
+                          - title
+                          - description
+                          - platform
+                          - platformId
+                          - thumbnailUrl
+                          - position
+                          - customTitle
+                          - customDescription
+                        additionalProperties: false
+                    required:
+                      - playlist
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
         "400":
           description: Invalid Input
           content:
@@ -4685,7 +5335,7 @@ paths:
                 data: null
                 message: Cannot add playlist to collection
                 errors:
-                  nameplaylist:
+                  playlist:
                     - You have already added this playlist to this collection
               schema:
                 type: object

@@ -1,12 +1,17 @@
 import { Response } from 'express';
 
 import { AuthRequest } from 'features/auth/types';
-import { CollectionService } from 'features/collectionsService';
-import { CollectionCreateData, CollectionPlaylistParams, CollectionUpdateData } from './type';
+import { CollectionService } from 'features/collections/collectionsService';
+import { CollectionCreateData, CollectionPlaylistParams, CollectionUpdateData } from './types';
 
 export type CollectionController = ReturnType<typeof createCollectionController>;
 
 export const createCollectionController = (collectionService: CollectionService) => {
+    const getCollections = async (req: AuthRequest, res: Response) => {
+        const userId = req.user!.id;
+        const collections = await collectionService.getUserCollections(userId);
+        return res.status(200).json({ collections });
+    };
     const createCollection = async (
         req: AuthRequest<any, any, CollectionCreateData>,
         res: Response,
@@ -37,13 +42,12 @@ export const createCollectionController = (collectionService: CollectionService)
         const userId = req.user!.id;
         const { id, playlistId } = req.params;
 
-        await collectionService.addPlaylist({
+        const playlist = await collectionService.addPlaylist({
             userId,
             collectionId: id,
             playlistId,
         });
-
-        return res.status(204).send();
+        return res.status(200).json({ playlist });
     };
 
     const deletePlaylist = async (req: AuthRequest<CollectionPlaylistParams>, res: Response) => {
@@ -55,7 +59,6 @@ export const createCollectionController = (collectionService: CollectionService)
             collectionId: id,
             playlistId,
         });
-
         return res.status(204).send();
     };
 
@@ -65,13 +68,20 @@ export const createCollectionController = (collectionService: CollectionService)
     ) => {
         const userId = req.user!.id;
         const { id } = req.params;
-
+        const { name, cover } = req.body;
         const collection = await collectionService.update({
             userId,
             id,
-            name: req.body.name,
+            name,
+            cover,
         });
 
+        return res.status(200).json({ collection });
+    };
+
+    const getCollection = async (req: AuthRequest<{ id: string }, any>, res: Response) => {
+        const { id } = req.params;
+        const collection = await collectionService.getById({ userId: req.user!.id, id });
         return res.status(200).json({ collection });
     };
 
@@ -81,5 +91,7 @@ export const createCollectionController = (collectionService: CollectionService)
         addPlaylist,
         deletePlaylist,
         updateCollection,
+        getCollection,
+        getCollections,
     };
 };

@@ -17,7 +17,7 @@ import { createPlaylistRepo } from 'features/playlist/repos/playlistRepo';
 import { createPlaylistVideoRepo } from 'features/playlist/repos/playlistVideoRepo';
 import { createPlaylistService, PlaylistService } from 'features/playlist/services/playlistService';
 import { createCollectionsRepo } from 'features/collections/collectionsRepo';
-import { createCollectionService } from 'features/collectionsService';
+import { createCollectionService } from 'features/collections/collectionsService';
 
 const createCodeServiceFixture = (redis: RedisClientType, emailService: EmailService) => {
     const codeRepo = createCodeRepo({ redis });

@@ -1,27 +1,29 @@
 import { Response } from 'express';
 
-import { Collection } from '@prisma/client';
-
 import { AuthRequest } from 'features/auth/types';
 
 import {
     CollectionCreateData,
     CollectionPlaylistParams,
+    CollectionSummaryDTO,
     CollectionUpdateData,
-} from 'features/collections/type';
+} from 'features/collections/types';
 
 import { buildExpressMocks } from '__tests__/shared/mocks/expressMock';
-
 import { expectMockResponse } from '__tests__/shared/helpers/controllerAssertions';
+
 import { createCollectionController } from 'features/collections/collectionsController';
+
 import { mockCollectionService } from '__tests__/shared/mocks/services/mockCollectionsService';
+
+import { buildPlaylist } from '__tests__/shared/factories';
 
 let mockRes: Response;
 
 const collectionController = createCollectionController(mockCollectionService);
 
 describe('Unit tests: Collection controllers', () => {
-    let collection: Collection;
+    let collection: CollectionSummaryDTO;
     let userId: string;
     let collectionId: string;
     let playlistId: string;
@@ -41,6 +43,8 @@ describe('Unit tests: Collection controllers', () => {
             name: 'My Collection',
             createdAt: new Date(),
             updatedAt: new Date(),
+            coverUrl: null,
+            numPlaylists: 0,
         };
     });
 
@@ -112,6 +116,63 @@ describe('Unit tests: Collection controllers', () => {
                 userId,
                 id: collectionId,
                 name: 'Updated Collection',
+                cover: undefined,
+            });
+
+            expectMockResponse({
+                mockRes,
+                data: { collection: updatedCollection },
+                status: 200,
+            });
+        });
+
+        test('Passes cover playlist ID to service', async () => {
+            const updatedCollection = {
+                ...collection,
+                coverUrl: 'https://example.com/cover.jpg',
+            };
+
+            mockReq.body = {
+                cover: playlistId,
+            };
+
+            mockCollectionService.update.mockResolvedValueOnce(updatedCollection);
+
+            await collectionController.updateCollection(mockReq, mockRes);
+
+            expect(mockCollectionService.update).toHaveBeenCalledWith({
+                userId,
+                id: collectionId,
+                name: undefined,
+                cover: playlistId,
+            });
+
+            expectMockResponse({
+                mockRes,
+                data: { collection: updatedCollection },
+                status: 200,
+            });
+        });
+
+        test('Passes null cover to service', async () => {
+            const updatedCollection = {
+                ...collection,
+                coverUrl: null,
+            };
+
+            mockReq.body = {
+                cover: null,
+            };
+
+            mockCollectionService.update.mockResolvedValueOnce(updatedCollection);
+
+            await collectionController.updateCollection(mockReq, mockRes);
+
+            expect(mockCollectionService.update).toHaveBeenCalledWith({
+                userId,
+                id: collectionId,
+                name: undefined,
+                cover: null,
             });
 
             expectMockResponse({
@@ -134,6 +195,7 @@ describe('Unit tests: Collection controllers', () => {
                 userId,
                 id: collectionId,
                 name: 'Updated Collection',
+                cover: undefined,
             });
         });
     });
@@ -191,19 +253,24 @@ describe('Unit tests: Collection controllers', () => {
             } as AuthRequest<CollectionPlaylistParams>;
         });
 
-        test('Returns 204 on success', async () => {
-            mockCollectionService.deletePlaylist.mockResolvedValueOnce();
+        test('Returns 200 on success', async () => {
+            const playlist = buildPlaylist();
 
-            await collectionController.deletePlaylist(mockReq, mockRes);
+            mockCollectionService.addPlaylist.mockResolvedValueOnce(playlist);
 
-            expect(mockCollectionService.deletePlaylist).toHaveBeenCalledWith({
+            await collectionController.addPlaylist(mockReq, mockRes);
+
+            expect(mockCollectionService.addPlaylist).toHaveBeenCalledWith({
                 userId,
                 collectionId,
                 playlistId,
             });
 
-            expect(mockRes.status).toHaveBeenCalledWith(204);
-            expect(mockRes.send).toHaveBeenCalled();
+            expectMockResponse({
+                mockRes,
+                data: { playlist },
+                status: 200,
+            });
         });
 
         test('Throws service error', async () => {
@@ -233,6 +300,7 @@ describe('Unit tests: Collection controllers', () => {
                 },
             } as AuthRequest<CollectionPlaylistParams>;
         });
+
         test('Returns 204 on success', async () => {
             mockCollectionService.deletePlaylist.mockResolvedValueOnce();
 
@@ -261,6 +329,92 @@ describe('Unit tests: Collection controllers', () => {
                 userId,
                 collectionId,
                 playlistId,
+            });
+        });
+    });
+
+    describe('Get collections', () => {
+        test('Returns 200 and user collections on success', async () => {
+            const collections = [collection];
+
+            mockCollectionService.getUserCollections.mockResolvedValueOnce(collections);
+
+            const mockReq = {
+                user: { id: userId },
+            } as AuthRequest;
+
+            await collectionController.getCollections(mockReq, mockRes);
+
+            expect(mockCollectionService.getUserCollections).toHaveBeenCalledWith(userId);
+
+            expectMockResponse({
+                mockRes,
+                data: { collections },
+                status: 200,
+            });
+        });
+
+        test('Throws service error', async () => {
+            const error = new Error('Service error');
+
+            mockCollectionService.getUserCollections.mockRejectedValueOnce(error);
+
+            const mockReq = {
+                user: { id: userId },
+            } as AuthRequest;
+
+            await expect(collectionController.getCollections(mockReq, mockRes)).rejects.toThrow(
+                error,
+            );
+
+            expect(mockCollectionService.getUserCollections).toHaveBeenCalledWith(userId);
+        });
+    });
+
+    describe('Get collection', () => {
+        let mockReq: AuthRequest<{ id: string }>;
+
+        beforeEach(() => {
+            mockReq = {
+                user: { id: userId },
+                params: { id: collectionId },
+            } as AuthRequest<{ id: string }>;
+        });
+
+        test('Returns 200 and collection on success', async () => {
+            const returnedCollection = {
+                ...collection,
+                playlists: [],
+            };
+
+            mockCollectionService.getById.mockResolvedValueOnce(returnedCollection);
+
+            await collectionController.getCollection(mockReq, mockRes);
+
+            expect(mockCollectionService.getById).toHaveBeenCalledWith({
+                userId,
+                id: collectionId,
+            });
+
+            expectMockResponse({
+                mockRes,
+                data: { collection: returnedCollection },
+                status: 200,
+            });
+        });
+
+        test('Throws service error', async () => {
+            const error = new Error('Service error');
+
+            mockCollectionService.getById.mockRejectedValueOnce(error);
+
+            await expect(collectionController.getCollection(mockReq, mockRes)).rejects.toThrow(
+                error,
+            );
+
+            expect(mockCollectionService.getById).toHaveBeenCalledWith({
+                userId,
+                id: collectionId,
             });
         });
     });

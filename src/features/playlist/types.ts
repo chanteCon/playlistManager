@@ -84,6 +84,7 @@ export type PlaylistDTO = {
     videos: PlaylistVideoDTO[];
     coverUrl: string | null;
     numVideos: number;
+    updatedAt: Date;
 };
 
 export type UpdatePlaylistPositionsInput = {

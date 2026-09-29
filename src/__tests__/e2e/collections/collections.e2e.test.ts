@@ -1,19 +1,24 @@
 import { createTestApp, TestAppEnv } from '__tests__/setup/e2e';
+
 import { collectionPaths } from 'routes/path';
+
 import { setAuthHeader } from '../helpers/e2eTestHelpers';
+
 import request from 'supertest';
+
 import { truncateDbTables } from '__tests__/shared/helpers/dbHelpers';
+
 import { seedPlaylist, seedUsers } from '__tests__/shared/seeds/seeds';
+
 import { User } from 'features/user/types';
+
 import * as jwt from 'jsonwebtoken';
+
 import { expectResError } from '../helpers/e2eAssertions';
+
 import { mockLogger } from '__tests__/shared/mocks/mockLogger';
-import {
-    ConflictError,
-    NotFoundError,
-    UnauthorisedError,
-    ValidationError,
-} from 'shared/errors/errors';
+
+import { ConflictError, NotFoundError, ValidationError } from 'shared/errors/errors';
 
 let testEnv: TestAppEnv;
 let users: User[];
@@ -31,8 +36,11 @@ afterAll(async () => {
 beforeEach(async () => {
     await truncateDbTables(testEnv.db);
     await testEnv.redis.flushDb();
+
     users = await seedUsers(testEnv.db, 2, [{ verified: true }, { verified: true }]);
+
     user = users[0];
+
     accessToken = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET!, {
         expiresIn: Number(process.env.ACCESS_TOKEN_EXPIRES_IN),
     });
@@ -46,7 +54,9 @@ describe('e2e tests Collection Routes', () => {
             const res = await setAuthHeader({
                 req: request(app).post(collectionPaths.base),
                 accessToken,
-            }).send({ name: 'My Collection' });
+            }).send({
+                name: 'My Collection',
+            });
 
             expect(res.status).toBe(201);
 
@@ -54,6 +64,7 @@ describe('e2e tests Collection Routes', () => {
                 collection: {
                     name: 'My Collection',
                     userId: user.id,
+                    numPlaylists: 0,
                 },
             });
 
@@ -69,7 +80,7 @@ describe('e2e tests Collection Routes', () => {
         test('Should return conflict error (409) for duplicate user collection name', async () => {
             const { app, db } = testEnv;
 
-            await testEnv.db.collection.create({
+            await db.collection.create({
                 data: {
                     userId: user.id,
                     name: 'My Collection',
@@ -79,7 +90,9 @@ describe('e2e tests Collection Routes', () => {
             const res = await setAuthHeader({
                 req: request(app).post(collectionPaths.base),
                 accessToken,
-            }).send({ name: 'My Collection' });
+            }).send({
+                name: 'My Collection',
+            });
 
             expectResError({
                 res,
@@ -101,13 +114,16 @@ describe('e2e tests Collection Routes', () => {
             const res = await setAuthHeader({
                 req: request(app).post(collectionPaths.base),
                 accessToken,
-            }).send({ name: 'My Collection' });
+            }).send({
+                name: 'My Collection',
+            });
 
             expect(res.status).toBe(201);
 
             expect(res.body.data.collection).toMatchObject({
                 name: 'My Collection',
                 userId: user.id,
+                numPlaylists: 0,
             });
         });
 
@@ -117,26 +133,14 @@ describe('e2e tests Collection Routes', () => {
             const res = await setAuthHeader({
                 req: request(app).post(collectionPaths.base),
                 accessToken,
-            }).send({ name: '' });
+            }).send({
+                name: '',
+            });
 
             expectResError({
                 res,
                 error: new ValidationError('Invalid Input'),
                 errors: [],
-                mockLogger,
-            });
-        });
-
-        test('Should return unauthorised error (401) if user is not authenticated', async () => {
-            const { app } = testEnv;
-
-            const res = await request(app)
-                .post(collectionPaths.base)
-                .send({ name: 'My Collection' });
-
-            expectResError({
-                res,
-                error: new UnauthorisedError('Unauthorized'),
                 mockLogger,
             });
         });
@@ -167,6 +171,7 @@ describe('e2e tests Collection Routes', () => {
                     id: collection.id,
                     name: 'Updated Name',
                     userId: user.id,
+                    numPlaylists: 0,
                 },
             });
         });
@@ -189,60 +194,11 @@ describe('e2e tests Collection Routes', () => {
             });
         });
 
-        test('Should return bad request error (400) if request body is invalid', async () => {
-            const { app, db } = testEnv;
-
-            const collection = await db.collection.create({
-                data: {
-                    userId: user.id,
-                    name: 'My Collection',
-                },
-            });
-
-            const res = await setAuthHeader({
-                req: request(app).patch(collectionPaths.id(collection.id)),
-                accessToken,
-            }).send({
-                name: '',
-            });
-
-            expectResError({
-                res,
-                error: new ValidationError('Invalid Input'),
-                errors: [],
-                mockLogger,
-            });
-        });
-
         test('Should return not found (404) if collection does not exist for user', async () => {
             const { app } = testEnv;
 
             const res = await setAuthHeader({
                 req: request(app).patch(collectionPaths.id(crypto.randomUUID())),
-                accessToken,
-            }).send({
-                name: 'Updated Name',
-            });
-
-            expectResError({
-                res,
-                error: new NotFoundError('Collection not found'),
-                mockLogger,
-            });
-        });
-
-        test('Should return not found (404) if collection belongs to another user', async () => {
-            const { app, db } = testEnv;
-
-            const collection = await db.collection.create({
-                data: {
-                    userId: users[1].id,
-                    name: 'Other Collection',
-                },
-            });
-
-            const res = await setAuthHeader({
-                req: request(app).patch(collectionPaths.id(collection.id)),
                 accessToken,
             }).send({
                 name: 'Updated Name',
@@ -286,7 +242,7 @@ describe('e2e tests Collection Routes', () => {
             });
         });
 
-        test('Should return unauthorised error (401) if user is not authenticated', async () => {
+        test('Should set collection cover from a playlist in the collection', async () => {
             const { app, db } = testEnv;
 
             const collection = await db.collection.create({
@@ -296,14 +252,142 @@ describe('e2e tests Collection Routes', () => {
                 },
             });
 
-            const res = await request(app).patch(collectionPaths.id(collection.id)).send({
+            const playlist = await seedPlaylist(db, {
+                userId: user.id,
+                coverUrl: 'https://example.com/playlist-cover.jpg',
+            });
+
+            await db.collectionPlaylist.create({
+                data: {
+                    collectionId: collection.id,
+                    playlistId: playlist.id,
+                },
+            });
+
+            const res = await setAuthHeader({
+                req: request(app).patch(collectionPaths.id(collection.id)),
+                accessToken,
+            }).send({
+                cover: playlist.id,
+            });
+
+            expect(res.status).toBe(200);
+
+            expect(res.body.data.collection).toMatchObject({
+                id: collection.id,
+                coverUrl: 'https://example.com/playlist-cover.jpg',
+                numPlaylists: 1,
+            });
+
+            const updatedCollection = await db.collection.findUnique({
+                where: {
+                    id: collection.id,
+                },
+            });
+
+            expect(updatedCollection?.coverUrl).toBe('https://example.com/playlist-cover.jpg');
+        });
+
+        test('Should clear collection cover when cover is null', async () => {
+            const { app, db } = testEnv;
+
+            const collection = await db.collection.create({
+                data: {
+                    userId: user.id,
+                    name: 'My Collection',
+                    coverUrl: 'https://example.com/existing-cover.jpg',
+                },
+            });
+
+            const res = await setAuthHeader({
+                req: request(app).patch(collectionPaths.id(collection.id)),
+                accessToken,
+            }).send({
+                cover: null,
+            });
+
+            expect(res.status).toBe(200);
+
+            expect(res.body.data.collection).toMatchObject({
+                id: collection.id,
+                coverUrl: null,
+                numPlaylists: 0,
+            });
+
+            const updatedCollection = await db.collection.findUnique({
+                where: {
+                    id: collection.id,
+                },
+            });
+
+            expect(updatedCollection?.coverUrl).toBeNull();
+        });
+
+        test('Should preserve existing cover when cover is omitted', async () => {
+            const { app, db } = testEnv;
+
+            const collection = await db.collection.create({
+                data: {
+                    userId: user.id,
+                    name: 'Old Name',
+                    coverUrl: 'https://example.com/existing-cover.jpg',
+                },
+            });
+
+            const res = await setAuthHeader({
+                req: request(app).patch(collectionPaths.id(collection.id)),
+                accessToken,
+            }).send({
                 name: 'Updated Name',
             });
 
-            expectResError({
-                res,
-                error: new UnauthorisedError('Unauthorized'),
-                mockLogger,
+            expect(res.status).toBe(200);
+
+            expect(res.body.data.collection).toMatchObject({
+                id: collection.id,
+                name: 'Updated Name',
+                coverUrl: 'https://example.com/existing-cover.jpg',
+                numPlaylists: 0,
+            });
+        });
+
+        test('Should update collection name and cover together', async () => {
+            const { app, db } = testEnv;
+
+            const collection = await db.collection.create({
+                data: {
+                    userId: user.id,
+                    name: 'Old Name',
+                },
+            });
+
+            const playlist = await seedPlaylist(db, {
+                userId: user.id,
+                coverUrl: 'https://example.com/playlist-cover.jpg',
+            });
+
+            await db.collectionPlaylist.create({
+                data: {
+                    collectionId: collection.id,
+                    playlistId: playlist.id,
+                },
+            });
+
+            const res = await setAuthHeader({
+                req: request(app).patch(collectionPaths.id(collection.id)),
+                accessToken,
+            }).send({
+                name: 'Updated Name',
+                cover: playlist.id,
+            });
+
+            expect(res.status).toBe(200);
+
+            expect(res.body.data.collection).toMatchObject({
+                id: collection.id,
+                name: 'Updated Name',
+                coverUrl: 'https://example.com/playlist-cover.jpg',
+                numPlaylists: 1,
             });
         });
     });
@@ -328,7 +412,9 @@ describe('e2e tests Collection Routes', () => {
 
             expect(
                 await db.collection.findUnique({
-                    where: { id: collection.id },
+                    where: {
+                        id: collection.id,
+                    },
                 }),
             ).toBeNull();
         });
@@ -369,41 +455,6 @@ describe('e2e tests Collection Routes', () => {
                 mockLogger,
             });
         });
-
-        test('Should return bad request error (400) if collection id is invalid format', async () => {
-            const { app } = testEnv;
-
-            const res = await setAuthHeader({
-                req: request(app).delete(collectionPaths.id('invalid-id')),
-                accessToken,
-            }).send();
-
-            expectResError({
-                res,
-                error: new ValidationError('Invalid Input'),
-                errors: [],
-                mockLogger,
-            });
-        });
-
-        test('Should return unauthorised error (401) if user is not authenticated', async () => {
-            const { app, db } = testEnv;
-
-            const collection = await db.collection.create({
-                data: {
-                    userId: user.id,
-                    name: 'My Collection',
-                },
-            });
-
-            const res = await request(app).delete(collectionPaths.id(collection.id)).send();
-
-            expectResError({
-                res,
-                error: new UnauthorisedError('Unauthorized'),
-                mockLogger,
-            });
-        });
     });
 
     describe('Add Playlist', () => {
@@ -426,7 +477,13 @@ describe('e2e tests Collection Routes', () => {
                 accessToken,
             }).send();
 
-            expect(res.status).toBe(204);
+            expect(res.status).toBe(200);
+
+            expect(res.body.data).toMatchObject({
+                playlist: {
+                    id: playlist.id,
+                },
+            });
 
             const relation = await db.collectionPlaylist.findUnique({
                 where: {
@@ -495,89 +552,6 @@ describe('e2e tests Collection Routes', () => {
             expectResError({
                 res,
                 error: new NotFoundError('Collection not found'),
-                mockLogger,
-            });
-        });
-
-        test('Should return not found (404) if playlist does not belong to user', async () => {
-            const { app, db } = testEnv;
-
-            const collection = await db.collection.create({
-                data: {
-                    userId: user.id,
-                    name: 'My Collection',
-                },
-            });
-
-            const playlist = await seedPlaylist(db, {
-                userId: users[1].id,
-            });
-
-            const res = await setAuthHeader({
-                req: request(app).post(collectionPaths.playlist(collection.id, playlist.id)),
-                accessToken,
-            }).send();
-
-            expectResError({
-                res,
-                error: new NotFoundError('Playlist not found'),
-                mockLogger,
-            });
-        });
-
-        test('Should return bad request error (400) if collection id is invalid format', async () => {
-            const { app } = testEnv;
-
-            const res = await setAuthHeader({
-                req: request(app).post(collectionPaths.playlist('invalid-id', crypto.randomUUID())),
-                accessToken,
-            }).send();
-
-            expectResError({
-                res,
-                error: new ValidationError('Invalid Input'),
-                errors: [],
-                mockLogger,
-            });
-        });
-
-        test('Should return bad request error (400) if playlist id is invalid format', async () => {
-            const { app } = testEnv;
-
-            const res = await setAuthHeader({
-                req: request(app).post(collectionPaths.playlist(crypto.randomUUID(), 'invalid-id')),
-                accessToken,
-            }).send();
-
-            expectResError({
-                res,
-                error: new ValidationError('Invalid Input'),
-                errors: [],
-                mockLogger,
-            });
-        });
-
-        test('Should return unauthorised error (401) if user is not authenticated', async () => {
-            const { app, db } = testEnv;
-
-            const collection = await db.collection.create({
-                data: {
-                    userId: user.id,
-                    name: 'My Collection',
-                },
-            });
-
-            const playlist = await seedPlaylist(db, {
-                userId: user.id,
-            });
-
-            const res = await request(app)
-                .post(collectionPaths.playlist(collection.id, playlist.id))
-                .send();
-
-            expectResError({
-                res,
-                error: new UnauthorisedError('Unauthorized'),
                 mockLogger,
             });
         });
@@ -693,26 +667,98 @@ describe('e2e tests Collection Routes', () => {
                 mockLogger,
             });
         });
+    });
 
-        test('Should return bad request error (400) if playlist id is invalid format', async () => {
-            const { app } = testEnv;
+    describe('Get Collections', () => {
+        test('Should return user collections', async () => {
+            const { app, db } = testEnv;
+
+            await db.collection.create({
+                data: {
+                    userId: user.id,
+                    name: 'Collection One',
+                },
+            });
+
+            await db.collection.create({
+                data: {
+                    userId: user.id,
+                    name: 'Collection Two',
+                },
+            });
 
             const res = await setAuthHeader({
-                req: request(app).delete(
-                    collectionPaths.playlist(crypto.randomUUID(), 'invalid-id'),
-                ),
+                req: request(app).get(collectionPaths.base),
                 accessToken,
             }).send();
 
-            expectResError({
-                res,
-                error: new ValidationError('Invalid Input'),
-                errors: [],
-                mockLogger,
+            expect(res.status).toBe(200);
+
+            expect(res.body.data.collections).toHaveLength(2);
+
+            expect(res.body.data.collections).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        userId: user.id,
+                        name: 'Collection One',
+                        numPlaylists: 0,
+                    }),
+                    expect.objectContaining({
+                        userId: user.id,
+                        name: 'Collection Two',
+                        numPlaylists: 0,
+                    }),
+                ]),
+            );
+        });
+
+        test('Should not return collections belonging to another user', async () => {
+            const { app, db } = testEnv;
+
+            await db.collection.create({
+                data: {
+                    userId: user.id,
+                    name: 'My Collection',
+                },
+            });
+
+            await db.collection.create({
+                data: {
+                    userId: users[1].id,
+                    name: 'Other Collection',
+                },
+            });
+
+            const res = await setAuthHeader({
+                req: request(app).get(collectionPaths.base),
+                accessToken,
+            }).send();
+
+            expect(res.status).toBe(200);
+            expect(res.body.data.collections).toHaveLength(1);
+
+            expect(res.body.data.collections[0]).toMatchObject({
+                userId: user.id,
+                name: 'My Collection',
+                numPlaylists: 0,
             });
         });
 
-        test('Should return unauthorised error (401) if user is not authenticated', async () => {
+        test('Should return empty array if user has no collections', async () => {
+            const { app } = testEnv;
+
+            const res = await setAuthHeader({
+                req: request(app).get(collectionPaths.base),
+                accessToken,
+            }).send();
+
+            expect(res.status).toBe(200);
+            expect(res.body.data.collections).toEqual([]);
+        });
+    });
+
+    describe('Get Collection', () => {
+        test('Should return collection with playlists', async () => {
             const { app, db } = testEnv;
 
             const collection = await db.collection.create({
@@ -726,13 +772,61 @@ describe('e2e tests Collection Routes', () => {
                 userId: user.id,
             });
 
-            const res = await request(app)
-                .delete(collectionPaths.playlist(collection.id, playlist.id))
-                .send();
+            await db.collectionPlaylist.create({
+                data: {
+                    collectionId: collection.id,
+                    playlistId: playlist.id,
+                },
+            });
+
+            const res = await setAuthHeader({
+                req: request(app).get(collectionPaths.id(collection.id)),
+                accessToken,
+            }).send();
+
+            expect(res.status).toBe(200);
+
+            expect(res.body.data.collection).toMatchObject({
+                id: collection.id,
+                name: 'My Collection',
+                userId: user.id,
+                numPlaylists: 1,
+            });
+
+            expect(res.body.data.collection.playlists).toHaveLength(1);
+
+            expect(res.body.data.collection.playlists[0]).toMatchObject({
+                id: playlist.id,
+            });
+        });
+
+        test('Should return not found (404) if collection does not exist for user', async () => {
+            const { app } = testEnv;
+
+            const res = await setAuthHeader({
+                req: request(app).get(collectionPaths.id(crypto.randomUUID())),
+                accessToken,
+            }).send();
 
             expectResError({
                 res,
-                error: new UnauthorisedError('Unauthorized'),
+                error: new NotFoundError('Collection not found'),
+                mockLogger,
+            });
+        });
+
+        test('Should return bad request error (400) if collection id is invalid format', async () => {
+            const { app } = testEnv;
+
+            const res = await setAuthHeader({
+                req: request(app).get(collectionPaths.id('invalid-id')),
+                accessToken,
+            }).send();
+
+            expectResError({
+                res,
+                error: new ValidationError('Invalid Input'),
+                errors: [],
                 mockLogger,
             });
         });

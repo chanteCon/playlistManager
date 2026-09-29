@@ -11,31 +11,10 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
 
     type PlaylistWithCount = Playlist & { _count: { playlistVideos: number } };
 
-    const findUserPlaylists = async (
-        userId: string,
-        search?: string,
-    ): Promise<PlaylistWithCount[]> => {
-        const normalizedSearch = search?.trim().toLowerCase();
-
+    const findUserPlaylists = async (userId: string): Promise<PlaylistWithCount[]> => {
         return await db.playlist.findMany({
             where: {
                 userId,
-                ...(normalizedSearch && {
-                    OR: [
-                        {
-                            name: {
-                                contains: normalizedSearch,
-                                mode: 'insensitive',
-                            },
-                        },
-                        {
-                            description: {
-                                contains: normalizedSearch,
-                                mode: 'insensitive',
-                            },
-                        },
-                    ],
-                }),
             },
             include: {
                 _count: {
@@ -56,17 +35,7 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
     const findById = async (
         playlistId: string,
         userId: string,
-        search?: string,
     ): Promise<PlaylistWithVideos | null> => {
-        const normalizedSearch = search?.trim().toLowerCase();
-
-        const platform: Platform | undefined =
-            normalizedSearch === 'youtube'
-                ? Platform.youtube
-                : normalizedSearch === 'tiktok'
-                  ? Platform.tiktok
-                  : undefined;
-
         return await db.playlist.findFirst({
             where: {
                 id: playlistId,
@@ -79,65 +48,6 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
                     },
                 },
                 playlistVideos: {
-                    where: normalizedSearch
-                        ? {
-                              OR: [
-                                  {
-                                      customTitle: {
-                                          contains: normalizedSearch,
-                                          mode: 'insensitive',
-                                      },
-                                  },
-                                  {
-                                      AND: [
-                                          { customTitle: null },
-                                          {
-                                              video: {
-                                                  source: {
-                                                      title: {
-                                                          contains: normalizedSearch,
-                                                          mode: 'insensitive',
-                                                      },
-                                                  },
-                                              },
-                                          },
-                                      ],
-                                  },
-                                  {
-                                      customDescription: {
-                                          contains: normalizedSearch,
-                                          mode: 'insensitive',
-                                      },
-                                  },
-                                  {
-                                      AND: [
-                                          { customDescription: null },
-                                          {
-                                              video: {
-                                                  source: {
-                                                      description: {
-                                                          contains: normalizedSearch,
-                                                          mode: 'insensitive',
-                                                      },
-                                                  },
-                                              },
-                                          },
-                                      ],
-                                  },
-                                  ...(platform
-                                      ? [
-                                            {
-                                                video: {
-                                                    source: {
-                                                        platform,
-                                                    },
-                                                },
-                                            },
-                                        ]
-                                      : []),
-                              ],
-                          }
-                        : undefined,
                     orderBy: {
                         position: 'asc',
                     },
@@ -146,7 +56,6 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
             },
         });
     };
-
     type PlaylistUpdateParams = {
         name?: string | undefined;
         description?: string | undefined;

@@ -14,10 +14,13 @@ export const createCollectionSchema = z
 
 export const updateCollectionSchema = z
     .object({
-        name: collectionNameField,
+        name: collectionNameField.optional(),
+        cover: z.uuid().nullable().optional(),
     })
-    .strip();
-
+    .strip()
+    .refine((data) => data.name !== undefined || data.cover !== undefined, {
+        message: 'At least one field must be provided',
+    });
 export const collectionIdField = z.uuid().meta({
     param: {
         name: 'id',
