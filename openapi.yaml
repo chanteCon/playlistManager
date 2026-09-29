@@ -1974,13 +1974,6 @@ paths:
         - Playlist
       security:
         - BearerAuth: []
-      parameters:
-        - &a1
-          name: search
-          in: query
-          required: false
-          schema:
-            type: string
       responses:
         "200":
           description: Successful response
@@ -2090,179 +2083,6 @@ paths:
                   - message
                   - data
                 additionalProperties: false
-  /api/playlists/search:
-    get:
-      summary: Search user library
-      tags:
-        - Playlist
-      security:
-        - BearerAuth: []
-      parameters:
-        - *a1
-      responses:
-        "200":
-          description: Successful response
-          content:
-            application/json:
-              example:
-                success: true
-                data:
-                  results:
-                    playlists:
-                      - id: 00000000-0000-0000-0000-000000000000
-                        userId: 00000000-0000-0000-0000-000000000000
-                        name: Music Favourites
-                        description: My favourite songs
-                        coverUrl: null
-                    videos:
-                      - id: 00000000-0000-0000-0000-000000000000
-                        playlistId: 00000000-0000-0000-0000-000000000000
-                        title: Best Music Videos
-                        description: My favourite music
-                        thumbnail: https://example.com/thumbnail.jpg
-                        url: https://www.youtube.com/watch?v=zzzzzzzzzzz
-                        platform: youtube
-                        platformId: zzzzzzzzzzz
-                        render: true
-                message: null
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    const: true
-                  message:
-                    anyOf:
-                      - type: string
-                      - type: "null"
-                    example: null
-                  data:
-                    type: object
-                    properties:
-                      results:
-                        type: object
-                        properties:
-                          playlists:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                id:
-                                  type: string
-                                  format: uuid
-                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                                userId:
-                                  type: string
-                                  format: uuid
-                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                                name:
-                                  type: string
-                                description:
-                                  anyOf:
-                                    - type: string
-                                    - type: "null"
-                                coverUrl:
-                                  anyOf:
-                                    - type: string
-                                    - type: "null"
-                              required:
-                                - id
-                                - userId
-                                - name
-                                - description
-                                - coverUrl
-                              additionalProperties: false
-                          videos:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                id:
-                                  type: string
-                                  format: uuid
-                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                                playlistId:
-                                  type: string
-                                  format: uuid
-                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                                title:
-                                  type: string
-                                description:
-                                  type: string
-                                thumbnail:
-                                  type: string
-                                url:
-                                  type: string
-                                platform:
-                                  anyOf:
-                                    - type: string
-                                    - type: "null"
-                                platformId:
-                                  anyOf:
-                                    - type: string
-                                    - type: "null"
-                                render:
-                                  type: boolean
-                                position:
-                                  type: number
-                              required:
-                                - id
-                                - playlistId
-                                - title
-                                - url
-                                - render
-                                - position
-                              additionalProperties: false
-                        required:
-                          - playlists
-                          - videos
-                        additionalProperties: false
-                    required:
-                      - results
-                    additionalProperties: false
-                required:
-                  - success
-                  - message
-                  - data
-                additionalProperties: false
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              example:
-                success: false
-                data: null
-                message: Unauthorized
-                errors: null
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    const: false
-                  message:
-                    default: Unauthorized
-                    type: string
-                  data:
-                    type: "null"
-                  errors:
-                    example:
-                      field:
-                        - Validation error
-                    anyOf:
-                      - type: object
-                        propertyNames:
-                          type: string
-                        additionalProperties:
-                          type: array
-                          items:
-                            type: string
-                      - type: "null"
-                required:
-                  - success
-                  - message
-                  - data
-                additionalProperties: false
   /api/playlists/{id}:
     get:
       summary: Get playlist
@@ -2271,7 +2091,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - &a2
+        - &a1
           in: path
           name: id
           schema:
@@ -2282,7 +2102,6 @@ paths:
             example: 00000000-0000-0000-0000-000000000000
           required: true
           description: The unique ID of the playlist
-        - *a1
       responses:
         "200":
           description: Successful response
@@ -2335,10 +2154,6 @@ paths:
                             anyOf:
                               - type: string
                               - type: "null"
-                          coverUrl:
-                            anyOf:
-                              - type: string
-                              - type: "null"
                           videos:
                             type: array
                             items:
@@ -2380,13 +2195,21 @@ paths:
                                 - render
                                 - position
                               additionalProperties: false
+                          coverUrl:
+                            anyOf:
+                              - type: string
+                              - type: "null"
                           numVideos:
                             type: number
+                          updatedAt:
+                            type: string
                         required:
                           - id
                           - name
                           - videos
+                          - coverUrl
                           - numVideos
+                          - updatedAt
                         additionalProperties: false
                     required:
                       - playlist
@@ -2519,7 +2342,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - *a2
+        - *a1
       requestBody:
         required: true
         content:
@@ -2797,7 +2620,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - *a2
+        - *a1
       responses:
         "204":
           description: Playlist deleted successfully
@@ -2925,7 +2748,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - *a2
+        - *a1
       requestBody:
         required: true
         content:
@@ -3304,7 +3127,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - *a2
+        - *a1
       requestBody:
         required: true
         content:
@@ -3538,8 +3361,8 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - *a2
-        - &a3
+        - *a1
+        - &a2
           in: path
           name: playlistVideoId
           schema:
@@ -3811,8 +3634,8 @@ paths:
       security:
         - BearerAuth: []
       parameters:
+        - *a1
         - *a2
-        - *a3
       responses:
         "204":
           description: Video removed from playlist successfully
@@ -4151,45 +3974,68 @@ paths:
                                   type: string
                                   format: uuid
                                   pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                                userId:
-                                  type: string
-                                  format: uuid
-                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                                title:
+                                name:
                                   type: string
                                 description:
                                   anyOf:
                                     - type: string
                                     - type: "null"
-                                platform:
-                                  type: string
-                                platformId:
-                                  type: string
-                                thumbnailUrl:
+                                videos:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                        format: uuid
+                                        pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                      playlistId:
+                                        type: string
+                                        format: uuid
+                                        pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                      title:
+                                        type: string
+                                      description:
+                                        type: string
+                                      thumbnail:
+                                        type: string
+                                      url:
+                                        type: string
+                                      platform:
+                                        anyOf:
+                                          - type: string
+                                          - type: "null"
+                                      platformId:
+                                        anyOf:
+                                          - type: string
+                                          - type: "null"
+                                      render:
+                                        type: boolean
+                                      position:
+                                        type: number
+                                    required:
+                                      - id
+                                      - playlistId
+                                      - title
+                                      - url
+                                      - render
+                                      - position
+                                    additionalProperties: false
+                                coverUrl:
                                   anyOf:
                                     - type: string
                                     - type: "null"
-                                position:
+                                numVideos:
                                   type: number
-                                customTitle:
-                                  anyOf:
-                                    - type: string
-                                    - type: "null"
-                                customDescription:
-                                  anyOf:
-                                    - type: string
-                                    - type: "null"
+                                updatedAt:
+                                  type: string
                               required:
                                 - id
-                                - userId
-                                - title
-                                - description
-                                - platform
-                                - platformId
-                                - thumbnailUrl
-                                - position
-                                - customTitle
-                                - customDescription
+                                - name
+                                - videos
+                                - coverUrl
+                                - numVideos
+                                - updatedAt
                               additionalProperties: false
                         required:
                           - id
@@ -4335,7 +4181,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - &a4
+        - &a3
           in: path
           name: id
           schema:
@@ -4417,45 +4263,68 @@ paths:
                                   type: string
                                   format: uuid
                                   pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                                userId:
-                                  type: string
-                                  format: uuid
-                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                                title:
+                                name:
                                   type: string
                                 description:
                                   anyOf:
                                     - type: string
                                     - type: "null"
-                                platform:
-                                  type: string
-                                platformId:
-                                  type: string
-                                thumbnailUrl:
+                                videos:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                        format: uuid
+                                        pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                      playlistId:
+                                        type: string
+                                        format: uuid
+                                        pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                      title:
+                                        type: string
+                                      description:
+                                        type: string
+                                      thumbnail:
+                                        type: string
+                                      url:
+                                        type: string
+                                      platform:
+                                        anyOf:
+                                          - type: string
+                                          - type: "null"
+                                      platformId:
+                                        anyOf:
+                                          - type: string
+                                          - type: "null"
+                                      render:
+                                        type: boolean
+                                      position:
+                                        type: number
+                                    required:
+                                      - id
+                                      - playlistId
+                                      - title
+                                      - url
+                                      - render
+                                      - position
+                                    additionalProperties: false
+                                coverUrl:
                                   anyOf:
                                     - type: string
                                     - type: "null"
-                                position:
+                                numVideos:
                                   type: number
-                                customTitle:
-                                  anyOf:
-                                    - type: string
-                                    - type: "null"
-                                customDescription:
-                                  anyOf:
-                                    - type: string
-                                    - type: "null"
+                                updatedAt:
+                                  type: string
                               required:
                                 - id
-                                - userId
-                                - title
-                                - description
-                                - platform
-                                - platformId
-                                - thumbnailUrl
-                                - position
-                                - customTitle
-                                - customDescription
+                                - name
+                                - videos
+                                - coverUrl
+                                - numVideos
+                                - updatedAt
                               additionalProperties: false
                         required:
                           - id
@@ -4602,7 +4471,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - *a4
+        - *a3
       requestBody:
         required: true
         content:
@@ -4704,45 +4573,68 @@ paths:
                                   type: string
                                   format: uuid
                                   pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                                userId:
-                                  type: string
-                                  format: uuid
-                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                                title:
+                                name:
                                   type: string
                                 description:
                                   anyOf:
                                     - type: string
                                     - type: "null"
-                                platform:
-                                  type: string
-                                platformId:
-                                  type: string
-                                thumbnailUrl:
+                                videos:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                        format: uuid
+                                        pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                      playlistId:
+                                        type: string
+                                        format: uuid
+                                        pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                      title:
+                                        type: string
+                                      description:
+                                        type: string
+                                      thumbnail:
+                                        type: string
+                                      url:
+                                        type: string
+                                      platform:
+                                        anyOf:
+                                          - type: string
+                                          - type: "null"
+                                      platformId:
+                                        anyOf:
+                                          - type: string
+                                          - type: "null"
+                                      render:
+                                        type: boolean
+                                      position:
+                                        type: number
+                                    required:
+                                      - id
+                                      - playlistId
+                                      - title
+                                      - url
+                                      - render
+                                      - position
+                                    additionalProperties: false
+                                coverUrl:
                                   anyOf:
                                     - type: string
                                     - type: "null"
-                                position:
+                                numVideos:
                                   type: number
-                                customTitle:
-                                  anyOf:
-                                    - type: string
-                                    - type: "null"
-                                customDescription:
-                                  anyOf:
-                                    - type: string
-                                    - type: "null"
+                                updatedAt:
+                                  type: string
                               required:
                                 - id
-                                - userId
-                                - title
-                                - description
-                                - platform
-                                - platformId
-                                - thumbnailUrl
-                                - position
-                                - customTitle
-                                - customDescription
+                                - name
+                                - videos
+                                - coverUrl
+                                - numVideos
+                                - updatedAt
                               additionalProperties: false
                         required:
                           - id
@@ -4968,7 +4860,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - *a4
+        - *a3
       responses:
         "204":
           description: Collection deleted successfully
@@ -5096,8 +4988,8 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - *a4
-        - &a5
+        - *a3
+        - &a4
           in: path
           name: playlistId
           schema:
@@ -5146,45 +5038,68 @@ paths:
                             type: string
                             format: uuid
                             pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                          userId:
-                            type: string
-                            format: uuid
-                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                          title:
+                          name:
                             type: string
                           description:
                             anyOf:
                               - type: string
                               - type: "null"
-                          platform:
-                            type: string
-                          platformId:
-                            type: string
-                          thumbnailUrl:
+                          videos:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                playlistId:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                title:
+                                  type: string
+                                description:
+                                  type: string
+                                thumbnail:
+                                  type: string
+                                url:
+                                  type: string
+                                platform:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                platformId:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                render:
+                                  type: boolean
+                                position:
+                                  type: number
+                              required:
+                                - id
+                                - playlistId
+                                - title
+                                - url
+                                - render
+                                - position
+                              additionalProperties: false
+                          coverUrl:
                             anyOf:
                               - type: string
                               - type: "null"
-                          position:
+                          numVideos:
                             type: number
-                          customTitle:
-                            anyOf:
-                              - type: string
-                              - type: "null"
-                          customDescription:
-                            anyOf:
-                              - type: string
-                              - type: "null"
+                          updatedAt:
+                            type: string
                         required:
                           - id
-                          - userId
-                          - title
-                          - description
-                          - platform
-                          - platformId
-                          - thumbnailUrl
-                          - position
-                          - customTitle
-                          - customDescription
+                          - name
+                          - videos
+                          - coverUrl
+                          - numVideos
+                          - updatedAt
                         additionalProperties: false
                     required:
                       - playlist
@@ -5373,8 +5288,8 @@ paths:
       security:
         - BearerAuth: []
       parameters:
+        - *a3
         - *a4
-        - *a5
       responses:
         "204":
           description: Playlist removed from collection successfully
@@ -5510,6 +5425,316 @@ paths:
                     errors:
                       playlist:
                         - Playlist not found in this collection
+  /api/search:
+    get:
+      summary: Search user library
+      description: Searches the authenticated user’s collections, playlists, and videos.
+      tags:
+        - Search
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+            minLength: 1
+          required: true
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  collections:
+                    - id: 00000000-0000-0000-0000-000000000000
+                      userId: 00000000-0000-0000-0000-000000000000
+                      name: Music Collection
+                      createdAt: 2026-01-01T00:00:00.000Z
+                      updatedAt: 2026-01-01T00:00:00.000Z
+                      numPlaylists: 2
+                      coverUrl: https://example.com/cover.jpg
+                  playlists:
+                    - id: 00000000-0000-0000-0000-000000000000
+                      name: Music Favourites
+                      description: My favourite music
+                      videos:
+                        - id: 00000000-0000-0000-0000-000000000000
+                          playlistId: 00000000-0000-0000-0000-000000000000
+                          title: Best Music Videos
+                          description: My favourite music videos
+                          thumbnail: https://example.com/thumbnail.jpg
+                          url: https://youtube.com/watch?v=abc123
+                          platform: youtube
+                          platformId: abc123
+                          render: true
+                          position: 0
+                      coverUrl: https://example.com/cover.jpg
+                      numVideos: 1
+                      updatedAt: 2026-01-01T00:00:00.000Z
+                  videos:
+                    - id: 00000000-0000-0000-0000-000000000000
+                      playlistId: 00000000-0000-0000-0000-000000000000
+                      title: Best Music Videos
+                      description: My favourite music videos
+                      thumbnail: https://example.com/thumbnail.jpg
+                      url: https://youtube.com/watch?v=abc123
+                      platform: youtube
+                      platformId: abc123
+                      render: true
+                      position: 0
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      collections:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            userId:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            name:
+                              type: string
+                            createdAt:
+                              type: string
+                            updatedAt:
+                              type: string
+                            numPlaylists:
+                              type: number
+                            coverUrl:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                          required:
+                            - id
+                            - userId
+                            - name
+                            - createdAt
+                            - updatedAt
+                            - numPlaylists
+                            - coverUrl
+                          additionalProperties: false
+                      playlists:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            name:
+                              type: string
+                            description:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            videos:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    format: uuid
+                                    pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                  playlistId:
+                                    type: string
+                                    format: uuid
+                                    pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                  title:
+                                    type: string
+                                  description:
+                                    type: string
+                                  thumbnail:
+                                    type: string
+                                  url:
+                                    type: string
+                                  platform:
+                                    anyOf:
+                                      - type: string
+                                      - type: "null"
+                                  platformId:
+                                    anyOf:
+                                      - type: string
+                                      - type: "null"
+                                  render:
+                                    type: boolean
+                                  position:
+                                    type: number
+                                required:
+                                  - id
+                                  - playlistId
+                                  - title
+                                  - url
+                                  - render
+                                  - position
+                                additionalProperties: false
+                            coverUrl:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            numVideos:
+                              type: number
+                            updatedAt:
+                              type: string
+                          required:
+                            - id
+                            - name
+                            - videos
+                            - coverUrl
+                            - numVideos
+                            - updatedAt
+                          additionalProperties: false
+                      videos:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            playlistId:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            title:
+                              type: string
+                            description:
+                              type: string
+                            thumbnail:
+                              type: string
+                            url:
+                              type: string
+                            platform:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            platformId:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            render:
+                              type: boolean
+                            position:
+                              type: number
+                          required:
+                            - id
+                            - playlistId
+                            - title
+                            - url
+                            - render
+                            - position
+                          additionalProperties: false
+                    required:
+                      - collections
+                      - playlists
+                      - videos
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid input
+                errors:
+                  search:
+                    - Invalid input
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
 components:
   schemas:
     SuccessResponse:

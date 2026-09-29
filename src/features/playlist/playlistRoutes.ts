@@ -5,7 +5,6 @@ import { validate } from 'middleware/validationMiddleware';
 import {
     playlistCreateSchema,
     playlistIdSchema,
-    playlistSearchSchema,
     playlistUpdateSchema,
     playlistVideoPositionsSchema,
     playlistVideoRefSchema,
@@ -32,12 +31,6 @@ export const createPlaylistRoutes = ({
     router.post('/', validate(playlistCreateSchema), playlistController.createPlaylist);
 
     router.get('/', playlistController.getAllUserPlaylists);
-
-    router.get(
-        '/search',
-        validate(playlistSearchSchema, 'query'),
-        playlistController.searchLibrary,
-    );
 
     router.get('/:id', validate(playlistIdSchema, 'params'), playlistController.getPlaylist);
 

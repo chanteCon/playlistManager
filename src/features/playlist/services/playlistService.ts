@@ -7,7 +7,6 @@ import {
     PlaylistDTO,
     PlaylistUpdateInput,
     PlaylistVideoDTO,
-    PlaylistVideoWithInclude,
 } from '../types';
 import { BadInputError, NotFoundError } from 'shared/errors/errors';
 import {
@@ -15,7 +14,7 @@ import {
     handleUniqueConstraintError,
     translateForeignKeyError,
 } from 'database/prisma/repoError';
-import { RENDERABLE_PLATFORMS } from 'features/video/constants';
+import { toPlaylistVideoDto } from 'shared/helper';
 
 type PlaylistServiceDeps = {
     playlistRepo: PlaylistRepo;
@@ -29,7 +28,6 @@ export const createPlaylistService = ({
     playlistVideoRepo,
     videoService,
 }: PlaylistServiceDeps) => {
-    //// Internal ////////////////////////////////////
     const ensurePlaylistExistsForUser = async (
         playlistId: string,
         userId: string,
@@ -39,26 +37,6 @@ export const createPlaylistService = ({
             throw new NotFoundError('Playlist not found', { playlist: ['Playlist not found'] });
         }
     };
-
-    const _toPlaylistVideoDto = (playlistVideo: PlaylistVideoWithInclude): PlaylistVideoDTO => {
-        const { video } = playlistVideo;
-        const source = video.source;
-
-        return {
-            id: playlistVideo.id,
-            playlistId: playlistVideo.playlistId,
-            title: playlistVideo.customTitle ?? source?.title ?? '',
-            description: playlistVideo.customDescription ?? source?.description ?? '',
-            thumbnail: source?.thumbnail ?? '',
-            url: source?.canonicalUrl ?? video.url,
-            platform: source?.platform ?? null,
-            platformId: source?.platformId ?? null,
-            render: RENDERABLE_PLATFORMS.has(source?.platform ?? ''),
-            position: playlistVideo.position,
-        };
-    };
-
-    //// External ////////////////////////////////////
 
     /// Playlist /////////////////////////////////////
     const create = async (
@@ -103,7 +81,7 @@ export const createPlaylistService = ({
             name: playlist.name,
             description: playlist.description,
             coverUrl: playlist.coverUrl,
-            videos: playlist.playlistVideos.map(_toPlaylistVideoDto),
+            videos: playlist.playlistVideos.map(toPlaylistVideoDto),
             numVideos: numVideos,
             updatedAt: playlist.updatedAt,
         };
@@ -114,7 +92,7 @@ export const createPlaylistService = ({
 
         return {
             playlists,
-            videos: playlistVideos.map(_toPlaylistVideoDto),
+            videos: playlistVideos.map(toPlaylistVideoDto),
         };
     };
 
@@ -195,7 +173,7 @@ export const createPlaylistService = ({
         const video = await videoService.addFromUrl(url);
         try {
             const playlistVideo = await playlistVideoRepo.create(playlistId, video.id);
-            return _toPlaylistVideoDto(playlistVideo);
+            return toPlaylistVideoDto(playlistVideo);
         } catch (error) {
             handleUniqueConstraintError(error, 'Cannot add video', {
                 url: ['You have already added this video to the playlist'],
@@ -220,7 +198,7 @@ export const createPlaylistService = ({
                 customTitle: data?.title,
                 customDescription: data?.description,
             });
-            return _toPlaylistVideoDto(playlistVideo);
+            return toPlaylistVideoDto(playlistVideo);
         } catch (error) {
             handleNotFoundError(error, 'Playlist video not found', {
                 video: ['Video not found in playlist'],

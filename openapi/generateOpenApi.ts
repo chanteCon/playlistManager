@@ -8,6 +8,7 @@ import { ErrorResponse, SuccessResponse } from './commonSchemas';
 import dotenv from 'dotenv';
 import { playlistApiPaths } from './playlistOpenApi';
 import { collectionsApiPaths } from './collectionsOpenApi';
+import { searchApiPaths } from './searchOpenapi';
 dotenv.config();
 
 const mergedComponents = {
@@ -30,6 +31,7 @@ const mergedPaths = {
     ...userApiPaths.paths,
     ...playlistApiPaths.paths,
     ...collectionsApiPaths.paths,
+    ...searchApiPaths.paths,
 };
 
 const openApiDoc = createDocument({

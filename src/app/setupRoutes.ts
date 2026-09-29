@@ -7,7 +7,7 @@ export const setUpRoutes = (app: Application, features: ReturnType<typeof create
     app.use(`${API_PREFIX}/auth`, features.authFeature.routes);
     app.use(`${API_PREFIX}/playlists`, features.playlistFeature.routes);
     app.use(`${API_PREFIX}/collections`, features.collectionFeature.routes);
-
+    app.use(`${API_PREFIX}/search`, features.searchFeature.routes);
     app.get('/health', (req: Request, res: Response) => {
         res.status(200).json({ ok: true });
     });

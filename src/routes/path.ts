@@ -47,3 +47,7 @@ export const collectionPaths = {
     playlist: (collectionId: string, playlistId: string) =>
         `${COLLECTION_PATH}/${collectionId}/playlists/${playlistId}`,
 };
+const SEARCH_PATH = `${API_PREFIX}/search`;
+export const searchPaths = {
+    base: SEARCH_PATH,
+};

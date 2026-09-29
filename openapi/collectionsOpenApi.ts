@@ -2,17 +2,27 @@ import * as collectionSchemas from '../src/features/collections/schemas';
 import { successResponse, errorResponse } from './commonSchemas';
 import { z } from 'zod';
 const id = '00000000-0000-0000-0000-000000000000';
+const playlistVideoDTOSchema = z.object({
+    id: z.uuid(),
+    playlistId: z.uuid(),
+    title: z.string(),
+    description: z.string().optional(),
+    thumbnail: z.string().optional(),
+    url: z.string(),
+    platform: z.string().nullable().optional(),
+    platformId: z.string().nullable().optional(),
+    render: z.boolean(),
+    position: z.number(),
+});
+
 const playlistDTOSchema = z.object({
     id: z.uuid(),
-    userId: z.uuid(),
-    title: z.string(),
-    description: z.string().nullable(),
-    platform: z.string(),
-    platformId: z.string(),
-    thumbnailUrl: z.string().nullable(),
-    position: z.number(),
-    customTitle: z.string().nullable(),
-    customDescription: z.string().nullable(),
+    name: z.string(),
+    description: z.string().nullable().optional(),
+    videos: z.array(playlistVideoDTOSchema),
+    coverUrl: z.string().nullable(),
+    numVideos: z.number(),
+    updatedAt: z.string(),
 });
 const collectionSummaryDTOSchema = z.object({
     id: z.uuid(),
@@ -38,6 +48,7 @@ const collectionSummaryResponseSchema = z.object({
 });
 const collectionResponseSchema = z.object({ collection: collectionDTOSchema });
 const playlistResponseSchema = z.object({ playlist: playlistDTOSchema });
+
 const paths = {
     '/api/collections/': {
         get: {
