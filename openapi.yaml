@@ -8,7 +8,7 @@ info:
         It provides authentication, playlist management, and video integration features.
         Requests are rate limited .
 servers:
-  - url: playlist.api.chantellecs.com
+  - url: https://playlist.api.chantellecs.com
 paths:
   /api/auth/register:
     post:
