@@ -3,7 +3,7 @@ import {
     Playlist,
     PlaylistCreateInput,
     PlaylistVideo,
-    PlaylistWithVideos,
+    PlaylistWithCollections,
 } from 'features/playlist/types';
 import { faker } from '@faker-js/faker';
 import { VideoSource, VideoWithSource } from 'features/video/types';
@@ -43,14 +43,16 @@ export const buildPlaylistWithVideos = (
         playlistVideoOverrides = [],
         videoOverrides = [],
         sourceOverrides = [],
+        collectionIds = [],
     }: {
         playlistOverrides?: Partial<Playlist & { _count?: { playlistVideos: number } }>;
         playlistVideoOverrides?: Partial<PlaylistVideo>[];
         videoOverrides?: Partial<VideoWithSource>[];
         sourceOverrides?: Partial<VideoSource>[];
+        collectionIds?: string[];
     } = {},
     length = 3,
-): PlaylistWithVideos => {
+): PlaylistWithCollections => {
     const playlist = buildPlaylist(playlistOverrides);
 
     const playlistVideos = Array.from({ length }, (_, i) => {
@@ -76,6 +78,7 @@ export const buildPlaylistWithVideos = (
     return {
         ...playlist,
         playlistVideos,
+        collectionIds,
         _count: { playlistVideos: 10 },
     };
 };

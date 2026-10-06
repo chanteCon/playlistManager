@@ -15,6 +15,7 @@ const videoDTO = {
     title: 'Test video',
     url,
     render: true,
+    position: 1,
 };
 const playlistVideoId = videoDTO.id;
 const { mockRes } = buildExpressMocks();

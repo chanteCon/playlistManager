@@ -1,108 +1,14 @@
 import { Platform, PrismaClient } from '@prisma/client';
-import {
-    Playlist,
-    PlaylistCreateInput,
-    playlistVideoInclude,
-    PlaylistWithCollections,
-} from '../types';
 
-type PlaylistRepoDeps = { db: PrismaClient };
-export type PlaylistRepo = ReturnType<typeof createPlaylistRepo>;
+import { playlistVideoInclude } from '../playlist/types';
 
-export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
-    const create = async (data: PlaylistCreateInput): Promise<Playlist> => {
-        return await db.playlist.create({ data });
-    };
+type SearchRepoDeps = {
+    db: PrismaClient;
+};
 
-    type PlaylistWithCount = Playlist & { _count: { playlistVideos: number } };
+export type SearchRepo = ReturnType<typeof createSearchRepo>;
 
-    const findUserPlaylists = async (userId: string): Promise<PlaylistWithCount[]> => {
-        return await db.playlist.findMany({
-            where: {
-                userId,
-            },
-            include: {
-                _count: {
-                    select: {
-                        playlistVideos: true,
-                    },
-                },
-            },
-        });
-    };
-    const existsForUser = async (playlistId: string, userId: string): Promise<boolean> => {
-        const count = await db.playlist.count({
-            where: { id: playlistId, userId },
-        });
-        return count > 0;
-    };
-
-    const findById = async (
-        playlistId: string,
-        userId: string,
-    ): Promise<PlaylistWithCollections | null> => {
-        const playlist = await db.playlist.findFirst({
-            where: {
-                id: playlistId,
-                userId,
-            },
-            include: {
-                _count: {
-                    select: {
-                        playlistVideos: true,
-                    },
-                },
-                playlistVideos: {
-                    orderBy: {
-                        position: 'asc',
-                    },
-                    include: playlistVideoInclude,
-                },
-                collections: {
-                    select: {
-                        collectionId: true,
-                    },
-                },
-            },
-        });
-        if (!playlist) return null;
-
-        const { collections, ...playlistData } = playlist;
-
-        return {
-            ...playlistData,
-            collectionIds: collections.map(({ collectionId }) => collectionId),
-        };
-    };
-    type PlaylistUpdateParams = {
-        name?: string | undefined;
-        description?: string | undefined;
-        coverUrl?: string | null | undefined;
-    };
-    const update = async (
-        playlistId: string,
-        userId: string,
-        data: PlaylistUpdateParams,
-    ): Promise<Playlist & { _count: { playlistVideos: number } }> => {
-        return await db.playlist.update({
-            where: { id: playlistId, userId },
-            data,
-            include: {
-                _count: {
-                    select: {
-                        playlistVideos: true,
-                    },
-                },
-            },
-        });
-    };
-
-    const deleteById = async (playlistId: string, userId: string): Promise<Playlist> => {
-        return await db.playlist.delete({
-            where: { id: playlistId, userId },
-        });
-    };
-
+export const createSearchRepo = ({ db }: SearchRepoDeps) => {
     const search = async (userId: string, search: string) => {
         const normalizedSearch = search.trim().toLowerCase();
 
@@ -113,7 +19,24 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
                   ? Platform.tiktok
                   : undefined;
 
-        const [playlists, playlistVideos] = await Promise.all([
+        const [collections, playlists, playlistVideos] = await Promise.all([
+            db.collection.findMany({
+                where: {
+                    userId,
+                    name: {
+                        contains: normalizedSearch,
+                        mode: 'insensitive',
+                    },
+                },
+                include: {
+                    _count: {
+                        select: {
+                            playlists: true,
+                        },
+                    },
+                },
+            }),
+
             db.playlist.findMany({
                 where: {
                     userId,
@@ -132,8 +55,20 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
                         },
                     ],
                 },
+                include: {
+                    _count: {
+                        select: {
+                            playlistVideos: true,
+                        },
+                    },
+                    playlistVideos: {
+                        include: playlistVideoInclude,
+                        orderBy: {
+                            position: 'asc',
+                        },
+                    },
+                },
             }),
-
             db.playlistVideo.findMany({
                 where: {
                     playlist: {
@@ -199,16 +134,14 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
             }),
         ]);
 
-        return { playlists, playlistVideos };
+        return {
+            collections,
+            playlists,
+            playlistVideos,
+        };
     };
 
     return {
-        create,
         search,
-        existsForUser,
-        findUserPlaylists,
-        findById,
-        update,
-        deleteById,
     };
 };

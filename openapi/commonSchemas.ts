@@ -101,3 +101,42 @@ export function errorResponse({ message, errors, examples }: ErrorParams) {
         },
     };
 }
+
+export const playlistVideoDTOSchema = z.object({
+    id: z.uuid(),
+    playlistId: z.uuid(),
+    title: z.string(),
+    description: z.string().optional(),
+    thumbnail: z.string().optional(),
+    url: z.string(),
+    platform: z.string().nullable().optional(),
+    platformId: z.string().nullable().optional(),
+    render: z.boolean(),
+    position: z.number(),
+});
+
+export const playlistDTOSchema = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    description: z.string().nullable().optional(),
+    videos: z.array(playlistVideoDTOSchema),
+    coverUrl: z.string().nullable(),
+    numVideos: z.number(),
+    updatedAt: z.string(),
+});
+
+export const collectionSummaryDTOSchema = z.object({
+    id: z.uuid(),
+    userId: z.uuid(),
+    name: z.string(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+    numPlaylists: z.number(),
+    coverUrl: z.string().nullable(),
+});
+
+export const searchResponseSchema = z.object({
+    collections: z.array(collectionSummaryDTOSchema),
+    playlists: z.array(playlistDTOSchema),
+    videos: z.array(playlistVideoDTOSchema),
+});

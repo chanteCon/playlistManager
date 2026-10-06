@@ -54,10 +54,7 @@ describe('Unit tests: playlist service', () => {
         test('Returns all user playlists', async () => {
             mockPlaylistRepo.findUserPlaylists.mockResolvedValueOnce([playlist]);
             const result = await playlistService.getUserPlaylists(playlist.userId);
-            expect(mockPlaylistRepo.findUserPlaylists).toHaveBeenCalledWith(
-                playlist.userId,
-                undefined,
-            );
+            expect(mockPlaylistRepo.findUserPlaylists).toHaveBeenCalledWith(playlist.userId);
             expect(result).toEqual([
                 {
                     ...playlist,
@@ -77,7 +74,6 @@ describe('Unit tests: playlist service', () => {
             expect(mockPlaylistRepo.findById).toHaveBeenCalledWith(
                 savedPlaylist.id,
                 savedPlaylist.userId,
-                undefined,
             );
             expectPlaylistDTO(result, savedPlaylist);
             expect(result.videos).toEqual([]);
@@ -194,7 +190,7 @@ describe('Unit tests: playlist service', () => {
             expect(mockPlaylistRepo.deleteById).toHaveBeenCalledTimes(1);
         });
     });
-    // TODO playlist service unit tests for playlist videos
+
     describe('addVideo', () => {
         test('Should add a video to users playlist', async () => {
             const savedVideo = buildPlaylistVideoInclude({
@@ -293,6 +289,151 @@ describe('Unit tests: playlist service', () => {
             );
 
             expect(mockPlaylistVideoRepo.update).toHaveBeenCalledTimes(0);
+        });
+    });
+
+    describe('updatePositions', () => {
+        test('Should update positions for all videos in playlist', async () => {
+            const savedPlaylist = buildPlaylistWithVideos({}, 3);
+            const positions = savedPlaylist.playlistVideos.map((video, index) => ({
+                id: video.id,
+                position: savedPlaylist.playlistVideos.length - index - 1,
+            }));
+
+            mockPlaylistRepo.findById.mockResolvedValueOnce(savedPlaylist);
+            mockPlaylistVideoRepo.updatePositions.mockResolvedValueOnce([]);
+
+            const result = await playlistService.updatePositions(
+                savedPlaylist.userId,
+                savedPlaylist.id,
+                positions,
+            );
+
+            expect(mockPlaylistRepo.findById).toHaveBeenCalledWith(
+                savedPlaylist.id,
+                savedPlaylist.userId,
+            );
+
+            expect(mockPlaylistVideoRepo.updatePositions).toHaveBeenCalledWith({
+                playlistId: savedPlaylist.id,
+                positions,
+            });
+
+            expect(result).toEqual([]);
+        });
+
+        test('Should throw error if positions are not unique', async () => {
+            const savedPlaylist = buildPlaylistWithVideos({}, 3);
+            const positions = savedPlaylist.playlistVideos.map((video, index) => ({
+                id: video.id,
+                position: index === 2 ? 1 : index,
+            }));
+
+            await expect(
+                playlistService.updatePositions(savedPlaylist.userId, savedPlaylist.id, positions),
+            ).rejects.toThrow('Invalid Input');
+
+            expect(mockPlaylistRepo.findById).not.toHaveBeenCalled();
+            expect(mockPlaylistVideoRepo.updatePositions).not.toHaveBeenCalled();
+        });
+
+        test('Should throw error if video IDs are not unique', async () => {
+            const savedPlaylist = buildPlaylistWithVideos({}, 3);
+            const positions = [
+                { id: savedPlaylist.playlistVideos[0].id, position: 0 },
+                { id: savedPlaylist.playlistVideos[0].id, position: 1 },
+                { id: savedPlaylist.playlistVideos[2].id, position: 2 },
+            ];
+
+            await expect(
+                playlistService.updatePositions(savedPlaylist.userId, savedPlaylist.id, positions),
+            ).rejects.toThrow('Invalid Input');
+
+            expect(mockPlaylistRepo.findById).not.toHaveBeenCalled();
+            expect(mockPlaylistVideoRepo.updatePositions).not.toHaveBeenCalled();
+        });
+
+        test('Should throw error if position is out of range', async () => {
+            const savedPlaylist = buildPlaylistWithVideos({}, 3);
+            const positions = savedPlaylist.playlistVideos.map((video, index) => ({
+                id: video.id,
+                position: index,
+            }));
+
+            positions[2].position = 3;
+
+            await expect(
+                playlistService.updatePositions(savedPlaylist.userId, savedPlaylist.id, positions),
+            ).rejects.toThrow('Invalid Input');
+
+            expect(mockPlaylistRepo.findById).not.toHaveBeenCalled();
+            expect(mockPlaylistVideoRepo.updatePositions).not.toHaveBeenCalled();
+        });
+
+        test('Should throw error if not all positions are provided', async () => {
+            const savedPlaylist = buildPlaylistWithVideos({}, 3);
+            const positions = savedPlaylist.playlistVideos.slice(0, 2).map((video, index) => ({
+                id: video.id,
+                position: index,
+            }));
+
+            mockPlaylistRepo.findById.mockResolvedValueOnce(savedPlaylist);
+
+            await expect(
+                playlistService.updatePositions(savedPlaylist.userId, savedPlaylist.id, positions),
+            ).rejects.toThrow('Invalid Input');
+
+            expect(mockPlaylistVideoRepo.updatePositions).not.toHaveBeenCalled();
+        });
+
+        test('Should throw error if too many positions are provided', async () => {
+            const savedPlaylist = buildPlaylistWithVideos({}, 3);
+            const positions = [
+                ...savedPlaylist.playlistVideos.map((video, index) => ({
+                    id: video.id,
+                    position: index,
+                })),
+                {
+                    id: randomUUID(),
+                    position: 3,
+                },
+            ];
+
+            mockPlaylistRepo.findById.mockResolvedValueOnce(savedPlaylist);
+
+            await expect(
+                playlistService.updatePositions(savedPlaylist.userId, savedPlaylist.id, positions),
+            ).rejects.toThrow('Invalid Input');
+
+            expect(mockPlaylistVideoRepo.updatePositions).not.toHaveBeenCalled();
+        });
+
+        test('Should throw error if video does not belong to playlist', async () => {
+            const savedPlaylist = buildPlaylistWithVideos({}, 3);
+            const positions = savedPlaylist.playlistVideos.map((video, index) => ({
+                id: video.id,
+                position: index,
+            }));
+
+            positions[2].id = randomUUID();
+
+            mockPlaylistRepo.findById.mockResolvedValueOnce(savedPlaylist);
+
+            await expect(
+                playlistService.updatePositions(savedPlaylist.userId, savedPlaylist.id, positions),
+            ).rejects.toThrow('Invalid Input');
+
+            expect(mockPlaylistVideoRepo.updatePositions).not.toHaveBeenCalled();
+        });
+
+        test('Should throw error if playlist does not exist', async () => {
+            mockPlaylistRepo.findById.mockResolvedValueOnce(null);
+
+            await expect(
+                playlistService.updatePositions(randomUUID(), randomUUID(), []),
+            ).rejects.toThrow(new NotFoundError('Playlist not found'));
+
+            expect(mockPlaylistVideoRepo.updatePositions).not.toHaveBeenCalled();
         });
     });
 

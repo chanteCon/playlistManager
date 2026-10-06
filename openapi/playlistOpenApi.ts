@@ -1,6 +1,11 @@
 import * as playlistSchemas from '../src/features/playlist/schemas';
 import { ZodOpenApiComponentsObject, ZodOpenApiSecuritySchemeObject } from 'zod-openapi';
-import { successResponse, errorResponse } from './commonSchemas';
+import {
+    successResponse,
+    errorResponse,
+    playlistDTOSchema,
+    playlistVideoDTOSchema,
+} from './commonSchemas';
 import { z } from 'zod';
 
 const id = '00000000-0000-0000-0000-000000000000';
@@ -18,40 +23,9 @@ const components: ZodOpenApiComponentsObject = {
     securitySchemes: authHeader,
 };
 
-export const playlistSearchField = {
-    name: 'search',
-    in: 'query',
-    required: false,
-    schema: {
-        type: 'string',
-    },
-};
-
 /*
  * DTOs
  */
-
-const playlistVideoDTOSchema = z.object({
-    id: z.uuid(),
-    playlistId: z.uuid(),
-    title: z.string(),
-    description: z.string().optional(),
-    thumbnail: z.string().optional(),
-    url: z.string(),
-    platform: z.string().nullable().optional(),
-    platformId: z.string().nullable().optional(),
-    render: z.boolean(),
-    position: z.number(),
-});
-
-const playlistDTOSchema = z.object({
-    id: z.uuid(),
-    name: z.string(),
-    description: z.string().nullable().optional(),
-    coverUrl: z.string().nullable().optional(),
-    videos: z.array(playlistVideoDTOSchema),
-    numVideos: z.number(),
-});
 
 const playlistResponseSchema = z.object({
     playlist: z.object({
@@ -61,6 +35,8 @@ const playlistResponseSchema = z.object({
         description: z.string().nullable(),
         coverUrl: z.string().nullable(),
         numVideos: z.number(),
+        updatedAt: z.string(),
+        collections: z.array(z.string()),
     }),
 });
 
@@ -73,23 +49,9 @@ const playlistsResponseSchema = z.object({
             description: z.string().nullable(),
             coverUrl: z.string().nullable(),
             numVideos: z.number(),
+            updatedAt: z.string(),
         }),
     ),
-});
-
-const searchResponseSchema = z.object({
-    results: z.object({
-        playlists: z.array(
-            z.object({
-                id: z.uuid(),
-                userId: z.uuid(),
-                name: z.string(),
-                description: z.string().nullable(),
-                coverUrl: z.string().nullable(),
-            }),
-        ),
-        videos: z.array(playlistVideoDTOSchema),
-    }),
 });
 
 const playlistWithVideosResponseSchema = z.object({
@@ -129,6 +91,7 @@ const paths = {
                             description: null,
                             coverUrl: null,
                             numVideos: 10,
+                            updatedAt: '2026-01-01T00:00:00.000Z',
                         },
                     },
                 }),
@@ -153,7 +116,6 @@ const paths = {
             summary: 'Get all user playlists',
             tags: ['Playlist'],
             security: [{ BearerAuth: [] }],
-            parameters: [playlistSearchField],
             responses: {
                 200: successResponse({
                     dataSchema: playlistsResponseSchema,
@@ -166,51 +128,9 @@ const paths = {
                                 description: null,
                                 coverUrl: null,
                                 numVideos: 10,
+                                updatedAt: '2026-01-01T00:00:00.000Z',
                             },
                         ],
-                    },
-                }),
-                401: errorResponse({
-                    message: 'Unauthorized',
-                }),
-            },
-        },
-    },
-
-    '/api/playlists/search': {
-        get: {
-            summary: 'Search user library',
-            tags: ['Playlist'],
-            security: [{ BearerAuth: [] }],
-            parameters: [playlistSearchField],
-            responses: {
-                200: successResponse({
-                    dataSchema: searchResponseSchema,
-                    data: {
-                        results: {
-                            playlists: [
-                                {
-                                    id,
-                                    userId: id,
-                                    name: 'Music Favourites',
-                                    description: 'My favourite songs',
-                                    coverUrl: null,
-                                },
-                            ],
-                            videos: [
-                                {
-                                    id,
-                                    playlistId: id,
-                                    title: 'Best Music Videos',
-                                    description: 'My favourite music',
-                                    thumbnail: 'https://example.com/thumbnail.jpg',
-                                    url: 'https://www.youtube.com/watch?v=zzzzzzzzzzz',
-                                    platform: 'youtube',
-                                    platformId: 'zzzzzzzzzzz',
-                                    render: true,
-                                },
-                            ],
-                        },
                     },
                 }),
                 401: errorResponse({
@@ -225,7 +145,7 @@ const paths = {
             summary: 'Get playlist',
             tags: ['Playlist'],
             security: [{ BearerAuth: [] }],
-            parameters: [playlistSchemas.playlistIdField, playlistSearchField],
+            parameters: [playlistSchemas.playlistIdField],
             responses: {
                 200: successResponse({
                     dataSchema: playlistWithVideosResponseSchema,
@@ -236,6 +156,8 @@ const paths = {
                             description: 'My playlist description',
                             coverUrl: null,
                             numVideos: 10,
+                            updatedAt: '2026-01-01T00:00:00.000Z',
+                            collections: [id, id, id],
                             videos: [
                                 {
                                     id,
@@ -295,6 +217,7 @@ const paths = {
                             description: 'Updated description',
                             coverUrl: 'example.image.com',
                             numVideos: 10,
+                            updatedAt: '2026-01-01T00:00:00.000Z',
                         },
                     },
                 }),

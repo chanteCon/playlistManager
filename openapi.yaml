@@ -8,8 +8,7 @@ info:
         It provides authentication, playlist management, and video integration features.
         Requests are rate limited .
 servers:
-  - url: http://localhost:4000
-    description: Main API server
+  - url: playlist.api.chantellecs.com
 paths:
   /api/auth/register:
     post:
@@ -1792,6 +1791,7 @@ paths:
                     description: null
                     coverUrl: null
                     numVideos: 10
+                    updatedAt: 2026-01-01T00:00:00.000Z
                 message: null
               schema:
                 type: object
@@ -1830,6 +1830,12 @@ paths:
                               - type: "null"
                           numVideos:
                             type: number
+                          updatedAt:
+                            type: string
+                          collections:
+                            type: array
+                            items:
+                              type: string
                         required:
                           - id
                           - userId
@@ -1837,6 +1843,8 @@ paths:
                           - description
                           - coverUrl
                           - numVideos
+                          - updatedAt
+                          - collections
                         additionalProperties: false
                     required:
                       - playlist
@@ -1972,13 +1980,6 @@ paths:
         - Playlist
       security:
         - BearerAuth: []
-      parameters:
-        - &a1
-          name: search
-          in: query
-          required: false
-          schema:
-            type: string
       responses:
         "200":
           description: Successful response
@@ -1994,6 +1995,7 @@ paths:
                       description: null
                       coverUrl: null
                       numVideos: 10
+                      updatedAt: 2026-01-01T00:00:00.000Z
                 message: null
               schema:
                 type: object
@@ -2034,6 +2036,8 @@ paths:
                                 - type: "null"
                             numVideos:
                               type: number
+                            updatedAt:
+                              type: string
                           required:
                             - id
                             - userId
@@ -2041,182 +2045,10 @@ paths:
                             - description
                             - coverUrl
                             - numVideos
+                            - updatedAt
                           additionalProperties: false
                     required:
                       - playlists
-                    additionalProperties: false
-                required:
-                  - success
-                  - message
-                  - data
-                additionalProperties: false
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              example:
-                success: false
-                data: null
-                message: Unauthorized
-                errors: null
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    const: false
-                  message:
-                    default: Unauthorized
-                    type: string
-                  data:
-                    type: "null"
-                  errors:
-                    example:
-                      field:
-                        - Validation error
-                    anyOf:
-                      - type: object
-                        propertyNames:
-                          type: string
-                        additionalProperties:
-                          type: array
-                          items:
-                            type: string
-                      - type: "null"
-                required:
-                  - success
-                  - message
-                  - data
-                additionalProperties: false
-  /api/playlists/search:
-    get:
-      summary: Search user library
-      tags:
-        - Playlist
-      security:
-        - BearerAuth: []
-      parameters:
-        - *a1
-      responses:
-        "200":
-          description: Successful response
-          content:
-            application/json:
-              example:
-                success: true
-                data:
-                  results:
-                    playlists:
-                      - id: 00000000-0000-0000-0000-000000000000
-                        userId: 00000000-0000-0000-0000-000000000000
-                        name: Music Favourites
-                        description: My favourite songs
-                        coverUrl: null
-                    videos:
-                      - id: 00000000-0000-0000-0000-000000000000
-                        playlistId: 00000000-0000-0000-0000-000000000000
-                        title: Best Music Videos
-                        description: My favourite music
-                        thumbnail: https://example.com/thumbnail.jpg
-                        url: https://www.youtube.com/watch?v=zzzzzzzzzzz
-                        platform: youtube
-                        platformId: zzzzzzzzzzz
-                        render: true
-                message: null
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    const: true
-                  message:
-                    anyOf:
-                      - type: string
-                      - type: "null"
-                    example: null
-                  data:
-                    type: object
-                    properties:
-                      results:
-                        type: object
-                        properties:
-                          playlists:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                id:
-                                  type: string
-                                  format: uuid
-                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                                userId:
-                                  type: string
-                                  format: uuid
-                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                                name:
-                                  type: string
-                                description:
-                                  anyOf:
-                                    - type: string
-                                    - type: "null"
-                                coverUrl:
-                                  anyOf:
-                                    - type: string
-                                    - type: "null"
-                              required:
-                                - id
-                                - userId
-                                - name
-                                - description
-                                - coverUrl
-                              additionalProperties: false
-                          videos:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                id:
-                                  type: string
-                                  format: uuid
-                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                                playlistId:
-                                  type: string
-                                  format: uuid
-                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-                                title:
-                                  type: string
-                                description:
-                                  type: string
-                                thumbnail:
-                                  type: string
-                                url:
-                                  type: string
-                                platform:
-                                  anyOf:
-                                    - type: string
-                                    - type: "null"
-                                platformId:
-                                  anyOf:
-                                    - type: string
-                                    - type: "null"
-                                render:
-                                  type: boolean
-                                position:
-                                  type: number
-                              required:
-                                - id
-                                - playlistId
-                                - title
-                                - url
-                                - render
-                                - position
-                              additionalProperties: false
-                        required:
-                          - playlists
-                          - videos
-                        additionalProperties: false
-                    required:
-                      - results
                     additionalProperties: false
                 required:
                   - success
@@ -2269,7 +2101,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - &a2
+        - &a1
           in: path
           name: id
           schema:
@@ -2280,7 +2112,6 @@ paths:
             example: 00000000-0000-0000-0000-000000000000
           required: true
           description: The unique ID of the playlist
-        - *a1
       responses:
         "200":
           description: Successful response
@@ -2295,6 +2126,11 @@ paths:
                     description: My playlist description
                     coverUrl: null
                     numVideos: 10
+                    updatedAt: 2026-01-01T00:00:00.000Z
+                    collections:
+                      - 00000000-0000-0000-0000-000000000000
+                      - 00000000-0000-0000-0000-000000000000
+                      - 00000000-0000-0000-0000-000000000000
                     videos:
                       - id: 00000000-0000-0000-0000-000000000000
                         title: Test Video
@@ -2330,10 +2166,6 @@ paths:
                           name:
                             type: string
                           description:
-                            anyOf:
-                              - type: string
-                              - type: "null"
-                          coverUrl:
                             anyOf:
                               - type: string
                               - type: "null"
@@ -2378,13 +2210,21 @@ paths:
                                 - render
                                 - position
                               additionalProperties: false
+                          coverUrl:
+                            anyOf:
+                              - type: string
+                              - type: "null"
                           numVideos:
                             type: number
+                          updatedAt:
+                            type: string
                         required:
                           - id
                           - name
                           - videos
+                          - coverUrl
                           - numVideos
+                          - updatedAt
                         additionalProperties: false
                     required:
                       - playlist
@@ -2517,7 +2357,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - *a2
+        - *a1
       requestBody:
         required: true
         content:
@@ -2565,6 +2405,7 @@ paths:
                     description: Updated description
                     coverUrl: example.image.com
                     numVideos: 10
+                    updatedAt: 2026-01-01T00:00:00.000Z
                 message: null
               schema:
                 type: object
@@ -2603,6 +2444,12 @@ paths:
                               - type: "null"
                           numVideos:
                             type: number
+                          updatedAt:
+                            type: string
+                          collections:
+                            type: array
+                            items:
+                              type: string
                         required:
                           - id
                           - userId
@@ -2610,6 +2457,8 @@ paths:
                           - description
                           - coverUrl
                           - numVideos
+                          - updatedAt
+                          - collections
                         additionalProperties: false
                     required:
                       - playlist
@@ -2795,7 +2644,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - *a2
+        - *a1
       responses:
         "204":
           description: Playlist deleted successfully
@@ -2923,7 +2772,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - *a2
+        - *a1
       requestBody:
         required: true
         content:
@@ -3302,7 +3151,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - *a2
+        - *a1
       requestBody:
         required: true
         content:
@@ -3536,8 +3385,8 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - *a2
-        - &a3
+        - *a1
+        - &a2
           in: path
           name: playlistVideoId
           schema:
@@ -3809,8 +3658,8 @@ paths:
       security:
         - BearerAuth: []
       parameters:
+        - *a1
         - *a2
-        - *a3
       responses:
         "204":
           description: Video removed from playlist successfully
@@ -3946,6 +3795,1802 @@ paths:
                     errors:
                       playlist:
                         - Video not found
+  /api/collections/:
+    get:
+      summary: Get user collections
+      tags:
+        - Collection
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  collections:
+                    - id: 00000000-0000-0000-0000-000000000000
+                      userId: 00000000-0000-0000-0000-000000000000
+                      name: Music
+                      createdAt: 2026-01-01T00:00:00.000Z
+                      updatedAt: 2026-01-01T00:00:00.000Z
+                      numPlaylists: 3
+                      coverUrl: https://example.com/cover.jpg
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      collections:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            userId:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            name:
+                              type: string
+                            createdAt:
+                              type: string
+                            updatedAt:
+                              type: string
+                            numPlaylists:
+                              type: number
+                            coverUrl:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                          required:
+                            - id
+                            - userId
+                            - name
+                            - createdAt
+                            - updatedAt
+                            - numPlaylists
+                            - coverUrl
+                          additionalProperties: false
+                    required:
+                      - collections
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+    post:
+      summary: Create collection
+      tags:
+        - Collection
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              name: Music
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+              required:
+                - name
+      responses:
+        "201":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  collection:
+                    id: 00000000-0000-0000-0000-000000000000
+                    userId: 00000000-0000-0000-0000-000000000000
+                    name: Music
+                    createdAt: 2026-01-01T00:00:00.000Z
+                    updatedAt: 2026-01-01T00:00:00.000Z
+                    numPlaylists: 0
+                    coverUrl: null
+                    playlists: []
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      collection:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          userId:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          name:
+                            type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          numPlaylists:
+                            type: number
+                          coverUrl:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          playlists:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                name:
+                                  type: string
+                                description:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                coverUrl:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                numVideos:
+                                  type: number
+                                updatedAt:
+                                  type: string
+                              required:
+                                - id
+                                - name
+                                - coverUrl
+                                - numVideos
+                                - updatedAt
+                              additionalProperties: false
+                        required:
+                          - id
+                          - userId
+                          - name
+                          - createdAt
+                          - updatedAt
+                          - numPlaylists
+                          - coverUrl
+                          - playlists
+                        additionalProperties: false
+                    required:
+                      - collection
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid input
+                errors:
+                  name:
+                    - Collection name must be 100 characters or less
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "409":
+          description: Cannot add collection
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Cannot add collection
+                errors:
+                  name:
+                    - You already have a collection with this name
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Cannot add collection
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/collections/{id}:
+    get:
+      summary: Get collection
+      tags:
+        - Collection
+      security:
+        - BearerAuth: []
+      parameters:
+        - &a3
+          in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+          required: true
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  collection:
+                    id: 00000000-0000-0000-0000-000000000000
+                    userId: 00000000-0000-0000-0000-000000000000
+                    name: Music
+                    createdAt: 2026-01-01T00:00:00.000Z
+                    updatedAt: 2026-01-01T00:00:00.000Z
+                    numPlaylists: 2
+                    coverUrl: https://example.com/cover.jpg
+                    playlists:
+                      - id: 00000000-0000-0000-0000-000000000000
+                        userId: 00000000-0000-0000-0000-000000000000
+                        title: My Playlist
+                        description: null
+                        platform: youtube
+                        platformId: abc123
+                        thumbnailUrl: https://example.com/thumbnail.jpg
+                        position: 0
+                        customTitle: null
+                        customDescription: null
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      collection:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          userId:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          name:
+                            type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          numPlaylists:
+                            type: number
+                          coverUrl:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          playlists:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                name:
+                                  type: string
+                                description:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                coverUrl:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                numVideos:
+                                  type: number
+                                updatedAt:
+                                  type: string
+                              required:
+                                - id
+                                - name
+                                - coverUrl
+                                - numVideos
+                                - updatedAt
+                              additionalProperties: false
+                        required:
+                          - id
+                          - userId
+                          - name
+                          - createdAt
+                          - updatedAt
+                          - numPlaylists
+                          - coverUrl
+                          - playlists
+                        additionalProperties: false
+                    required:
+                      - collection
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors:
+                  id:
+                    - Invalid UUID
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: Collection not found
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Collection not found
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Collection not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+    patch:
+      summary: Update collection
+      description: Updates a collection name and/or cover. To set the cover, provide
+        the ID of a playlist already in the collection. The selected playlist
+        must have a cover image. Provide null to remove the current cover. If
+        cover is omitted, the existing cover is preserved.
+      tags:
+        - Collection
+      security:
+        - BearerAuth: []
+      parameters:
+        - *a3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                cover:
+                  anyOf:
+                    - type: string
+                      format: uuid
+                      pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                    - type: "null"
+            examples:
+              updateName:
+                summary: Update collection name
+                value:
+                  name: Updated Collection
+              updateCover:
+                summary: Set cover from a playlist
+                description: The playlist must already belong to the collection and must have a
+                  cover image.
+                value:
+                  cover: 00000000-0000-0000-0000-000000000000
+              removeCover:
+                summary: Remove collection cover
+                value:
+                  cover: null
+              updateNameAndCover:
+                summary: Update name and cover
+                value:
+                  name: Updated Collection
+                  cover: 00000000-0000-0000-0000-000000000000
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  collection:
+                    id: 00000000-0000-0000-0000-000000000000
+                    userId: 00000000-0000-0000-0000-000000000000
+                    name: Updated Collection
+                    createdAt: 2026-01-01T00:00:00.000Z
+                    updatedAt: 2026-01-01T00:00:00.000Z
+                    numPlaylists: 2
+                    coverUrl: https://example.com/cover.jpg
+                    playlists: []
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      collection:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          userId:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          name:
+                            type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                          numPlaylists:
+                            type: number
+                          coverUrl:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          playlists:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  format: uuid
+                                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                name:
+                                  type: string
+                                description:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                coverUrl:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                                numVideos:
+                                  type: number
+                                updatedAt:
+                                  type: string
+                              required:
+                                - id
+                                - name
+                                - coverUrl
+                                - numVideos
+                                - updatedAt
+                              additionalProperties: false
+                        required:
+                          - id
+                          - userId
+                          - name
+                          - createdAt
+                          - updatedAt
+                          - numPlaylists
+                          - coverUrl
+                          - playlists
+                        additionalProperties: false
+                    required:
+                      - collection
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+              examples:
+                invalidName:
+                  summary: Invalid collection name
+                  value:
+                    success: false
+                    data: null
+                    message: Invalid input
+                    errors:
+                      name:
+                        - Collection name must be 100 characters or less
+                invalidCover:
+                  summary: Invalid cover playlist ID
+                  value:
+                    success: false
+                    data: null
+                    message: Invalid input
+                    errors:
+                      cover:
+                        - Invalid UUID
+                playlistHasNoCover:
+                  summary: Selected playlist has no cover
+                  value:
+                    success: false
+                    data: null
+                    message: Cannot set playlist as cover
+                    errors:
+                      cover:
+                        - This playlist does not have a cover
+                noFieldsProvided:
+                  summary: No fields provided
+                  value:
+                    success: false
+                    data: null
+                    message: Invalid input
+                    errors: {}
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: Collection not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Collection not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+              examples:
+                collectionNotFound:
+                  summary: Collection not found
+                  value:
+                    success: false
+                    data: null
+                    message: Collection not found
+                    errors:
+                      collection:
+                        - Collection not found
+                playlistNotFound:
+                  summary: Selected playlist is not in the collection
+                  value:
+                    success: false
+                    data: null
+                    message: Collection or playlist not found
+                    errors:
+                      cover:
+                        - Could not find playlist selected for the cover image
+                          in this collection.
+        "409":
+          description: Cannot update collection
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Cannot update collection
+                errors:
+                  name:
+                    - You already have a collection with this name
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Cannot update collection
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+    delete:
+      summary: Delete collection
+      tags:
+        - Collection
+      security:
+        - BearerAuth: []
+      parameters:
+        - *a3
+      responses:
+        "204":
+          description: Collection deleted successfully
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors:
+                  id:
+                    - Invalid UUID
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: Collection not found
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Collection not found
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Collection not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+  /api/collections/{id}/playlists/{playlistId}:
+    post:
+      summary: Add playlist to collection
+      tags:
+        - Collection
+      security:
+        - BearerAuth: []
+      parameters:
+        - *a3
+        - &a4
+          in: path
+          name: playlistId
+          schema:
+            type: string
+            format: uuid
+            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+          required: true
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  playlist:
+                    id: 00000000-0000-0000-0000-000000000000
+                    userId: 00000000-0000-0000-0000-000000000000
+                    title: My Playlist
+                    description: null
+                    platform: youtube
+                    platformId: abc123
+                    thumbnailUrl: https://example.com/thumbnail.jpg
+                    position: 0
+                    customTitle: null
+                    customDescription: null
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      playlist:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                          name:
+                            type: string
+                          description:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          coverUrl:
+                            anyOf:
+                              - type: string
+                              - type: "null"
+                          numVideos:
+                            type: number
+                          updatedAt:
+                            type: string
+                        required:
+                          - id
+                          - name
+                          - coverUrl
+                          - numVideos
+                          - updatedAt
+                        additionalProperties: false
+                    required:
+                      - playlist
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors:
+                  id:
+                    - Invalid UUID
+                  playlistId:
+                    - Invalid UUID
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: Collection or playlist not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Collection or playlist not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+              examples:
+                collectionNotFound:
+                  summary: Collection not found
+                  value:
+                    success: false
+                    data: null
+                    message: Collection not found
+                    errors:
+                      collection:
+                        - Collection not found
+                playlistNotFound:
+                  summary: Playlist not found
+                  value:
+                    success: false
+                    data: null
+                    message: Playlist not found
+                    errors:
+                      playlist:
+                        - Playlist not found
+        "409":
+          description: Cannot add playlist to collection
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Cannot add playlist to collection
+                errors:
+                  playlist:
+                    - You have already added this playlist to this collection
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Cannot add playlist to collection
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+    delete:
+      summary: Remove playlist from collection
+      tags:
+        - Collection
+      security:
+        - BearerAuth: []
+      parameters:
+        - *a3
+        - *a4
+      responses:
+        "204":
+          description: Playlist removed from collection successfully
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid Input
+                errors:
+                  id:
+                    - Invalid UUID
+                  playlistId:
+                    - Invalid UUID
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid Input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "404":
+          description: Collection or playlist not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Collection or playlist not found
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+              examples:
+                collectionNotFound:
+                  summary: Collection not found
+                  value:
+                    success: false
+                    data: null
+                    message: Collection not found
+                    errors:
+                      collection:
+                        - Collection not found
+                playlistNotFound:
+                  summary: Playlist not found in collection
+                  value:
+                    success: false
+                    data: null
+                    message: Playlist not found in this collection
+                    errors:
+                      playlist:
+                        - Playlist not found in this collection
+  /api/search:
+    get:
+      summary: Search user library
+      description: Searches the authenticated user’s collections, playlists, and videos.
+      tags:
+        - Search
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+            minLength: 1
+          required: true
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  collections:
+                    - id: 00000000-0000-0000-0000-000000000000
+                      userId: 00000000-0000-0000-0000-000000000000
+                      name: Music Collection
+                      createdAt: 2026-01-01T00:00:00.000Z
+                      updatedAt: 2026-01-01T00:00:00.000Z
+                      numPlaylists: 2
+                      coverUrl: https://example.com/cover.jpg
+                  playlists:
+                    - id: 00000000-0000-0000-0000-000000000000
+                      name: Music Favourites
+                      description: My favourite music
+                      videos:
+                        - id: 00000000-0000-0000-0000-000000000000
+                          playlistId: 00000000-0000-0000-0000-000000000000
+                          title: Best Music Videos
+                          description: My favourite music videos
+                          thumbnail: https://example.com/thumbnail.jpg
+                          url: https://youtube.com/watch?v=abc123
+                          platform: youtube
+                          platformId: abc123
+                          render: true
+                          position: 0
+                      coverUrl: https://example.com/cover.jpg
+                      numVideos: 1
+                      updatedAt: 2026-01-01T00:00:00.000Z
+                  videos:
+                    - id: 00000000-0000-0000-0000-000000000000
+                      playlistId: 00000000-0000-0000-0000-000000000000
+                      title: Best Music Videos
+                      description: My favourite music videos
+                      thumbnail: https://example.com/thumbnail.jpg
+                      url: https://youtube.com/watch?v=abc123
+                      platform: youtube
+                      platformId: abc123
+                      render: true
+                      position: 0
+                message: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    anyOf:
+                      - type: string
+                      - type: "null"
+                    example: null
+                  data:
+                    type: object
+                    properties:
+                      collections:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            userId:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            name:
+                              type: string
+                            createdAt:
+                              type: string
+                            updatedAt:
+                              type: string
+                            numPlaylists:
+                              type: number
+                            coverUrl:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                          required:
+                            - id
+                            - userId
+                            - name
+                            - createdAt
+                            - updatedAt
+                            - numPlaylists
+                            - coverUrl
+                          additionalProperties: false
+                      playlists:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            name:
+                              type: string
+                            description:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            videos:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    format: uuid
+                                    pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                  playlistId:
+                                    type: string
+                                    format: uuid
+                                    pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                                  title:
+                                    type: string
+                                  description:
+                                    type: string
+                                  thumbnail:
+                                    type: string
+                                  url:
+                                    type: string
+                                  platform:
+                                    anyOf:
+                                      - type: string
+                                      - type: "null"
+                                  platformId:
+                                    anyOf:
+                                      - type: string
+                                      - type: "null"
+                                  render:
+                                    type: boolean
+                                  position:
+                                    type: number
+                                required:
+                                  - id
+                                  - playlistId
+                                  - title
+                                  - url
+                                  - render
+                                  - position
+                                additionalProperties: false
+                            coverUrl:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            numVideos:
+                              type: number
+                            updatedAt:
+                              type: string
+                          required:
+                            - id
+                            - name
+                            - videos
+                            - coverUrl
+                            - numVideos
+                            - updatedAt
+                          additionalProperties: false
+                      videos:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            playlistId:
+                              type: string
+                              format: uuid
+                              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                            title:
+                              type: string
+                            description:
+                              type: string
+                            thumbnail:
+                              type: string
+                            url:
+                              type: string
+                            platform:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            platformId:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            render:
+                              type: boolean
+                            position:
+                              type: number
+                          required:
+                            - id
+                            - playlistId
+                            - title
+                            - url
+                            - render
+                            - position
+                          additionalProperties: false
+                    required:
+                      - collections
+                      - playlists
+                      - videos
+                    additionalProperties: false
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Invalid input
+                errors:
+                  search:
+                    - Invalid input
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Invalid input
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                success: false
+                data: null
+                message: Unauthorized
+                errors: null
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  message:
+                    default: Unauthorized
+                    type: string
+                  data:
+                    type: "null"
+                  errors:
+                    example:
+                      field:
+                        - Validation error
+                    anyOf:
+                      - type: object
+                        propertyNames:
+                          type: string
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: string
+                      - type: "null"
+                required:
+                  - success
+                  - message
+                  - data
+                additionalProperties: false
 components:
   schemas:
     SuccessResponse:

@@ -37,5 +37,6 @@ export const createPlaylistFeature = ({ db, authUserLimiter }: PlaylistFeatureDe
             playlistVideoController,
             authUserLimiter,
         }),
+        services: { playlistService },
     };
 };

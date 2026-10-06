@@ -7,6 +7,8 @@ import { userApiPaths } from './userOpenApi';
 import { ErrorResponse, SuccessResponse } from './commonSchemas';
 import dotenv from 'dotenv';
 import { playlistApiPaths } from './playlistOpenApi';
+import { collectionsApiPaths } from './collectionsOpenApi';
+import { searchApiPaths } from './searchOpenapi';
 dotenv.config();
 
 const mergedComponents = {
@@ -28,6 +30,8 @@ const mergedPaths = {
     ...authApiPaths.paths,
     ...userApiPaths.paths,
     ...playlistApiPaths.paths,
+    ...collectionsApiPaths.paths,
+    ...searchApiPaths.paths,
 };
 
 const openApiDoc = createDocument({
@@ -41,8 +45,7 @@ const openApiDoc = createDocument({
     },
     servers: [
         {
-            url: `${process.env.SERVER_URL}:${process.env.SERVER_PORT}`,
-            description: 'Main API server',
+            url: process.env.SERVER_URL!,
         },
     ],
     components: mergedComponents,
