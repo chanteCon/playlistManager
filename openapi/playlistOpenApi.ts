@@ -35,6 +35,8 @@ const playlistResponseSchema = z.object({
         description: z.string().nullable(),
         coverUrl: z.string().nullable(),
         numVideos: z.number(),
+        updatedAt: z.string(),
+        collections: z.array(z.string()),
     }),
 });
 
@@ -47,6 +49,7 @@ const playlistsResponseSchema = z.object({
             description: z.string().nullable(),
             coverUrl: z.string().nullable(),
             numVideos: z.number(),
+            updatedAt: z.string(),
         }),
     ),
 });
@@ -88,6 +91,7 @@ const paths = {
                             description: null,
                             coverUrl: null,
                             numVideos: 10,
+                            updatedAt: '2026-01-01T00:00:00.000Z',
                         },
                     },
                 }),
@@ -124,6 +128,7 @@ const paths = {
                                 description: null,
                                 coverUrl: null,
                                 numVideos: 10,
+                                updatedAt: '2026-01-01T00:00:00.000Z',
                             },
                         ],
                     },
@@ -151,6 +156,8 @@ const paths = {
                             description: 'My playlist description',
                             coverUrl: null,
                             numVideos: 10,
+                            updatedAt: '2026-01-01T00:00:00.000Z',
+                            collections: [id, id, id],
                             videos: [
                                 {
                                     id,
@@ -210,6 +217,7 @@ const paths = {
                             description: 'Updated description',
                             coverUrl: 'example.image.com',
                             numVideos: 10,
+                            updatedAt: '2026-01-01T00:00:00.000Z',
                         },
                     },
                 }),

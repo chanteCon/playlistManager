@@ -85,9 +85,14 @@ export type PlaylistDTO = {
     coverUrl: string | null;
     numVideos: number;
     updatedAt: Date;
+    collections?: string[];
 };
 
 export type UpdatePlaylistPositionsInput = {
     userId: string;
     positions: { id: string; position: number }[];
+};
+
+export type PlaylistWithCollections = PlaylistWithVideos & {
+    collectionIds: string[];
 };

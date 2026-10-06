@@ -84,6 +84,7 @@ export const createPlaylistService = ({
             videos: playlist.playlistVideos.map(toPlaylistVideoDto),
             numVideos: numVideos,
             updatedAt: playlist.updatedAt,
+            collections: playlist.collectionIds,
         };
     };
 
@@ -139,8 +140,41 @@ export const createPlaylistService = ({
         positions: { id: string; position: number }[],
     ) => {
         try {
-            await ensurePlaylistExistsForUser(playlistId, userId);
+            const uniquePositions = new Set(positions.map((p) => p.position));
+            const uniqueVideos = new Set(positions.map((p) => p.id));
 
+            if (
+                uniquePositions.size !== positions.length ||
+                uniqueVideos.size !== positions.length
+            ) {
+                throw new BadInputError('Invalid Input', {
+                    positions: ['The positions must be unique'],
+                });
+            }
+
+            if (positions.some((p) => p.position >= positions.length)) {
+                throw new BadInputError('Invalid Input', {
+                    positions: ['The positions are not in range'],
+                });
+            }
+            const playlist = await getPlaylistById(userId, playlistId);
+            if (!playlist) {
+                throw new NotFoundError('Playlist not found', {
+                    playlist: ['Playlist does not exist'],
+                });
+            }
+            if (playlist.videos.length !== positions.length) {
+                throw new BadInputError('Invalid Input', {
+                    positions: ['All positions must be provided'],
+                });
+            }
+            const videoIds = new Set(playlist.videos.map((video) => video.id));
+
+            if (positions.some((p) => !videoIds.has(p.id))) {
+                throw new BadInputError('Invalid Input', {
+                    positions: ['All videos must belong to this playlist'],
+                });
+            }
             return await playlistVideoRepo.updatePositions({
                 playlistId,
                 positions,

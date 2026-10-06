@@ -1,5 +1,10 @@
 import { Platform, PrismaClient } from '@prisma/client';
-import { Playlist, PlaylistCreateInput, playlistVideoInclude, PlaylistWithVideos } from '../types';
+import {
+    Playlist,
+    PlaylistCreateInput,
+    playlistVideoInclude,
+    PlaylistWithCollections,
+} from '../types';
 
 type PlaylistRepoDeps = { db: PrismaClient };
 export type PlaylistRepo = ReturnType<typeof createPlaylistRepo>;
@@ -35,8 +40,8 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
     const findById = async (
         playlistId: string,
         userId: string,
-    ): Promise<PlaylistWithVideos | null> => {
-        return await db.playlist.findFirst({
+    ): Promise<PlaylistWithCollections | null> => {
+        const playlist = await db.playlist.findFirst({
             where: {
                 id: playlistId,
                 userId,
@@ -53,8 +58,21 @@ export const createPlaylistRepo = ({ db }: PlaylistRepoDeps) => {
                     },
                     include: playlistVideoInclude,
                 },
+                collections: {
+                    select: {
+                        collectionId: true,
+                    },
+                },
             },
         });
+        if (!playlist) return null;
+
+        const { collections, ...playlistData } = playlist;
+
+        return {
+            ...playlistData,
+            collectionIds: collections.map(({ collectionId }) => collectionId),
+        };
     };
     type PlaylistUpdateParams = {
         name?: string | undefined;

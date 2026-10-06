@@ -45,12 +45,7 @@ const openApiDoc = createDocument({
     },
     servers: [
         {
-            url: `http://localhost:${process.env.SERVER_PORT}`,
-            description: 'Local development server',
-        },
-        {
-            url: 'https://playlist.api.chantellecs.com',
-            description: 'Deployed server',
+            url: process.env.SERVER_URL!,
         },
     ],
     components: mergedComponents,
