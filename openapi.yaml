@@ -2362,7 +2362,6 @@ paths:
         required: true
         content:
           application/json:
-            description: At least one or name or description must be provided.
             example:
               name: Updated Playlist
               description: Updated description
@@ -2390,6 +2389,7 @@ paths:
                       format: uuid
                       pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
                     - type: "null"
+              description: At least one of name, description or cover must be provided.
       responses:
         "200":
           description: Successful response
@@ -3176,6 +3176,7 @@ paths:
                     required:
                       - id
                       - position
+                  description: Positions for all videos must be provided, and must be unqiue
               required:
                 - positions
       responses:
@@ -3401,7 +3402,6 @@ paths:
         required: true
         content:
           application/json:
-            description: At least one of title or description must be provided.
             example:
               title: Updated title
               description: Updated description
@@ -3420,6 +3420,7 @@ paths:
                   example: This is a description example.
                   type: string
                   maxLength: 500
+              description: At least one of title or description must be provided.
       responses:
         "200":
           description: Successful response

@@ -197,7 +197,6 @@ const paths = {
                 content: {
                     'application/json': {
                         schema: playlistSchemas.playlistUpdateSchema,
-                        description: 'At least one or name or description must be provided.',
                         example: {
                             name: 'Updated Playlist',
                             description: 'Updated description',
@@ -514,7 +513,6 @@ const paths = {
                 content: {
                     'application/json': {
                         schema: playlistSchemas.updateVideoSchema,
-                        description: 'At least one of title or description must be provided.',
                         example: {
                             title: 'Updated title',
                             description: 'Updated description',
