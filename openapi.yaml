@@ -8,7 +8,7 @@ info:
         It provides authentication, playlist management, and video integration features.
         Requests are rate limited .
 servers:
-  - url: playlist.api.chantellecs.com
+  - url: http://localhost
 paths:
   /api/auth/register:
     post:
@@ -4000,6 +4000,8 @@ paths:
                                   pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
                                 name:
                                   type: string
+                                userId:
+                                  type: string
                                 description:
                                   anyOf:
                                     - type: string
@@ -4012,12 +4014,16 @@ paths:
                                   type: number
                                 updatedAt:
                                   type: string
+                                createdAt:
+                                  type: string
                               required:
                                 - id
                                 - name
+                                - userId
                                 - coverUrl
                                 - numVideos
                                 - updatedAt
+                                - createdAt
                               additionalProperties: false
                         required:
                           - id
@@ -4188,16 +4194,14 @@ paths:
                     numPlaylists: 2
                     coverUrl: https://example.com/cover.jpg
                     playlists:
-                      - id: 00000000-0000-0000-0000-000000000000
+                      - name: My playlist
+                        id: 00000000-0000-0000-0000-000000000000
                         userId: 00000000-0000-0000-0000-000000000000
-                        title: My Playlist
                         description: null
-                        platform: youtube
-                        platformId: abc123
-                        thumbnailUrl: https://example.com/thumbnail.jpg
-                        position: 0
-                        customTitle: null
-                        customDescription: null
+                        coverUrl: example.com
+                        numVideos: 1
+                        createdAt: 2026-01-01T00:00:00.000Z
+                        updatedAt: 2026-01-01T00:00:00.000Z
                 message: null
               schema:
                 type: object
@@ -4247,6 +4251,8 @@ paths:
                                   pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
                                 name:
                                   type: string
+                                userId:
+                                  type: string
                                 description:
                                   anyOf:
                                     - type: string
@@ -4259,12 +4265,16 @@ paths:
                                   type: number
                                 updatedAt:
                                   type: string
+                                createdAt:
+                                  type: string
                               required:
                                 - id
                                 - name
+                                - userId
                                 - coverUrl
                                 - numVideos
                                 - updatedAt
+                                - createdAt
                               additionalProperties: false
                         required:
                           - id
@@ -4515,6 +4525,8 @@ paths:
                                   pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
                                 name:
                                   type: string
+                                userId:
+                                  type: string
                                 description:
                                   anyOf:
                                     - type: string
@@ -4527,12 +4539,16 @@ paths:
                                   type: number
                                 updatedAt:
                                   type: string
+                                createdAt:
+                                  type: string
                               required:
                                 - id
                                 - name
+                                - userId
                                 - coverUrl
                                 - numVideos
                                 - updatedAt
+                                - createdAt
                               additionalProperties: false
                         required:
                           - id
@@ -4938,6 +4954,8 @@ paths:
                             pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
                           name:
                             type: string
+                          userId:
+                            type: string
                           description:
                             anyOf:
                               - type: string
@@ -4950,12 +4968,16 @@ paths:
                             type: number
                           updatedAt:
                             type: string
+                          createdAt:
+                            type: string
                         required:
                           - id
                           - name
+                          - userId
                           - coverUrl
                           - numVideos
                           - updatedAt
+                          - createdAt
                         additionalProperties: false
                     required:
                       - playlist

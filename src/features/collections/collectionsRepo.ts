@@ -85,7 +85,15 @@ export const createCollectionsRepo = ({ db }: { db: PrismaClient }) => {
             include: {
                 playlists: {
                     include: {
-                        playlist: true,
+                        playlist: {
+                            include: {
+                                _count: {
+                                    select: {
+                                        playlistVideos: true,
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
             },
