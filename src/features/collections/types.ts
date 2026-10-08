@@ -1,4 +1,4 @@
-import { Playlist } from 'features/playlist/types';
+import { PlaylistWithNumVideos } from 'features/playlist/types';
 import { CollectionPlaylist as PrismaCollectionPlaylist } from '@prisma/client';
 
 export type CollectionCreateData = { name: string; userId: string };
@@ -28,7 +28,7 @@ export type CollectionDTO = {
     createdAt: Date;
     numPlaylists: number;
     coverUrl: string | null;
-    playlists: Playlist[];
+    playlists: PlaylistWithNumVideos[];
 };
 
 export type CollectionPlaylist = PrismaCollectionPlaylist;

@@ -65,7 +65,8 @@ export const playlistUpdateSchema = z
             message: 'Name, cover video or description field must be provided',
             path: ['name'],
         },
-    );
+    )
+    .meta({ description: 'At least one of name, description or cover must be provided.' });
 
 export const videoUrlSchema = z
     .object({
@@ -99,7 +100,8 @@ export const updateVideoSchema = z
     .refine((data) => data.title !== undefined || data.description !== undefined, {
         message: 'Title or description field must be provided',
         path: ['title'],
-    });
+    })
+    .meta({ description: 'At least one of title or description must be provided.' });
 
 export const playlistVideoRefSchema = z
     .object({ id: playlistIdField, playlistVideoId: videoIdField })
@@ -113,5 +115,6 @@ export const playlistVideoPositionsSchema = z.object({
                 position: z.number().int().nonnegative(),
             }),
         )
-        .min(1),
+        .min(1)
+        .meta({ description: 'Positions for all videos must be provided, and must be unqiue' }),
 });

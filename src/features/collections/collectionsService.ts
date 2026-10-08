@@ -169,7 +169,10 @@ export const createCollectionService = ({
         }
         return {
             ...collection,
-            playlists: collection.playlists.map(({ playlist }) => playlist),
+            playlists: collection.playlists.map(({ playlist }) => ({
+                numVideos: playlist._count.playlistVideos,
+                ...playlist,
+            })),
             numPlaylists: collection.playlists.length,
         };
     };

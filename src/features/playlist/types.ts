@@ -96,3 +96,7 @@ export type UpdatePlaylistPositionsInput = {
 export type PlaylistWithCollections = PlaylistWithVideos & {
     collectionIds: string[];
 };
+
+export type PlaylistWithNumVideos = Playlist & {
+    numVideos: number;
+};

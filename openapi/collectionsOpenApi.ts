@@ -6,10 +6,12 @@ const id = '00000000-0000-0000-0000-000000000000';
 const playlistDTOSchema = z.object({
     id: z.uuid(),
     name: z.string(),
+    userId: z.string(),
     description: z.string().nullable().optional(),
     coverUrl: z.string().nullable(),
     numVideos: z.number(),
     updatedAt: z.string(),
+    createdAt: z.string(),
 });
 const collectionSummaryDTOSchema = z.object({
     id: z.uuid(),
@@ -123,16 +125,14 @@ const paths = {
                             coverUrl: 'https://example.com/cover.jpg',
                             playlists: [
                                 {
-                                    id,
+                                    name: 'My playlist',
+                                    id: id,
                                     userId: id,
-                                    title: 'My Playlist',
                                     description: null,
-                                    platform: 'youtube',
-                                    platformId: 'abc123',
-                                    thumbnailUrl: 'https://example.com/thumbnail.jpg',
-                                    position: 0,
-                                    customTitle: null,
-                                    customDescription: null,
+                                    coverUrl: 'example.com',
+                                    numVideos: 1,
+                                    createdAt: '2026-01-01T00:00:00.000Z',
+                                    updatedAt: '2026-01-01T00:00:00.000Z',
                                 },
                             ],
                         },
