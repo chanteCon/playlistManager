@@ -38,8 +38,8 @@ export const createVideoMetadataService = () => {
             const data = await response.json();
 
             return {
-                title: truncate(data.title, MAX_TITLE_LENGTH),
-                thumbnail: data.thumbnail_url,
+                title: 'TikTok video',
+                thumbnail: undefined,
                 description: undefined,
                 platformId: data.embed_product_id,
             };
